@@ -1,0 +1,12 @@
+name = "TSML"
+uuid = "486c3eca-181c-11e9-1ec4-1d6993a4262d"
+authors = ["Paulito Palmes <ppalmes@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
+RDatasets = "ce6b1742-4840-55fa-b093-852dadbb1d8b"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
