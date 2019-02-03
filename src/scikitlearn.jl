@@ -4,6 +4,8 @@ export SKLearner,transform!,fit!
 export skkrun
 
 using TSML.TSMLTypes
+import TSML.TSMLTypes.fit! # to overload
+import TSML.TSMLTypes.transform! # to overload
 using TSML.Utils
 
 using RDatasets

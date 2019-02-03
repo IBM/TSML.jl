@@ -12,7 +12,6 @@ greet() = print("Hello World!")
 include("types.jl")
 using .TSMLTypes
 export typerun
-export  Transformer,TSLearner,fit!,transform!
 
 
 include("utils.jl")

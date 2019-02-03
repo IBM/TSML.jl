@@ -4,6 +4,7 @@ export 	Transformer,
 		TSLearner,
 		fit!,
 		transform!
+
 abstract type Transformer end
 abstract type TSLearner <: Transformer end
 

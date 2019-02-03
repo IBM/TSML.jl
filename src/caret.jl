@@ -1,12 +1,16 @@
 module CaretLearners
 
-export CaretLearner
+export CaretLearner,fit!,transform!
 export caretrun
+
 
 using RDatasets
 
 using TSML.TSMLTypes
 using TSML.Utils
+
+import TSML.TSMLTypes.fit!   # importing to overload
+import TSML.TSMLTypes.transform! # importing to overload
 
 using RCall
 R"library(caret)"

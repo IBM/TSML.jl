@@ -1,12 +1,16 @@
 module BaselineAlgos
 
+using TSML.TSMLTypes
+using TSML.Utils
+
+import TSML.TSMLTypes.fit!
+import TSML.TSMLTypes.transform!
+
 export baselinerun
 export Baseline,
        fit!,
        transform!
 
-using TSML.TSMLTypes
-using TSML.Utils
 
 using StatsBase: mode
 using RDatasets
