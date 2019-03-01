@@ -1,0 +1,43 @@
+# Documentation: http://docs.travis-ci.com/user/languages/julia/
+language: julia
+os:
+  - osx
+julia:
+  - 1.0
+  - nightly
+matrix:
+  allow_failures:
+    - julia: nightly
+env:
+  matrix:
+    - CONDA_JL_VERSION="2" PYTHON=""
+    - CONDA_JL_VERSION="3" PYTHON=""
+notifications:
+  email: false
+
+
+before_install:
+  # linux
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y "deb http://cran.rstudio.com/bin/linux/ubuntu $(lsb_release -s -c)/"; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update -qq -y; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install git r-base r-base-dev r-recommended -y; fi
+  #- if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo R -e "install.packages('caret',repos='https://cloud.r-project.org')"; fi
+  #- if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install python-sklearn -y; fi
+
+ 
+ 
+  # osx
+  # faster than using homebrew/science tap
+  # but no permalink to release download
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget "https://cran.rstudio.com/bin/macosx/$(wget -qO- https://cran.rstudio.com/bin/macosx/ | sed -n 's/.*href="\(R-[^"]*.pkg\)".*/\1/p' | head -n 1)"; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then sudo installer -pkg R-*.pkg -target /; fi
+
+#after_success:
+#  - julia --color=yes -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+  
+#script:
+#  - julia -e 'Pkg.init(); Pkg.clone(pwd())'
+#  - julia --code-coverage test/runtests.jl
+#after_success:
+#  - julia -e 'cd(Pkg.dir("CombineML")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder()); Codecov.submit(process_folder())'
