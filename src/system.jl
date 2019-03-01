@@ -30,6 +30,8 @@ function check_r_dep()
   catch
     try
       R"install.packages('caret',repos='https://cloud.r-project.org')"
+      R"install.packages('earth',repos='https://cloud.r-project.org')"
+      R"install.packages('mda',repos='https://cloud.r-project.org')"
       R"install.packages('e1071',repos='https://cloud.r-project.org')"
       R"install.packages('gam',repos='https://cloud.r-project.org')"
       R"install.packages('randomForest',repos='https://cloud.r-project.org')"
