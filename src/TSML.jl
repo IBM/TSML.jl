@@ -9,6 +9,9 @@ export mergedict
 
 greet() = print("Hello World!")
 
+include("system.jl")
+using .System
+
 include("types.jl")
 using .TSMLTypes
 export typerun
@@ -30,13 +33,17 @@ include("baseline.jl")
 using .BaselineAlgos
 export baselinerun
 
-include("scikitlearn.jl")
-using .SKLearners
-export skkrun
+if LIB_SKL_AVAILABLE # from System module
+    include("scikitlearn.jl")
+    using .SKLearners
+    export skkrun
+end
 
-include("caret.jl")
-using .CaretLearners
-export caretrun
+if LIB_CRT_AVAILABLE # from System module
+    include("caret.jl")
+    using .CaretLearners
+    export caretrun
+end
 
 function testall()
     typerun()
