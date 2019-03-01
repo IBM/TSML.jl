@@ -12,17 +12,17 @@ using RDatasets
 
 using PyCall
 
-@pyimport sklearn.ensemble as ENS
-@pyimport sklearn.linear_model as LM
-@pyimport sklearn.discriminant_analysis as DA
-@pyimport sklearn.neighbors as NN
-@pyimport sklearn.svm as SVM
-@pyimport sklearn.tree as TREE
-@pyimport sklearn.neural_network as ANN
-@pyimport sklearn.gaussian_process as GP
-@pyimport sklearn.kernel_ridge as KR
-@pyimport sklearn.naive_bayes as NB
-@pyimport sklearn.isotonic as ISO
+const ENS=pyimport("sklearn.ensemble") 
+const LM=pyimport("sklearn.linear_model")
+const DA=pyimport("sklearn.discriminant_analysis")
+const NN=pyimport("sklearn.neighbors")
+const SVM=pyimport("sklearn.svm")
+const TREE=pyimport("sklearn.tree")
+const ANN=pyimport("sklearn.neural_network")
+const GP=pyimport("sklearn.gaussian_process")
+const KR=pyimport("sklearn.kernel_ridge")
+const NB=pyimport("sklearn.naive_bayes")
+const ISO=pyimport("sklearn.isotonic")
 
 # Available scikit-learn learners.
 learner_dict = Dict(
@@ -105,11 +105,13 @@ function fit!(skl::SKLearner, x::T, y::Vector) where {T<:Union{Vector,Matrix}}
 
   # Train
   skl.model = py_learner(;impl_args...)
-  skl.model[:fit](x, y)
+  #skl.model[:fit](x, y)
+  skl.model.fit(x, y)
 end
 
 function transform!(skl::SKLearner, x::T) where {T<:Union{Vector,Matrix}}
-  return collect(skl.model[:predict](x))
+  #return collect(skl.model[:predict](x))
+  return collect(skl.model.predict(x))
 end
 
 function skkrun()

@@ -59,9 +59,15 @@ const regressors = [
 function fit_test(learner::String,in::T,out::Vector) where {T<:Union{Matrix,Vector}}
 	_learner=SKLearner(Dict(:learner=>learner))
 	fit!(_learner,in,out)
-	println(learner)
+	#println(learner)
 	@test _learner.model != nothing
+	return _learner
 end
+
+function fit_transform_reg(model::TSLearner,in::T,out::Vector) where {T<:Union{Matrix,Vector}}
+    @test sum((transform!(model,in) .- out).^2)/length(out) < 2.0
+end
+
 
 @testset "scikit classifiers" begin
     for cls in classifiers
@@ -71,10 +77,9 @@ end
 
 @testset "scikit regressors" begin
     for rg in regressors
-	fit_test(rg,XX,YY)
+	model=fit_test(rg,XX,YY)
+	fit_transform_reg(model,XX,YY)
     end
 end
-
-
 
 end

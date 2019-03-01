@@ -20,6 +20,12 @@ R"library(randomForest)"
 R"library(nnet)" 
 R"library(kernlab)"
 R"library(grid)"
+R"library(MASS)"
+R"library(pls)"
+#R"install.packages('xgboost',repos='https://cloud.r-project.org')"
+#R"install.packages('pls',repos='https://cloud.r-project.org')"
+#R"install.packages('caret', dependencies = c('Depends', 'Suggests'))"
+R"library(xgboost)"
 
 mutable struct CaretLearner <: TSLearner
     model
