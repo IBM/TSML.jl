@@ -19,6 +19,7 @@ function check_py_dep(package::AbstractString)
     catch
       is_available = false
     end
+    is_available = false
   end
   return is_available
 end
@@ -44,6 +45,7 @@ function check_r_dep()
     catch
       is_available = false
     end
+    is_available = false
   end
   return is_available
 end
