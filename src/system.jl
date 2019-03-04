@@ -30,18 +30,18 @@ function check_r_dep()
     R"library(caret)"
   catch
     try
-      R"install.packages('caret',repos='https://cloud.r-project.org')"
-      R"install.packages('earth',repos='https://cloud.r-project.org')"
-      R"install.packages('mda',repos='https://cloud.r-project.org')"
-      R"install.packages('e1071',repos='https://cloud.r-project.org')"
-      R"install.packages('gam',repos='https://cloud.r-project.org')"
-      R"install.packages('randomForest',repos='https://cloud.r-project.org')"
-      R"install.packages('nnet',repos='https://cloud.r-project.org')"
-      R"install.packages('kernlab',repos='https://cloud.r-project.org')"
-      R"install.packages('grid',repos='https://cloud.r-project.org')"
-      R"install.packages('MASS',repos='https://cloud.r-project.org')"
-      R"install.packages('pls',repos='https://cloud.r-project.org')"
-      R"install.packages('xgboost',repos='https://cloud.r-project.org')"
+      R"install.packages('caret',repos='https://cloud.r-project.org',type='binary')"
+      R"install.packages('earth',repos='https://cloud.r-project.org',type='binary')"
+      R"install.packages('mda',repos='https://cloud.r-project.org',type='binary')"
+      R"install.packages('e1071',repos='https://cloud.r-project.org',type='binary')"
+      R"install.packages('gam',repos='https://cloud.r-project.org',type='binary')"
+      R"install.packages('randomForest',repos='https://cloud.r-project.org',type='binary')"
+      R"install.packages('nnet',repos='https://cloud.r-project.org',type='binary')"
+      R"install.packages('kernlab',repos='https://cloud.r-project.org',type='binary')"
+      R"install.packages('grid',repos='https://cloud.r-project.org',type='binary')"
+      R"install.packages('MASS',repos='https://cloud.r-project.org',type='binary')"
+      R"install.packages('pls',repos='https://cloud.r-project.org',type='binary')"
+      R"install.packages('xgboost',repos='https://cloud.r-project.org',type='binary')"
     catch
       is_available = false
     end
