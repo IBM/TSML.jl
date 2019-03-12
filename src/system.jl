@@ -16,10 +16,10 @@ function check_py_dep(package::AbstractString)
   catch
     try 
       Conda.add(package)
+      is_available = true
     catch
       is_available = false
     end
-    is_available = true
   end
   return is_available
 end
@@ -42,10 +42,10 @@ function check_r_dep()
       R"install.packages('MASS',repos='https://cloud.r-project.org',type='binary')"
       R"install.packages('pls',repos='https://cloud.r-project.org',type='binary')"
       R"install.packages('xgboost',repos='https://cloud.r-project.org',type='binary')"
+      is_available = true
     catch
       is_available = false
     end
-    is_available = true
   end
   return is_available
 end
