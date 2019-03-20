@@ -135,7 +135,7 @@ mutable struct Matrifier <: Transformer
   end
 end
 
-function fit!(mtr::Matrifier,x::T,y::Vector) where {T<:Union{Matrix,Vector}}
+function fit!(mtr::Matrifier,x::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector}}
   mtr.model = mtr.args
 end
 
@@ -144,25 +144,27 @@ function transform!(mtr::Matrifier,x::T) where {T<:Union{Matrix,Vector}}
   x isa Vector || error("data should be a vector")
   xlength = length(x)
   xlength > sz || error("data too short for the given size of sliding window")
-  ndx = slidingwindow(i->(i+sz+ahead-1),x,sz,stride)
-  return ndx
+  ndx=collect(xlength:-1:1)
+  mtuples = slidingwindow(i->(i-ahead),ndx,sz,stride)
+  height=size(mtuples)[1]
+  mmatrix = zeros(height,sz+1)
+  ctr=1
+  gap = xlength - mtuples[1][2][1]
+  for (s,k) in mtuples
+    v = [reverse(s);k] .+ gap
+    mmatrix[ctr,:]=x[v]
+    ctr+=1
+  end
+  return mmatrix
 end
 
 function matrifyrun()
-  mtr = Matrifier(Dict(:ahead=>1,:size=>24,:stride=>1))
+  mtr = Matrifier(Dict(:ahead=>24,:size=>24,:stride=>1))
   sz = mtr.args[:size]
-  x=rand(50)
+  x=collect(1:100)
   y=collect(1:100)
   println(fit!(mtr,x,y))
-  mtuples = transform!(mtr,x)
-  height=size(mtuples)[1]
-  mmatrix = zeros(height,sz+1)
-  ndx=1
-  for (s,k) in mtuples
-    mmatrix[ndx,:]=[s;k]
-    ndx+=1
-  end
-  return mmatrix
+  transform!(mtr,x)
 end
 
 function tupletomatrix(dt) 
