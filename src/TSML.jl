@@ -5,6 +5,9 @@ export greet
 export testall
 export mrun,prun # from DataProc 
 export mergedict
+export multirun
+export matrifyrun, dateifierrun
+export datevalgatorrun, datevalizerrun
 
 
 greet() = print("Hello World!")
@@ -44,6 +47,9 @@ if LIB_CRT_AVAILABLE # from System module
     using .CaretLearners
     export caretrun
 end
+
+include("multilearner.jl")
+using .MultiLearners
 
 function testall()
     typerun()
