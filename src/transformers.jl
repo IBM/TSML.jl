@@ -3,8 +3,9 @@ module TSMLTransformers
 using MLDataUtils
 using Dates
 using DataFrames
+using Statistics
 
-export matrifyrun,daterun
+export matrifyrun,daterun,datevalrun
 export Transformer,
        TSLearner,
        fit!,
@@ -16,6 +17,7 @@ export Transformer,
        Imputer,
        Matrifier,
        Dateifier,
+       DateVal,
        Pipeline,
        Wrapper
 
@@ -215,17 +217,61 @@ function transform!(dtr::Dateifier,x::T) where {T<:Union{Matrix,Vector}}
   dt[:doq]=Dates.dayofquarter.(endpoints)
   dt[:qoy]=Dates.quarterofyear.(endpoints)
   dtr.args[:header] = names(dt)
-  convert(Matrix{Float64},dt)
+  convert(Matrix{Int64},dt)
 end
 
 function daterun()
-  dtr = Dateifier(Dict(:stride=>10))
+  dtr = Dateifier(Dict(:stride=>5))
   lower = DateTime(2017,1,1)
   upper = DateTime(2019,1,1)
   x=lower:Dates.Hour(1):upper |> collect
   y=lower:Dates.Hour(1):upper |> collect
   fit!(dtr,x,y)
   transform!(dtr,x)
+end
+
+
+# Date,Val time series
+mutable struct DateValmer <: Transformer
+  model
+  args
+
+  function DateValmer(args=Dict())
+    default_args = Dict(
+        :ahead => 1,
+        :size => 7,
+        :stride => 1,
+        :dateinterval => Dates.Hour(1)
+    )
+    new(nothing,mergedict(default_args,args))
+  end
+end
+
+function fit!(dvmr::DateValmer,x::T,y::Vector=[]) where {T<:DataFrame}
+  size(x)[2] == 2 || error("Date Val timeseries need two columns")
+  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
+  eltype(x[:,2]) <: Real || error("array element types are not dates")
+  dvmr.model=dvmr.args
+end
+
+function transform!(dvmr::DateValmer,x::T) where {T<:DataFrame}
+  size(x)[2] == 2 || error("Date Val timeseries need two columns")
+  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
+  eltype(x[:,2]) <: Real || error("array element types are not dates")
+  cnames = names(x)
+  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+  grpby = typeof(dvmr.args[:dateinterval])
+  sym = Symbol(grpby)
+  x[sym] = round.(x[:Date],grpby)
+  by(x,sym,MeanValue = :Value=>mean)
+end
+
+function datevalrun()
+  dtvl = DateValmer(Dict(:dateinterval=>Dates.Hour(1)))
+  dte=DateTime(2014,1,1):Dates.Minute(1):DateTime(2016,1,1)
+  val = rand(length(dte))
+  fit!(dtvl,DataFrame(date=dte,values=val),[])
+  transform!(dtvl,DataFrame(date=dte,values=val))
 end
 
 # Imputes NaN values from Float64 features.

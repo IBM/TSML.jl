@@ -8,6 +8,7 @@ export mergedict
 export multirun
 export matrifyrun
 export daterun
+export datevalrun
 
 
 greet() = print("Hello World!")
