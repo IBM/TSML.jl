@@ -5,21 +5,15 @@ using Dates
 using DataFrames
 using Statistics
 
-export matrifyrun,daterun,datevalrun
-export Transformer,
-       TSLearner,
-       fit!,
-       transform!,
-       Imputer,
-       Pipeline,
-       SKLLearner,
- 	   OneHotEncoder,
-       Imputer,
-       Matrifier,
-       Dateifier,
-       DateVal,
-       Pipeline,
-       Wrapper
+export fit!,transform!
+
+export Transformer,TSLearner
+export Imputer,Pipeline,SKLLearner,OneHotEncoder,Pipeline,Wrapper
+
+export Matrifier,Dateifier
+export DateValizer,DateValgator
+
+export matrifyrun,dateifierrun,datevalgatorrun,datevalizerrun
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload
@@ -220,7 +214,7 @@ function transform!(dtr::Dateifier,x::T) where {T<:Union{Matrix,Vector}}
   convert(Matrix{Int64},dt)
 end
 
-function daterun()
+function dateifierrun()
   dtr = Dateifier(Dict(:stride=>5))
   lower = DateTime(2017,1,1)
   upper = DateTime(2019,1,1)
@@ -232,11 +226,11 @@ end
 
 
 # Date,Val time series
-mutable struct DateValmer <: Transformer
+mutable struct DateValgator <: Transformer
   model
   args
 
-  function DateValmer(args=Dict())
+  function DateValgator(args=Dict())
     default_args = Dict(
         :ahead => 1,
         :size => 7,
@@ -247,14 +241,14 @@ mutable struct DateValmer <: Transformer
   end
 end
 
-function fit!(dvmr::DateValmer,x::T,y::Vector=[]) where {T<:DataFrame}
+function fit!(dvmr::DateValgator,x::T,y::Vector=[]) where {T<:DataFrame}
   size(x)[2] == 2 || error("Date Val timeseries need two columns")
   (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
   eltype(x[:,2]) <: Real || error("array element types are not dates")
   dvmr.model=dvmr.args
 end
 
-function transform!(dvmr::DateValmer,x::T) where {T<:DataFrame}
+function transform!(dvmr::DateValgator,x::T) where {T<:DataFrame}
   size(x)[2] == 2 || error("Date Val timeseries need two columns")
   (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
   eltype(x[:,2]) <: Real || error("array element types are not dates")
@@ -266,13 +260,68 @@ function transform!(dvmr::DateValmer,x::T) where {T<:DataFrame}
   by(x,sym,MeanValue = :Value=>mean)
 end
 
-function datevalrun()
-  dtvl = DateValmer(Dict(:dateinterval=>Dates.Hour(1)))
+function datevalgatorrun()
+  dtvl = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
   dte=DateTime(2014,1,1):Dates.Minute(1):DateTime(2016,1,1)
   val = rand(length(dte))
   fit!(dtvl,DataFrame(date=dte,values=val),[])
   transform!(dtvl,DataFrame(date=dte,values=val))
 end
+
+
+# Date,Val time series
+# Normalize and clean date,val
+mutable struct DateValizer <: Transformer
+  model
+  args
+
+  function DateValizer(args=Dict())
+    default_args = Dict(
+        :ahead => 1,
+        :size => 7,
+        :stride => 1,
+        :dateinterval => Dates.Hour(1)
+    )
+    new(nothing,mergedict(default_args,args))
+  end
+end
+
+function fit!(dvzr::DateValizer,x::T,y::Vector=[]) where {T<:DataFrame}
+  size(x)[2] == 2 || error("Date Val timeseries need two columns")
+  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
+  eltype(x[:,2]) <: Real || error("array element types are not dates")
+  dvzr.model=dvzr.args
+end
+
+function transform!(dvzr::DateValizer,x::T) where {T<:DataFrame}
+  size(x)[2] == 2 || error("Date Val timeseries need two columns")
+  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
+  eltype(x[:,2]) <: Real || error("array element types are not dates")
+  cnames = names(x)
+  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+  grpby = typeof(dvzr.args[:dateinterval])
+  sym = Symbol(grpby)
+  x[sym] = round.(x[:Date],grpby)
+  aggr = by(x,sym,MeanValue = :Value=>mean)
+  rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
+  lower = minimum(x[:Date])
+  upper = maximum(x[:Date])
+  cdate = DataFrame(Date = collect(lower:dvzr.args[:dateinterval]:upper))
+  join(cdate,aggr,on=:Date,kind=:left)
+end
+
+
+function datevalizerrun()
+  # test passing args from one structure to another
+  dvzr1 = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
+  dvzr2 = DateValizer(dvzr1.args)
+  dte=DateTime(2014,1,1):Dates.Hour(2):DateTime(2016,1,1)
+  val = rand(length(dte))
+  fit!(dvzr2,DataFrame(date=dte,values=val),[])
+  transform!(dvzr2,DataFrame(date=dte,values=val))
+end
+
+
 
 # Imputes NaN values from Float64 features.
 mutable struct Imputer <: Transformer
