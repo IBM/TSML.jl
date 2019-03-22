@@ -7,7 +7,7 @@ export mrun,prun # from DataProc
 export mergedict
 export multirun
 export matrifyrun, dateifierrun
-export datevalgatorrun, datevalizerrun
+export datevalgatorrun, datevalizerrun, datevalnnerrun
 
 
 greet() = print("Hello World!")

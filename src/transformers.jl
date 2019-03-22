@@ -12,9 +12,11 @@ export Transformer,TSLearner
 export Imputer,Pipeline,SKLLearner,OneHotEncoder,Pipeline,Wrapper
 
 export Matrifier,Dateifier
-export DateValizer,DateValgator
+export DateValizer,DateValgator,DateValNNer
 
-export matrifyrun,dateifierrun,datevalgatorrun,datevalizerrun
+export matrifyrun,dateifierrun,
+       datevalgatorrun,datevalizerrun,
+       datevalnnerrun
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload
@@ -272,7 +274,7 @@ end
 
 
 # Date,Val time series
-# Normalize and clean date,val
+# Normalize and clean date,val by replacing missings with medians
 mutable struct DateValizer <: Transformer
   model
   args
@@ -314,6 +316,7 @@ function transform!(dvzr::DateValizer,x::T) where {T<:DataFrame}
   missingndx = findall(ismissing.(joined[:Value]))
   jmndx=joined[missingndx,sym] .+ 1 # get time period index of missing, convert 0 index time to 1 index
   joined[missingndx,:Value] = medians[jmndx,:Value] # replace missing with median value
+  sum(ismissing.(joined[:,:Value])) == 0 || error("Aggregation by time period failed to replace missings")
   joined[:,[:Date,:Value]]
 end
 
@@ -344,6 +347,65 @@ function datevalizerrun()
   fit!(dvzr2,x,y)
   transform!(dvzr2,x)
 end
+
+
+# fill-in missings with nearest-neighbors median
+mutable struct DateValNNer <: Transformer
+  model
+  args
+
+  function DateValNNer(args=Dict())
+    default_args = Dict(
+        :ahead => 1,
+        :size => 7,
+        :stride => 1,
+        :dateinterval => Dates.Hour(1),
+        :nnsize => 5 
+    )
+    new(nothing,mergedict(default_args,args))
+  end
+end
+
+function fit!(dnnr::DateValNNer,x::T,y::Vector=[]) where {T<:DataFrame}
+  size(x)[2] == 2 || error("Date Val timeseries need two columns")
+  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
+  eltype(x[:,2]) <: Union{Missing,Real} || error("array element types are not values")
+  dnnr.model=dnnr.args
+end
+
+function transform!(dnnr::DateValNNer,x::T) where {T<:DataFrame}
+  size(x)[2] == 2 || error("Date Val timeseries need two columns")
+  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
+  eltype(x[:,2]) <: Union{Real,Missing} || error("array element types are not values")
+  cnames = names(x)
+  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+  grpby = typeof(dnnr.args[:dateinterval])
+  sym = Symbol(grpby)
+  # to fill-in with nearest neighbors
+  nnsize = dnnr.args[:nnsize]
+  missingndx = DataFrame(missed = findall(ismissing.(x[:Value])))
+  missingndx[:neighbors] = (x->(x-nnsize):(x-1)).(missingndx[:missed]) # NN ranges
+  x[missingndx[:missed],:Value] = (r -> skipmedian(x[r,:Value])).(missingndx[:neighbors]) # iterate to each range
+  sum(ismissing.(x[:,:Value])) == 0 || error("Nearest Neigbour algo failed to replace missings")
+  x
+end
+
+
+function datevalnnerrun()
+  # test passing args from one structure to another
+  Random.seed!(123)
+  dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:nnsize=>3))
+  dte=DateTime(2014,1,1):Dates.Hour(1):DateTime(2016,1,1)
+  val = Array{Union{Missing,Float64}}(rand(length(dte)))
+  y = []
+  x = DataFrame(MDate=dte,MValue=val)
+  nmissing=10
+  ndxmissing=Random.shuffle(1:length(dte))[1:nmissing]
+  x[:MValue][ndxmissing] .= missing
+  fit!(dnnr,x,y)
+  transform!(dnnr,x)
+end
+
 
 
 
