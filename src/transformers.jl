@@ -4,6 +4,7 @@ using MLDataUtils
 using Dates
 using DataFrames
 using Statistics
+using Random
 
 export fit!,transform!
 
@@ -257,7 +258,8 @@ function transform!(dvmr::DateValgator,x::T) where {T<:DataFrame}
   grpby = typeof(dvmr.args[:dateinterval])
   sym = Symbol(grpby)
   x[sym] = round.(x[:Date],grpby)
-  by(x,sym,MeanValue = :Value=>mean)
+  res=by(x,sym,MeanValue = :Value=>skipmean)
+  rename!(res,Dict(names(res)[1]=>:Date,names(res)[2]=>:Value))
 end
 
 function datevalgatorrun()
@@ -289,36 +291,58 @@ end
 function fit!(dvzr::DateValizer,x::T,y::Vector=[]) where {T<:DataFrame}
   size(x)[2] == 2 || error("Date Val timeseries need two columns")
   (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Real || error("array element types are not dates")
+  eltype(x[:,2]) <: Union{Missing,Real} || error("array element types are not values")
   dvzr.model=dvzr.args
 end
 
 function transform!(dvzr::DateValizer,x::T) where {T<:DataFrame}
   size(x)[2] == 2 || error("Date Val timeseries need two columns")
   (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Real || error("array element types are not dates")
+  eltype(x[:,2]) <: Union{Real,Missing} || error("array element types are not values")
   cnames = names(x)
   rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
   grpby = typeof(dvzr.args[:dateinterval])
   sym = Symbol(grpby)
   x[sym] = round.(x[:Date],grpby)
-  aggr = by(x,sym,MeanValue = :Value=>mean)
+  aggr = by(x,sym,MeanValue = :Value=>skipmean)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
   lower = minimum(x[:Date])
   upper = maximum(x[:Date])
   cdate = DataFrame(Date = collect(lower:dvzr.args[:dateinterval]:upper))
-  join(cdate,aggr,on=:Date,kind=:left)
+  joined = join(cdate,aggr,on=:Date,kind=:left)
+  medians = getMedian(grpby,joined)
+  missingndx = findall(ismissing.(joined[:Value]))
+  jmndx=joined[missingndx,sym] .+ 1 # get time period index of missing, convert 0 index time to 1 index
+  joined[missingndx,:Value] = medians[jmndx,:Value] # replace missing with median value
+  joined[:,[:Date,:Value]]
 end
 
+function getMedian(t::Type{T},x::DataFrame) where {T<:Union{TimePeriod,DatePeriod}}
+  sgp = Symbol(t)
+  fn = Dict(:Hour=>Dates.hour,:Minute=>Dates.minute,
+            :Second=>Dates.second,:Month=>Dates.month)
+  try
+    x[sgp]=fn[sgp].(x[:Date])
+  catch
+    error("unknown dateinterval")
+  end
+  gpmeans = by(x,sgp,Value = :Value => skipmedian)
+end
 
 function datevalizerrun()
   # test passing args from one structure to another
+  Random.seed!(123)
   dvzr1 = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
   dvzr2 = DateValizer(dvzr1.args)
-  dte=DateTime(2014,1,1):Dates.Hour(2):DateTime(2016,1,1)
-  val = rand(length(dte))
-  fit!(dvzr2,DataFrame(date=dte,values=val),[])
-  transform!(dvzr2,DataFrame(date=dte,values=val))
+  dte=DateTime(2014,1,1):Dates.Hour(1):DateTime(2016,1,1)
+  val = Array{Union{Missing,Float64}}(rand(length(dte)))
+  y = []
+  x = DataFrame(MDate=dte,MValue=val)
+  nmissing=10
+  ndxmissing=Random.shuffle(1:length(dte))[1:nmissing]
+  x[:MValue][ndxmissing] .= missing
+  fit!(dvzr2,x,y)
+  transform!(dvzr2,x)
 end
 
 
