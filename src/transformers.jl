@@ -310,12 +310,15 @@ function transform!(dvzr::DateValizer,x::T) where {T<:DataFrame}
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
   lower = minimum(x[:Date])
   upper = maximum(x[:Date])
+  #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dvzr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
   medians = getMedian(grpby,joined)
+  # find indices of missing
   missingndx = findall(ismissing.(joined[:Value]))
   jmndx=joined[missingndx,sym] .+ 1 # get time period index of missing, convert 0 index time to 1 index
-  joined[missingndx,:Value] = medians[jmndx,:Value] # replace missing with median value
+  missingvals::SubArray = @view joined[missingndx,:Value] 
+  missingvals .= medians[jmndx,:Value] # replace missing with median value
   sum(ismissing.(joined[:,:Value])) == 0 || error("Aggregation by time period failed to replace missings")
   joined[:,[:Date,:Value]]
 end
@@ -381,13 +384,25 @@ function transform!(dnnr::DateValNNer,x::T) where {T<:DataFrame}
   rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
   grpby = typeof(dnnr.args[:dateinterval])
   sym = Symbol(grpby)
+  # aggregate by time period
+  x[sym] = round.(x[:Date],grpby)
+  aggr = by(x,sym,MeanValue = :Value=>skipmean)
+  rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
+  lower = minimum(x[:Date])
+  upper = maximum(x[:Date])
+  #create list of complete dates and join with aggregated data
+  cdate = DataFrame(Date = collect(lower:dnnr.args[:dateinterval]:upper))
+  joined = join(cdate,aggr,on=:Date,kind=:left)
+
   # to fill-in with nearest neighbors
-  nnsize = dnnr.args[:nnsize]
-  missingndx = DataFrame(missed = findall(ismissing.(x[:Value])))
+  nnsize::Int64 = dnnr.args[:nnsize]
+  missingndx = DataFrame(missed = findall(ismissing.(joined[:Value])))
   missingndx[:neighbors] = (x->(x-nnsize):(x-1)).(missingndx[:missed]) # NN ranges
-  x[missingndx[:missed],:Value] = (r -> skipmedian(x[r,:Value])).(missingndx[:neighbors]) # iterate to each range
-  sum(ismissing.(x[:,:Value])) == 0 || error("Nearest Neigbour algo failed to replace missings")
-  x
+  #joined[missingndx[:missed],:Value] = (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # iterate to each range
+  missingvals::SubArray = @view joined[missingndx[:missed],:Value] # get view of only missings
+  missingvals .=  (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # replace with nn medians
+  sum(ismissing.(joined[:,:Value])) == 0 || error("Nearest Neigbour algo failed to replace missings")
+  joined
 end
 
 
