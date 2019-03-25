@@ -13,7 +13,7 @@ mutable struct Matrifier <: Transformer
   end
 end
 
-function fit!(mtr::Matrifier,x::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector}}
+function fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector}}
   mtr.model = mtr.args
 end
 
@@ -40,7 +40,6 @@ function toMatrix(mtr::Transformer, x::Vector)
   end
   return mmatrix
 end
-
 
 function matrifyrun()
   mtr = Matrifier(Dict(:ahead=>24,:size=>24,:stride=>1))
@@ -120,24 +119,30 @@ mutable struct DateValgator <: Transformer
   end
 end
 
-function fit!(dvmr::DateValgator,x::T,y::Vector=[]) where {T<:DataFrame}
+function validdateval!(x::T) where {T<:DataFrame}
   size(x)[2] == 2 || error("Date Val timeseries need two columns")
   (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Real || error("array element types are not dates")
+  eltype(x[:,2]) <: Union{Missing,Real} || error("array element types are not values")
+  cnames = names(x)
+  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+end
+
+
+function fit!(dvmr::DateValgator,xx::T,y::Vector=[]) where {T<:DataFrame}
+  x = deepcopy(xx)
+  validdateval!(x)
   dvmr.model=dvmr.args
 end
 
-function transform!(dvmr::DateValgator,x::T) where {T<:DataFrame}
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Real || error("array element types are not dates")
-  cnames = names(x)
-  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+function transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
+  x = deepcopy(xx)
+  validdateval!(x)
   grpby = typeof(dvmr.args[:dateinterval])
   sym = Symbol(grpby)
   x[sym] = round.(x[:Date],grpby)
   res=by(x,sym,MeanValue = :Value=>skipmean)
   rename!(res,Dict(names(res)[1]=>:Date,names(res)[2]=>:Value))
+  res
 end
 
 function datevalgatorrun()
@@ -196,13 +201,9 @@ function fullaggregate!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   joined
 end
 
-function fit!(dvzr::DateValizer,x::T,y::Vector=[]) where {T<:DataFrame}
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Union{Missing,Real} || error("array element types are not values")
-  # compute medians
-  cnames = names(x)
-  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+function fit!(dvzr::DateValizer,xx::T,y::Vector=[]) where {T<:DataFrame}
+  x = deepcopy(xx)
+  validdateval!(x)
   # get complete dates and aggregate
   joined = fullaggregate!(dvzr,x)
   grpby = typeof(dvzr.args[:dateinterval])
@@ -214,11 +215,7 @@ end
 
 function transform!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   x = deepcopy(xx)
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Union{Real,Missing} || error("array element types are not values")
-  cnames = names(x)
-  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+  validdateval!(x)
   # get complete dates, aggregate, and get medians
   joined = fullaggregate!(dvzr,x)
   # copy medians
@@ -252,7 +249,7 @@ function datevalizerrun()
   val = Array{Union{Missing,Float64}}(rand(length(dte)))
   y = []
   x = DataFrame(MDate=dte,MValue=val)
-  nmissing=1000
+  nmissing=50000
   ndxmissing=Random.shuffle(1:length(dte))[1:nmissing]
   x[:MValue][ndxmissing] .= missing
   fit!(dvzr2,x,y)
@@ -277,19 +274,15 @@ mutable struct DateValNNer <: Transformer
   end
 end
 
-function fit!(dnnr::DateValNNer,x::T,y::Vector=[]) where {T<:DataFrame}
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Union{Missing,Real} || error("array element types are not values")
+function fit!(dnnr::DateValNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
+  x = deepcopy(xx)
+  validdateval!(x)
   dnnr.model=dnnr.args
 end
 
-function transform!(dnnr::DateValNNer,x::T) where {T<:DataFrame}
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Union{Real,Missing} || error("array element types are not values")
-  cnames = names(x)
-  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
+  x = deepcopy(xx)
+  validdateval!(x)
   grpby = typeof(dnnr.args[:dateinterval])
   sym = Symbol(grpby)
   # aggregate by time period
@@ -313,7 +306,6 @@ function transform!(dnnr::DateValNNer,x::T) where {T<:DataFrame}
   joined
 end
 
-
 function datevalnnerrun()
   # test passing args from one structure to another
   Random.seed!(123)
@@ -328,5 +320,3 @@ function datevalnnerrun()
   fit!(dnnr,x,y)
   transform!(dnnr,x)
 end
-
-
