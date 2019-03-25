@@ -290,19 +290,8 @@ mutable struct DateValizer <: Transformer
   end
 end
 
-function fit!(dvzr::DateValizer,x::T,y::Vector=[]) where {T<:DataFrame}
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Union{Missing,Real} || error("array element types are not values")
-  dvzr.model=dvzr.args
-end
-
-function transform!(dvzr::DateValizer,x::T) where {T<:DataFrame}
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Union{Real,Missing} || error("array element types are not values")
-  cnames = names(x)
-  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+function fullaggregate!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
+  x = deepcopy(xx)
   grpby = typeof(dvzr.args[:dateinterval])
   sym = Symbol(grpby)
   x[sym] = round.(x[:Date],grpby)
@@ -313,7 +302,45 @@ function transform!(dvzr::DateValizer,x::T) where {T<:DataFrame}
   #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dvzr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
+  joined
+end
+
+function fit!(dvzr::DateValizer,x::T,y::Vector=[]) where {T<:DataFrame}
+  size(x)[2] == 2 || error("Date Val timeseries need two columns")
+  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
+  eltype(x[:,2]) <: Union{Missing,Real} || error("array element types are not values")
+  # compute medians
+  cnames = names(x)
+  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+  # get complete dates and aggregate
+  joined = fullaggregate!(dvzr,x)
+  grpby = typeof(dvzr.args[:dateinterval])
+  sym = Symbol(grpby)
   medians = getMedian(grpby,joined)
+  dvzr.args[:medians] = medians
+  dvzr.model=dvzr.args
+end
+
+function transform!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
+  x = deepcopy(xx)
+  size(x)[2] == 2 || error("Date Val timeseries need two columns")
+  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
+  eltype(x[:,2]) <: Union{Real,Missing} || error("array element types are not values")
+  cnames = names(x)
+  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+  # get complete dates, aggregate, and get medians
+  joined = fullaggregate!(dvzr,x)
+  # copy medians
+  medians = dvzr.args[:medians]
+  grpby = typeof(dvzr.args[:dateinterval])
+  sym = Symbol(grpby)
+  fn = Dict(:Hour=>Dates.hour,:Minute=>Dates.minute,
+            :Second=>Dates.second,:Month=>Dates.month)
+  try
+    joined[sym]=fn[sym].(joined[:Date])
+  catch
+    error("unknown dateinterval")
+  end
   # find indices of missing
   missingndx = findall(ismissing.(joined[:Value]))
   jmndx=joined[missingndx,sym] .+ 1 # get time period index of missing, convert 0 index time to 1 index
@@ -323,7 +350,8 @@ function transform!(dvzr::DateValizer,x::T) where {T<:DataFrame}
   joined[:,[:Date,:Value]]
 end
 
-function getMedian(t::Type{T},x::DataFrame) where {T<:Union{TimePeriod,DatePeriod}}
+function getMedian(t::Type{T},xx::DataFrame) where {T<:Union{TimePeriod,DatePeriod}}
+  x = deepcopy(xx)
   sgp = Symbol(t)
   fn = Dict(:Hour=>Dates.hour,:Minute=>Dates.minute,
             :Second=>Dates.second,:Month=>Dates.month)
@@ -340,11 +368,11 @@ function datevalizerrun()
   Random.seed!(123)
   dvzr1 = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
   dvzr2 = DateValizer(dvzr1.args)
-  dte=DateTime(2014,1,1):Dates.Hour(1):DateTime(2016,1,1)
+  dte=DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
   val = Array{Union{Missing,Float64}}(rand(length(dte)))
   y = []
   x = DataFrame(MDate=dte,MValue=val)
-  nmissing=10
+  nmissing=1000
   ndxmissing=Random.shuffle(1:length(dte))[1:nmissing]
   x[:MValue][ndxmissing] .= missing
   fit!(dvzr2,x,y)
