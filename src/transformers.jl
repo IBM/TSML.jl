@@ -4,6 +4,7 @@ using MLDataUtils
 using Dates
 using DataFrames
 using Statistics
+using Random
 
 export fit!,transform!
 
@@ -11,15 +12,18 @@ export Transformer,TSLearner
 export Imputer,Pipeline,SKLLearner,OneHotEncoder,Pipeline,Wrapper
 
 export Matrifier,Dateifier
-export DateValizer,DateValgator
+export DateValizer,DateValgator,DateValNNer
 
-export matrifyrun,dateifierrun,datevalgatorrun,datevalizerrun
+export matrifyrun,dateifierrun,
+       datevalgatorrun,datevalizerrun,
+       datevalnnerrun
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
 using TSML.Utils
-using DataFrames
+
+include("valdate.jl")
 
 # Transforms instances with nominal features into one-hot form
 # and coerces the instance matrix to be of element type Float64.
@@ -118,210 +122,6 @@ function find_nominal_columns(features::T) where {T<:Union{Matrix,DataFrame}}
   end
   return nominal_columns
 end
-
-# Convert a 1-D timeseries into sliding window matrix for ML training
-mutable struct Matrifier <: Transformer
-  model
-  args
-
-  function Matrifier(args=Dict())
-    default_args = Dict(
-        :ahead => 1,
-        :size => 7,
-        :stride => 1,
-    )
-    new(nothing,mergedict(default_args,args))
-  end
-end
-
-function fit!(mtr::Matrifier,x::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector}}
-  mtr.model = mtr.args
-end
-
-function transform!(mtr::Matrifier,x::T) where {T<:Union{Matrix,Vector}}
-  x isa Vector || error("data should be a vector")
-  res=toMatrix(mtr,x)
-  convert(Array{Float64},res)
-end
-
-function toMatrix(mtr::Transformer, x::Vector)
-  stride=mtr.args[:stride];sz=mtr.args[:size];ahead=mtr.args[:ahead]
-  xlength = length(x)
-  xlength > sz || error("data too short for the given size of sliding window")
-  ndx=collect(xlength:-1:1)
-  mtuples = slidingwindow(i->(i-ahead),ndx,sz,stride)
-  height=size(mtuples)[1]
-  mmatrix = Array{Union{DateTime,<:Real},2}(zeros(height,sz+1))
-  ctr=1
-  gap = xlength - mtuples[1][2][1]
-  for (s,k) in mtuples
-    v = [reverse(s);k] .+ gap
-    mmatrix[ctr,:].=x[v]
-    ctr+=1
-  end
-  return mmatrix
-end
-
-
-function matrifyrun()
-  mtr = Matrifier(Dict(:ahead=>24,:size=>24,:stride=>1))
-  sz = mtr.args[:size]
-  x=collect(1:100)
-  y=collect(1:100)
-  println(fit!(mtr,x,y))
-  transform!(mtr,x)
-end
-
-# Convert a 1-D date series into sliding window matrix for ML training
-mutable struct Dateifier <: Transformer
-  model
-  args
-
-  function Dateifier(args=Dict())
-    default_args = Dict(
-        :ahead => 1,
-        :size => 7,
-        :stride => 1,
-        :dateinterval => Dates.Hour(1)
-    )
-    new(nothing,mergedict(default_args,args))
-  end
-end
-
-function fit!(dtr::Dateifier,x::T,y::Vector=[]) where {T<:Union{Matrix,Vector}}
-  (eltype(x) <: DateTime || eltype(x) <: Date) || error("array element types are not dates")
-  dtr.args[:lower] = minimum(x)
-  dtr.args[:upper] = maximum(x)
-  dtr.model = dtr.args
-end
-
-# transform to day of the month, day of the week, etc
-function transform!(dtr::Dateifier,x::T) where {T<:Union{Matrix,Vector}}
-  x isa Vector || error("data should be a vector")
-  @assert eltype(x) <: DateTime || eltype(x) <: Date
-  res=toMatrix(dtr,x)
-  endpoints = convert(Array{DateTime},res)[:,end-1]
-  dt = DataFrame()
-  dt[:year]=Dates.year.(endpoints)
-  dt[:month]=Dates.month.(endpoints)
-  dt[:day]=Dates.day.(endpoints)
-  dt[:hour]=Dates.hour.(endpoints)
-  dt[:week]=Dates.week.(endpoints)
-  dt[:dow]=Dates.dayofweek.(endpoints)
-  dt[:doq]=Dates.dayofquarter.(endpoints)
-  dt[:qoy]=Dates.quarterofyear.(endpoints)
-  dtr.args[:header] = names(dt)
-  convert(Matrix{Int64},dt)
-end
-
-function dateifierrun()
-  dtr = Dateifier(Dict(:stride=>5))
-  lower = DateTime(2017,1,1)
-  upper = DateTime(2019,1,1)
-  x=lower:Dates.Hour(1):upper |> collect
-  y=lower:Dates.Hour(1):upper |> collect
-  fit!(dtr,x,y)
-  transform!(dtr,x)
-end
-
-
-# Date,Val time series
-mutable struct DateValgator <: Transformer
-  model
-  args
-
-  function DateValgator(args=Dict())
-    default_args = Dict(
-        :ahead => 1,
-        :size => 7,
-        :stride => 1,
-        :dateinterval => Dates.Hour(1)
-    )
-    new(nothing,mergedict(default_args,args))
-  end
-end
-
-function fit!(dvmr::DateValgator,x::T,y::Vector=[]) where {T<:DataFrame}
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Real || error("array element types are not dates")
-  dvmr.model=dvmr.args
-end
-
-function transform!(dvmr::DateValgator,x::T) where {T<:DataFrame}
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Real || error("array element types are not dates")
-  cnames = names(x)
-  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
-  grpby = typeof(dvmr.args[:dateinterval])
-  sym = Symbol(grpby)
-  x[sym] = round.(x[:Date],grpby)
-  by(x,sym,MeanValue = :Value=>mean)
-end
-
-function datevalgatorrun()
-  dtvl = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-  dte=DateTime(2014,1,1):Dates.Minute(1):DateTime(2016,1,1)
-  val = rand(length(dte))
-  fit!(dtvl,DataFrame(date=dte,values=val),[])
-  transform!(dtvl,DataFrame(date=dte,values=val))
-end
-
-
-# Date,Val time series
-# Normalize and clean date,val
-mutable struct DateValizer <: Transformer
-  model
-  args
-
-  function DateValizer(args=Dict())
-    default_args = Dict(
-        :ahead => 1,
-        :size => 7,
-        :stride => 1,
-        :dateinterval => Dates.Hour(1)
-    )
-    new(nothing,mergedict(default_args,args))
-  end
-end
-
-function fit!(dvzr::DateValizer,x::T,y::Vector=[]) where {T<:DataFrame}
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Real || error("array element types are not dates")
-  dvzr.model=dvzr.args
-end
-
-function transform!(dvzr::DateValizer,x::T) where {T<:DataFrame}
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Real || error("array element types are not dates")
-  cnames = names(x)
-  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
-  grpby = typeof(dvzr.args[:dateinterval])
-  sym = Symbol(grpby)
-  x[sym] = round.(x[:Date],grpby)
-  aggr = by(x,sym,MeanValue = :Value=>mean)
-  rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
-  lower = minimum(x[:Date])
-  upper = maximum(x[:Date])
-  cdate = DataFrame(Date = collect(lower:dvzr.args[:dateinterval]:upper))
-  join(cdate,aggr,on=:Date,kind=:left)
-end
-
-
-function datevalizerrun()
-  # test passing args from one structure to another
-  dvzr1 = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
-  dvzr2 = DateValizer(dvzr1.args)
-  dte=DateTime(2014,1,1):Dates.Hour(2):DateTime(2016,1,1)
-  val = rand(length(dte))
-  fit!(dvzr2,DataFrame(date=dte,values=val),[])
-  transform!(dvzr2,DataFrame(date=dte,values=val))
-end
-
-
 
 # Imputes NaN values from Float64 features.
 mutable struct Imputer <: Transformer

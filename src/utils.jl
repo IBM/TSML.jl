@@ -1,5 +1,33 @@
 module Utils
 export mergedict
+export skipmean,skipmedian,skipstd
+
+using Statistics
+using DataFrames
+
+function skipmean(x::T) where {T<:Union{AbstractArray,DataFrame}} 
+  if length(collect(skipmissing(x))) == 0
+    missing
+  else
+    mean(skipmissing(x))
+  end
+end
+
+function skipmedian(x::T) where {T<:Union{AbstractArray,DataFrame}} 
+  if length(collect(skipmissing(x))) == 0
+    missing
+  else
+    median(skipmissing(x))
+  end
+end
+
+function skipstd(x::T) where {T<:Union{AbstractArray,DataFrame}} 
+  if length(collect(skipmissing(x))) == 0
+    missing
+  else
+    std(skipmissing(x))
+  end
+end
 
 function mergedict(first::Dict, second::Dict)
   target = copy(first)

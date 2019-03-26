@@ -50,7 +50,9 @@ function check_r_dep()
   return is_available
 end
 
-# Check system for python dependencies.
-LIB_SKL_AVAILABLE = check_py_dep("scikit-learn")
-LIB_CRT_AVAILABLE = check_r_dep()
+## Check system for python dependencies.
+const LIB_SKL_AVAILABLE = check_py_dep("scikit-learn")
+const LIB_CRT_AVAILABLE = check_r_dep()
+#const LIB_SKL_AVAILABLE = false
+#const LIB_CRT_AVAILABLE = false
 end # module
