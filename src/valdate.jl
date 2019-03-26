@@ -4,7 +4,7 @@ mutable struct Matrifier <: Transformer
   args
 
   function Matrifier(args=Dict())
-    default_args = Dict(
+    default_args = Dict{Symbol,Any}(
         :ahead => 1,
         :size => 7,
         :stride => 1,
@@ -25,6 +25,7 @@ end
 
 function toMatrix(mtr::Transformer, x::Vector)
   stride=mtr.args[:stride];sz=mtr.args[:size];ahead=mtr.args[:ahead]
+  @assert stride>0 && sz>0 && ahead > 0 
   xlength = length(x)
   xlength > sz || error("data too short for the given size of sliding window")
   ndx=collect(xlength:-1:1)
@@ -38,7 +39,7 @@ function toMatrix(mtr::Transformer, x::Vector)
     mmatrix[ctr,:].=x[v]
     ctr+=1
   end
-  return mmatrix
+  mmatrix
 end
 
 function matrifyrun()
@@ -50,17 +51,18 @@ function matrifyrun()
   transform!(mtr,x)
 end
 
+### ====
+
 # Convert a 1-D date series into sliding window matrix for ML training
 mutable struct Dateifier <: Transformer
   model
   args
 
   function Dateifier(args=Dict())
-    default_args = Dict(
+    default_args = Dict{Symbol,Any}(
         :ahead => 1,
         :size => 7,
-        :stride => 1,
-        :dateinterval => Dates.Hour(1)
+        :stride => 1
     )
     new(nothing,mergedict(default_args,args))
   end
@@ -102,6 +104,7 @@ function dateifierrun()
   transform!(dtr,x)
 end
 
+### ====
 
 # Date,Val time series
 mutable struct DateValgator <: Transformer
@@ -109,10 +112,7 @@ mutable struct DateValgator <: Transformer
   args
 
   function DateValgator(args=Dict())
-    default_args = Dict(
-        :ahead => 1,
-        :size => 7,
-        :stride => 1,
+    default_args = Dict{Symbol,Any}(
         :dateinterval => Dates.Hour(1)
     )
     new(nothing,mergedict(default_args,args))
@@ -153,6 +153,7 @@ function datevalgatorrun()
   transform!(dtvl,DataFrame(date=dte,values=val))
 end
 
+### ====
 
 # Date,Val time series
 # Normalize and clean date,val by replacing missings with medians
@@ -161,10 +162,8 @@ mutable struct DateValizer <: Transformer
   args
 
   function DateValizer(args=Dict())
-    default_args = Dict(
-        :ahead => 1,
-        :size => 7,
-        :stride => 1,
+    default_args = Dict{Symbol,Any}(
+        :medians => DataFrame(),
         :dateinterval => Dates.Hour(1)
     )
     new(nothing,mergedict(default_args,args))
@@ -184,6 +183,7 @@ function getMedian(t::Type{T},xx::DataFrame) where {T<:Union{TimePeriod,DatePeri
     error("unknown dateinterval")
   end
   gpmeans = by(x,sgp,Value = :Value => skipmedian)
+  gpmeans
 end
 
 function fullaggregate!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
@@ -256,6 +256,7 @@ function datevalizerrun()
   transform!(dvzr2,x)
 end
 
+### ====
 
 # fill-in missings with nearest-neighbors median
 mutable struct DateValNNer <: Transformer
@@ -263,12 +264,11 @@ mutable struct DateValNNer <: Transformer
   args
 
   function DateValNNer(args=Dict())
-    default_args = Dict(
-        :ahead => 1,
-        :size => 7,
-        :stride => 1,
+    default_args = Dict{Symbol,Any}(
         :dateinterval => Dates.Hour(1),
-        :nnsize => 5 
+        :nnsize => 5,
+        :strict => true,
+        :missdirection => :reverse # or :forward
     )
     new(nothing,mergedict(default_args,args))
   end
@@ -294,15 +294,21 @@ function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dnnr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
+  maxrow = size(joined)[1]
 
   # to fill-in with nearest neighbors
   nnsize::Int64 = dnnr.args[:nnsize]
-  missingndx = DataFrame(missed = findall(ismissing.(joined[:Value])))
-  missingndx[:neighbors] = (x->(x-nnsize):(x-1)).(missingndx[:missed]) # NN ranges
-  #joined[missingndx[:missed],:Value] = (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # iterate to each range
-  missingvals::SubArray = @view joined[missingndx[:missed],:Value] # get view of only missings
+  themissing = findall(ismissing.(joined[:Value])) 
+  missed = (dnnr.args[:missdirection] == :reverse) ? (themissing |> reverse) : themissing
+  missingndx = DataFrame(Missed=missed)
+  # dealing with boundary exceptions, default to range until the maxrow
+  missingndx[:neighbors] = (x->((x+1>=maxrow) || (x+nnsize>=maxrow)) ? (x+1:maxrow) : (x+1:x+nnsize)).(missingndx[:Missed]) # NN ranges
+  #missingndx[:neighbors] = (x->(x+1:x+nnsize)).(missingndx[:Missed]) # NN ranges
+  #joined[missingndx[:Missed],:Value] = (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # iterate to each range
+  missingvals::SubArray = @view joined[missingndx[:Missed],:Value] # get view of only missings
   missingvals .=  (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # replace with nn medians
-  sum(ismissing.(joined[:,:Value])) == 0 || error("Nearest Neigbour algo failed to replace missings")
+  #@show last(joined,5); @show sum(ismissing.(joined[:,:Value]));@show last(missingndx,5)
+  dnnr.args[:strict] && (sum(ismissing.(joined[:,:Value])) == 0 || error("Nearest Neigbour algo failed to replace missings"))
   joined
 end
 
