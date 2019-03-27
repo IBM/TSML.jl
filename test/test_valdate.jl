@@ -58,7 +58,7 @@ end
 end
 
 function test_datevalnner()
-    dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(25),:nnsize=>10,:missdirection => :forward))
+    dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(25),:nnsize=>10,:missdirection => :forward,:strict=>true))
     fit!(dnnr,XX,YY)
     res=transform!(dnnr,XX)
     @test sum(size(res) .== (701,2)) == 2
@@ -69,11 +69,13 @@ function test_datevalnner()
     @test round(sum(res[:Value]),digits=2) == 352.19
     dnnr.args[:dateinterval]=Dates.Hour(1)
     @test_throws ErrorException res=transform!(dnnr,XX) 
-    dnnr.args[:missdirection] = :forward
+    dnnr.args[:missdirection] = :reverse
     @test_throws ErrorException res=transform!(dnnr,XX) 
+    dnnr.args[:missdirection] = :symmetric
+    @test sum(size(transform!(dnnr,XX)) .== (17521,2)) == 2
     # testing boundaries
     Random.seed!(123)
-    dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:nnsize=>2,:missdirection => :forward))
+    dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:nnsize=>2,:missdirection => :forward,:strict=>true))
     v1=DateTime(2014,1,1,1,0):Dates.Hour(1):DateTime(2014,1,3,1,0)
     val=Array{Union{Missing,Float64}}(rand(length(v1)))
     x=DataFrame(Date=v1,Value=val)
@@ -87,6 +89,8 @@ function test_datevalnner()
     dlnr.args[:missdirection] = :forward
     dlnr.args[:strict] = false
     @test sum(ismissing.(transform!(dlnr,x)[:Value])) == 2
+    dlnr.args[:missdirection] = :symmetric
+    @test sum(ismissing.(transform!(dlnr,x)[:Value])) == 0
     defdnr=DateValNNer(Dict(:strict=>false))
     fit!(defdnr,XX,YY)
     @test sum((size(transform!(defdnr,XX))) .== (17521,2)) == 2
@@ -137,4 +141,17 @@ end
     test_matrifier()
 end
 
+function test_pipeline()
+  # start with aggregator in time period
+  dtvalgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
+  fit!(dtvalgator,XX,YY)
+  res_dtvalgator =  transform!(dtvalgator,XX)
+  @show res_dtvalgator
+  # replace missing with NN
+  dtvalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:strict=>true,:nnsize=>1))
+  fit!(dtvalnner,res_dtvalgator,[])
+  res_dtvalnner = transform!(dtvalnner,res_dtvalgator)
+  # slidewindow values and dates
+  # note: implement symmetric nearest neighbor where replace missing x with x-nnsize to x+nnsize
 end
+test_pipeline()

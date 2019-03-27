@@ -265,10 +265,10 @@ mutable struct DateValNNer <: Transformer
 
   function DateValNNer(args=Dict())
     default_args = Dict{Symbol,Any}(
+        :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
         :dateinterval => Dates.Hour(1),
-        :nnsize => 5,
-        :strict => true,
-        :missdirection => :reverse # or :forward
+        :nnsize => 2,
+        :strict => true
     )
     new(nothing,mergedict(default_args,args))
   end
@@ -299,15 +299,30 @@ function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   # to fill-in with nearest neighbors
   nnsize::Int64 = dnnr.args[:nnsize]
   themissing = findall(ismissing.(joined[:Value])) 
-  missed = (dnnr.args[:missdirection] == :reverse) ? (themissing |> reverse) : themissing
-  missingndx = DataFrame(Missed=missed)
-  # dealing with boundary exceptions, default to range until the maxrow
-  missingndx[:neighbors] = (x->((x+1>=maxrow) || (x+nnsize>=maxrow)) ? (x+1:maxrow) : (x+1:x+nnsize)).(missingndx[:Missed]) # NN ranges
-  #missingndx[:neighbors] = (x->(x+1:x+nnsize)).(missingndx[:Missed]) # NN ranges
+  # ==== symmetric nearest neighbor
+  missingndx = DataFrame()
+  if dnnr.args[:missdirection] == :symmetric
+    missed = themissing |> reverse
+    missingndx[:Missed] = missed
+    # get lower:upper range
+    missingndx[:neighbors] = map(missingndx[:Missed]) do m
+      lower = (m-nnsize >= 1) ? (m-nnsize) : 1
+      upper = (m+nnsize <= maxrow) ? m+nnsize : maxrow
+      lower:upper
+    end
+  else
+    # ===== reverse and forward
+    missed = (dnnr.args[:missdirection] == :reverse) ? (themissing |> reverse) : themissing
+    missingndx[:Missed] = missed
+    # dealing with boundary exceptions, default to range until the maxrow
+    missingndx[:neighbors] = (m->((m+1>=maxrow) || (m+nnsize>=maxrow)) ? (m+1:maxrow) : (m+1:m+nnsize)).(missingndx[:Missed]) # NN ranges
+  end
   #joined[missingndx[:Missed],:Value] = (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # iterate to each range
   missingvals::SubArray = @view joined[missingndx[:Missed],:Value] # get view of only missings
   missingvals .=  (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # replace with nn medians
-  #@show last(joined,5); @show sum(ismissing.(joined[:,:Value]));@show last(missingndx,5)
+  ## replace missing at the boundary for reverse replacement direction
+  #(dnnr.args[:missdirection] == :reverse) && ismissing(joined[end,:Value]) && (joined[end,:Value]=joined[end-1,:Value])
+  ##@show last(joined,5); @show sum(ismissing.(joined[:,:Value]));@show last(missingndx,5)
   dnnr.args[:strict] && (sum(ismissing.(joined[:,:Value])) == 0 || error("Nearest Neigbour algo failed to replace missings"))
   joined
 end
@@ -325,4 +340,21 @@ function datevalnnerrun()
   x[:MValue][ndxmissing] .= missing
   fit!(dnnr,x,y)
   transform!(dnnr,x)
+  dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:nnsize=>2,:strict=>false,:missdirection => :symmetric))
+  v1=DateTime(2014,1,1,1,0):Dates.Hour(1):DateTime(2014,1,3,1,0)
+  val=Array{Union{Missing,Float64}}(rand(length(v1)))
+  x=DataFrame(Date=v1,Value=val)
+  x[45:end,:Value] = missing
+  x[1:5,:Value] = missing
+  @show x
+  fit!(dlnr,x,[])
+  res = transform!(dlnr,x) 
+  count=1
+  while sum(ismissing.(res[:Value])) > 0
+    res = transform!(dlnr,res) 
+    @show first(res,5);@show last(res,5)
+    @show sum(ismissing.(res[:Value]))
+    count += 1
+  end
+  @show count
 end
