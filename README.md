@@ -3,7 +3,7 @@
 Julia 1.0: [![Build Status](https://travis-ci.com/IBM/TSML.jl.svg?branch=master)](https://travis-ci.com/IBM/TSML.jl)
 
 
-TSML (Time Series Machine Learning) is package for Time Series data processing and prediction. It combines ML libraries from Python's ScikitLearn, R's Caret, and Julia using a common API and allows seamless ensembling and integration of heterogenous ML libraries to create complex models for robust time-series prediction.
+TSML (Time Series Machine Learning) is package for Time Series data processing, classification, and prediction. It combines ML libraries from Python's ScikitLearn, R's Caret, and Julia using a common API and allows seamless ensembling and integration of heterogenous ML libraries to create complex models for robust time-series prediction.
 
 The package assumes a two-column input composed of Dates and Values. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by k nearest neighbors where k is the symmetric distance from the location of missing value. This approach can be called several times until there are no more missing values.
 
