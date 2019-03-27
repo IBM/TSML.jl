@@ -353,14 +353,15 @@ function datevalnnerrun()
   x[:MValue][ndxmissing] .= missing
   fit!(dnnr,x,y)
   transform!(dnnr,x)
-  dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:nnsize=>2,:strict=>false,:missdirection => :symmetric))
+  dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),
+                          :nnsize=>10,:strict=>false,
+                          :missdirection => :forward))
   v1=DateTime(2014,1,1,1,0):Dates.Hour(1):DateTime(2014,1,3,1,0)
   val=Array{Union{Missing,Float64}}(collect(1:(length(v1))))
   x=DataFrame(Date=v1,Value=val)
-  #x[45:end,:Value] = missing
-  #x[1:10,:Value] = missing
-  #x[20:30,:Value] = missing
-  x[1:2:end,:Value] = missing
+  x[45:end,:Value] = missing
+  x[1:10,:Value] = missing
+  x[20:30,:Value] = missing
   @show x
   fit!(dlnr,x,[])
   res = transform!(dlnr,x)

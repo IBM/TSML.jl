@@ -94,6 +94,23 @@ function test_datevalnner()
     defdnr=DateValNNer(Dict(:strict=>false))
     fit!(defdnr,XX,YY)
     @test sum((size(transform!(defdnr,XX))) .== (17521,2)) == 2
+    # test with controlled locations of missings
+    dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),
+			    :nnsize=>10,:strict=>false,
+			    :missdirection => :forward))
+    v1=DateTime(2014,1,1,1,0):Dates.Hour(1):DateTime(2014,1,3,1,0)
+    val=Array{Union{Missing,Float64}}(collect(1:(length(v1))))
+    x=DataFrame(Date=v1,Value=val)
+    x[45:end,:Value] = missing
+    x[1:10,:Value] = missing
+    x[20:30,:Value] = missing
+    fit!(dlnr,x,[])
+    res = transform!(dlnr,x)
+    @test sum(ismissing.(transform!(dlnr,x)[:Value])) == 6
+    dlnr.args[:missdirection] = :reverse
+    @test sum(ismissing.(transform!(dlnr,x)[:Value])) == 5 
+    dlnr.args[:missdirection] = :symmetric
+    @test sum(ismissing.(transform!(dlnr,x)[:Value])) == 0
 end
 @testset "DateValNNer: replace missings with nearest neighbors" begin
     test_datevalnner()
