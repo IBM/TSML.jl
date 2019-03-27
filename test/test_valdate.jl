@@ -155,3 +155,4 @@ function test_pipeline()
   # note: implement symmetric nearest neighbor where replace missing x with x-nnsize to x+nnsize
 end
 test_pipeline()
+end
