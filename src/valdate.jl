@@ -140,7 +140,7 @@ function transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
   grpby = typeof(dvmr.args[:dateinterval])
   sym = Symbol(grpby)
   x[sym] = round.(x[:Date],grpby)
-  res=by(x,sym,MeanValue = :Value=>skipmean)
+  res=by(x,sym,MeanValue = :Value=>skipmedian)
   rename!(res,Dict(names(res)[1]=>:Date,names(res)[2]=>:Value))
   res
 end
@@ -191,7 +191,7 @@ function fullaggregate!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   grpby = typeof(dvzr.args[:dateinterval])
   sym = Symbol(grpby)
   x[sym] = round.(x[:Date],grpby)
-  aggr = by(x,sym,MeanValue = :Value=>skipmean)
+  aggr = by(x,sym,MeanValue = :Value=>skipmedian)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
   lower = minimum(x[:Date])
   upper = maximum(x[:Date])
@@ -287,13 +287,29 @@ function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   sym = Symbol(grpby)
   # aggregate by time period
   x[sym] = round.(x[:Date],grpby)
-  aggr = by(x,sym,MeanValue = :Value=>skipmean)
+  aggr = by(x,sym,MeanValue = :Value=>skipmedian)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
   lower = minimum(x[:Date])
   upper = maximum(x[:Date])
   #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dnnr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
+  missingcount = sum(ismissing.(joined[:Value])) 
+  dnnr.args[:missingcount] = missingcount
+  res = transform_worker!(dnnr,joined) 
+  count=1
+  if dnnr.args[:missdirection] == :symmetric
+    while sum(ismissing.(res[:Value])) > 0
+      res = transform_worker!(dnnr,res) 
+      count += 1
+    end
+  end
+  dnnr.args[:loopcount] = count
+  res
+end
+
+function transform_worker!(dnnr::DateValNNer,joinc::T) where {T<:DataFrame}
+  joined = deepcopy(joinc)
   maxrow = size(joined)[1]
 
   # to fill-in with nearest neighbors
@@ -320,9 +336,6 @@ function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   #joined[missingndx[:Missed],:Value] = (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # iterate to each range
   missingvals::SubArray = @view joined[missingndx[:Missed],:Value] # get view of only missings
   missingvals .=  (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # replace with nn medians
-  ## replace missing at the boundary for reverse replacement direction
-  #(dnnr.args[:missdirection] == :reverse) && ismissing(joined[end,:Value]) && (joined[end,:Value]=joined[end-1,:Value])
-  ##@show last(joined,5); @show sum(ismissing.(joined[:,:Value]));@show last(missingndx,5)
   dnnr.args[:strict] && (sum(ismissing.(joined[:,:Value])) == 0 || error("Nearest Neigbour algo failed to replace missings"))
   joined
 end
@@ -342,19 +355,15 @@ function datevalnnerrun()
   transform!(dnnr,x)
   dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:nnsize=>2,:strict=>false,:missdirection => :symmetric))
   v1=DateTime(2014,1,1,1,0):Dates.Hour(1):DateTime(2014,1,3,1,0)
-  val=Array{Union{Missing,Float64}}(rand(length(v1)))
+  val=Array{Union{Missing,Float64}}(collect(1:(length(v1))))
   x=DataFrame(Date=v1,Value=val)
-  x[45:end,:Value] = missing
-  x[1:5,:Value] = missing
+  #x[45:end,:Value] = missing
+  #x[1:10,:Value] = missing
+  #x[20:30,:Value] = missing
+  x[1:2:end,:Value] = missing
   @show x
   fit!(dlnr,x,[])
-  res = transform!(dlnr,x) 
-  count=1
-  while sum(ismissing.(res[:Value])) > 0
-    res = transform!(dlnr,res) 
-    @show first(res,5);@show last(res,5)
-    @show sum(ismissing.(res[:Value]))
-    count += 1
-  end
-  @show count
+  res = transform!(dlnr,x)
+  @show res
+  @show dlnr.args
 end

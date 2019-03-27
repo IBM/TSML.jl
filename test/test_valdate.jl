@@ -37,7 +37,7 @@ function test_datevalizer()
     @test sum(ismissing.(res[:Value])) == 0
     @test sum(X1[:Value] .!== XX[:Value]) == 0
     @test sum(Y1 .!== YY) == 0
-    @test round(sum(res[:Value]),digits=2) == 8796.64
+    @test round(sum(res[:Value]),digits=2) == 8798.2
     @test nrow(dvzr2.args[:medians]) == 24
 end
 @testset "DateValizer: Fill missings with medians" begin
@@ -49,7 +49,7 @@ function test_datevalgator()
     fit!(dtvl,XX,YY)
     res = transform!(dtvl,XX)
     @test sum(ismissing.(res[:Value])) == 4466
-    @test round(sum(skipmissing(res[:Value])),digits=2) == 6557.97
+    @test round(sum(skipmissing(res[:Value])),digits=2) == 6556.17
     @test sum(X1[:Value] .!== XX[:Value]) == 0
     @test sum(Y1 .!== YY) == 0
 end
@@ -62,11 +62,11 @@ function test_datevalnner()
     fit!(dnnr,XX,YY)
     res=transform!(dnnr,XX)
     @test sum(size(res) .== (701,2)) == 2
-    @test round(sum(res[:Value]),digits=2) == 352.1
+    @test round(sum(res[:Value]),digits=2) == 350.57
     dnnr.args[:missdirection] = :reverse
     res=transform!(dnnr,XX)
     @test sum(size(res) .== (701,2)) == 2
-    @test round(sum(res[:Value]),digits=2) == 352.19
+    @test round(sum(res[:Value]),digits=2) == 350.17
     dnnr.args[:dateinterval]=Dates.Hour(1)
     @test_throws ErrorException res=transform!(dnnr,XX) 
     dnnr.args[:missdirection] = :reverse
@@ -155,4 +155,5 @@ function test_pipeline()
   # note: implement symmetric nearest neighbor where replace missing x with x-nnsize to x+nnsize
 end
 test_pipeline()
+
 end
