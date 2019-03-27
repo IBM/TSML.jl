@@ -7,7 +7,7 @@ TSML (Time Series Machine Learning) is package for Time Series data processing a
 
 The package assumes a two-column input composed of Dates and Values. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by k nearest neighbors where k is the symmetric distance from the location of missing value. This approach can be called several times until there are no more missing values.
 
-The next part extract the date features and convert the values into matrix form parameterized by the size and stride of the sliding window representing the dimension of the input for ML.
+The next part extract the date features and convert the values into matrix form parameterized by the _size_ and _stride_ of the sliding window representing the dimension of the input for ML training and prediction.
 
 The final part combines the date features and the matrix of values as input to the ML with the output representing the value of the time period to be predicted ahead of time.
 
