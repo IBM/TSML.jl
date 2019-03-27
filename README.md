@@ -9,7 +9,7 @@ The package assumes a two-column input composed of Dates and Values. The first p
 
 The next part extract the date features and convert the values into matrix form parameterized by the _size_ and _stride_ of the sliding window representing the dimension of the input for ML training and prediction.
 
-The final part combines the date features and the matrix of values as input to the ML with the output representing the value of the time period to be predicted ahead of time.
+The final part combines the date features and the matrix of values as input to the ML with the output representing the values of the time periods to be predicted ahead of time.
 
 TSML uses a pipeline which iteratively calls fit! and transform! relying on multiple dispatch to do the corresponding algorithm of the steps outlined above.
 
