@@ -11,7 +11,7 @@ The next part extract the date features and convert the values into matrix form 
 
 The final part combines the date features and the matrix of values as input to the ML with the output representing the values of the time periods to be predicted ahead of time.
 
-TSML uses a pipeline which iteratively calls fit! and transform! relying on multiple dispatch to do the corresponding algorithm of the steps outlined above.
+TSML uses a pipeline which iteratively calls the __fit__ and __transform__ families of functions relying on multiple dispatch to select the correct algorithm from the steps outlined above.
 
 Machine learning functions in TSML are wrappers to the corresponding Scikit-learn, Caret, and native Julia ML libraries. There are more than hundred classifiers and regression functions available using a common API. 
 
