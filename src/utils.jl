@@ -1,4 +1,5 @@
 module Utils
+
 export mergedict
 export skipmean,skipmedian,skipstd
 
@@ -43,5 +44,6 @@ function mergedict(first::Dict, second::Dict)
   end
   return target
 end
+
 
 end

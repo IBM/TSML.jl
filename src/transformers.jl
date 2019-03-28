@@ -9,7 +9,7 @@ using Random
 export fit!,transform!
 
 export Transformer,TSLearner
-export Imputer,Pipeline,SKLLearner,OneHotEncoder,Pipeline,Wrapper
+export Imputer,Pipeline,SKLLearner,OneHotEncoder,Wrapper
 
 export Matrifier,Dateifier
 export DateValizer,DateValgator,DateValNNer
@@ -181,14 +181,15 @@ mutable struct Pipeline <: Transformer
 end
 
 function fit!(pipe::Pipeline, features::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
-  instances=convert(Matrix,features)
+  #instances=convert(Matrix,features)
+  instances=copy(features)
   transformers = pipe.args[:transformers]
   transformer_args = pipe.args[:transformer_args]
 
   current_instances = instances
   new_transformers = Transformer[]
   for t_index in 1:length(transformers)
-    transformer = create_transformer(transformers[t_index], transformer_args)
+    transformer = createtransformer(transformers[t_index], transformer_args)
     push!(new_transformers, transformer)
     fit!(transformer, current_instances, labels)
     current_instances = transform!(transformer, current_instances)
@@ -201,7 +202,8 @@ function fit!(pipe::Pipeline, features::T, labels::Vector) where {T<:Union{Matri
 end
 
 function transform!(pipe::Pipeline, features::T) where {T<:Union{Matrix,DataFrame}}
-  instances = convert(Matrix,features)
+  #instances = convert(Matrix,features)
+  instances = copy(features)
   transformers = pipe.model[:transformers]
 
   current_instances = instances
@@ -233,7 +235,7 @@ end
 function fit!(wrapper::Wrapper, features::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
   instances=convert(Matrix,features)
   transformer_args = wrapper.args[:transformer_args]
-  transformer = create_transformer(
+  transformer = createtransformer(
     wrapper.args[:transformer],
     transformer_args
   )
@@ -253,5 +255,21 @@ function transform!(wrapper::Wrapper, instances::T) where {T<:Union{Matrix,DataF
   transformer = wrapper.model[:transformer]
   return transform!(transformer, instances)
 end
+
+# Create transformer
+#
+# @param prototype Prototype transformer to base new transformer on.
+# @param options Additional options to override prototype's options.
+# @return New transformer.
+function createtransformer(prototype::Transformer, args=nothing)
+  new_args = copy(prototype.args)
+  if args != nothing
+    new_args = mergedict(new_args, args)
+  end
+
+  prototype_type = typeof(prototype)
+  return prototype_type(new_args)
+end
+
 
 end

@@ -1,4 +1,6 @@
 # Convert a 1-D timeseries into sliding window matrix for ML training
+# using Plots
+
 mutable struct Matrifier <: Transformer
   model
   args
@@ -13,11 +15,16 @@ mutable struct Matrifier <: Transformer
   end
 end
 
-function fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector}}
+function fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector,DataFrame}}
+  typeof(xx) <: DataFrame || error("input is not a dataframe")
+  x = deepcopy(xx[:Value]) 
+  x isa Vector || error("data should be a vector")
   mtr.model = mtr.args
 end
 
-function transform!(mtr::Matrifier,x::T) where {T<:Union{Matrix,Vector}}
+function transform!(mtr::Matrifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
+  typeof(xx) <: DataFrame || error("input is not a dataframe")
+  x = deepcopy(xx[:Value]) 
   x isa Vector || error("data should be a vector")
   res=toMatrix(mtr,x)
   convert(Array{Float64},res)
@@ -68,7 +75,9 @@ mutable struct Dateifier <: Transformer
   end
 end
 
-function fit!(dtr::Dateifier,x::T,y::Vector=[]) where {T<:Union{Matrix,Vector}}
+function fit!(dtr::Dateifier,xx::T,y::Vector=[]) where {T<:Union{Matrix,Vector,DataFrame}}
+  typeof(xx) <: DataFrame || error("input not a dataframe")
+  x = deepcopy(xx[:Date]) 
   (eltype(x) <: DateTime || eltype(x) <: Date) || error("array element types are not dates")
   dtr.args[:lower] = minimum(x)
   dtr.args[:upper] = maximum(x)
@@ -76,7 +85,9 @@ function fit!(dtr::Dateifier,x::T,y::Vector=[]) where {T<:Union{Matrix,Vector}}
 end
 
 # transform to day of the month, day of the week, etc
-function transform!(dtr::Dateifier,x::T) where {T<:Union{Matrix,Vector}}
+function transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
+  typeof(xx) <: DataFrame || error("input not a dataframe")
+  x = deepcopy(xx[:Date])
   x isa Vector || error("data should be a vector")
   @assert eltype(x) <: DateTime || eltype(x) <: Date
   res=toMatrix(dtr,x)
@@ -128,7 +139,7 @@ function validdateval!(x::T) where {T<:DataFrame}
 end
 
 
-function fit!(dvmr::DateValgator,xx::T,y::Vector=[]) where {T<:DataFrame}
+function fit!(dvmr::DateValgator,xx::T,y::Vector=[]) where {T<:Union{Matrix,DataFrame}}
   x = deepcopy(xx)
   validdateval!(x)
   dvmr.model=dvmr.args
@@ -354,17 +365,22 @@ function datevalnnerrun()
   fit!(dnnr,x,y)
   transform!(dnnr,x)
   dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),
-                          :nnsize=>10,:strict=>false,
-                          :missdirection => :forward))
-  v1=DateTime(2014,1,1,1,0):Dates.Hour(1):DateTime(2014,1,3,1,0)
-  val=Array{Union{Missing,Float64}}(collect(1:(length(v1))))
-  x=DataFrame(Date=v1,Value=val)
-  x[45:end,:Value] = missing
-  x[1:10,:Value] = missing
-  x[20:30,:Value] = missing
-  @show x
+                          :nnsize=>1,:strict=>false,
+                          :missdirection => :symmetric))
+  Random.seed!(123)
+  v1=DateTime(2014,1,1,1,0):Dates.Hour(1):DateTime(2014,1,6,1,0)
+  val=Array{Union{Missing,Float64}}(sin.(-2π:0.1:2π)[1:length(v1)])
+  dat = deepcopy(val)
+  x=DataFrame(Date=v1,Value=dat)
+  ndx = Random.shuffle(1:length(v1))
+  x[ndx[1:50],:Value] = missing
+  #@show x
   fit!(dlnr,x,[])
   res = transform!(dlnr,x)
-  @show res
+  rmse = sqrt(mean(val .- res[:Value]).^2)
+  #@show res
+  @show rmse
   @show dlnr.args
+  #plot([val,res[:Value]]) |> display
+  #(val,res)
 end
