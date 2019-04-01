@@ -198,7 +198,7 @@ end
 end
 
 function test_csvreader()
-  csvreader = CSVDateValReader(Dict(:filename=>"data/testdata.csv",:dateformat=>"d/m/y H:M"))
+  csvreader = CSVDateValReader(Dict(:filename=>"../data/testdata.csv",:dateformat=>"d/m/y H:M"))
   filter1 = DateValgator()
   filter2 = DateValNNer(Dict(:nnsize=>1))
   mypipeline = Pipeline(Dict(
