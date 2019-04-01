@@ -5,6 +5,7 @@ using TSML.Utils
 using TSML.TSMLTypes
 using TSML.TSMLTransformers
 
+using CSV
 using Random
 using Statistics
 using DataFrames
@@ -166,16 +167,6 @@ end
 end
 
 function test_pipeline()
-  # start with aggregator in time period
-  #dtvalgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-  #fit!(dtvalgator,XX,YY)
-  #res_dtvalgator =  transform!(dtvalgator,XX)
-  #@show first(res_dtvalgator,10)
-  ## replace missing with NN
-  #dtvalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:strict=>true,:nnsize=>1,:missdirection=>:symmetric))
-  #fit!(dtvalnner,res_dtvalgator,[])
-  #res_dtvalnner = transform!(dtvalnner,res_dtvalgator)
-  #@show first(res_dtvalnner,10)
   dtvalgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
   dtvalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:strict=>true,:nnsize=>1,:missdirection=>:symmetric))
   dtr = Dateifier(Dict())
@@ -205,5 +196,32 @@ end
 @testset "Pipeline: check " begin
   test_pipeline()
 end
+
+function test_csvreader()
+  csvreader = CSVDateValReader(Dict(:filename=>"../data/testdata.csv",:dateformat=>"d/m/y H:M"))
+  filter1 = DateValgator()
+  filter2 = DateValNNer(Dict(:nnsize=>1))
+  mypipeline = Pipeline(Dict(
+	:transformers => [csvreader,filter1,filter2]
+    )
+  )
+  fit!(mypipeline)
+  res=transform!(mypipeline)
+  @test nrow(res) == 8761
+  @test ncol(res) == 2
+  @test sum(ismissing.(res[:Value])) == 0
+  @test floor(sum(res[:Value])) == 97564.0
+  fit!(csvreader)
+  dat = transform!(csvreader)
+  fit!(filter1,dat,[])
+  res1=transform!(filter1,dat)
+  fit!(filter2,res1,[])
+  res2=transform!(filter2,res1)
+  @test mypipeline.args[:transformers][3].args[:missingcount] == filter2.args[:missingcount]
+end
+@testset "CSVDateValReader: reading csv with Date,Value columns" begin
+  test_csvreader()
+end
+
 
 end

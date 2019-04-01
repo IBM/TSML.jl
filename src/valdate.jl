@@ -384,3 +384,31 @@ function datevalnnerrun()
   #plot([val,res[:Value]]) |> display
   #(val,res)
 end
+
+mutable struct CSVDateValReader <: Transformer
+    model
+    args
+    function CSVDateValReader(args=Dict())
+        default_args = Dict(
+            :filename => "",
+            :dateformat => ""
+        )
+        new(nothing,mergedict(default_args,args))
+    end
+end
+function fit!(csvrdr::CSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+    fname = csvrdr.args[:filename]
+    fmt = csvrdr.args[:dateformat]
+    (fname != "" && fmt != "") || error("missing filename or date format")
+    model = csvrdr.args
+end
+
+function transform!(csvrdr::CSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+    fname = csvrdr.args[:filename]
+    fmt = csvrdr.args[:dateformat]
+    df = CSV.read(fname)
+    ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
+    rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
+    df[:Date] = DateTime.(df[:Date],fmt)
+    df
+end

@@ -5,6 +5,7 @@ using Dates
 using DataFrames
 using Statistics
 using Random
+using CSV
 
 export fit!,transform!
 
@@ -12,7 +13,7 @@ export Transformer,TSLearner
 export Imputer,Pipeline,SKLLearner,OneHotEncoder,Wrapper
 
 export Matrifier,Dateifier
-export DateValizer,DateValgator,DateValNNer
+export DateValizer,DateValgator,DateValNNer,CSVDateValReader
 
 export matrifyrun,dateifierrun,
        datevalgatorrun,datevalizerrun,
