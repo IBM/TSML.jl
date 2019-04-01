@@ -5,14 +5,15 @@ using Dates
 using DataFrames
 using Statistics
 using Random
+using CSV
 
 export fit!,transform!
 
 export Transformer,TSLearner
-export Imputer,Pipeline,SKLLearner,OneHotEncoder,Pipeline,Wrapper
+export Imputer,Pipeline,SKLLearner,OneHotEncoder,Wrapper
 
 export Matrifier,Dateifier
-export DateValizer,DateValgator,DateValNNer
+export DateValizer,DateValgator,DateValNNer,CSVDateValReader
 
 export matrifyrun,dateifierrun,
        datevalgatorrun,datevalizerrun,
@@ -43,7 +44,7 @@ mutable struct OneHotEncoder <: Transformer
   end
 end
 
-function fit!(ohe::OneHotEncoder, features::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
+function fit!(ohe::OneHotEncoder, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   # Obtain nominal columns
   nominal_columns = ohe.args[:nominal_columns]
@@ -67,7 +68,7 @@ function fit!(ohe::OneHotEncoder, features::T, labels::Vector) where {T<:Union{M
   )
 end
 
-function transform!(ohe::OneHotEncoder, features::T) where {T<:Union{Matrix,DataFrame}}
+function transform!(ohe::OneHotEncoder, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   nominal_columns = ohe.model[:nominal_columns]
   nominal_column_values_map = ohe.model[:nominal_column_values_map]
@@ -111,7 +112,7 @@ end
 #
 # Nominal columns are those that do not have Real type nor
 # do all their elements correspond to Real.
-function find_nominal_columns(features::T) where {T<:Union{Matrix,DataFrame}}
+function find_nominal_columns(features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   nominal_columns = Int[]
   for column in 1:size(instances, 2)
@@ -138,11 +139,11 @@ mutable struct Imputer <: Transformer
   end
 end
 
-function fit!(imp::Imputer, instances::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
+function fit!(imp::Imputer, instances::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   imp.model = imp.args
 end
 
-function transform!(imp::Imputer, features::T)  where {T<:Union{Matrix,DataFrame}}
+function transform!(imp::Imputer, features::T)  where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   new_instances = copy(instances)
   strategy = imp.model[:strategy]
@@ -180,15 +181,16 @@ mutable struct Pipeline <: Transformer
   end
 end
 
-function fit!(pipe::Pipeline, features::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
-  instances=convert(Matrix,features)
+function fit!(pipe::Pipeline, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+  #instances=convert(Matrix,features)
+  instances=copy(features)
   transformers = pipe.args[:transformers]
   transformer_args = pipe.args[:transformer_args]
 
   current_instances = instances
   new_transformers = Transformer[]
   for t_index in 1:length(transformers)
-    transformer = create_transformer(transformers[t_index], transformer_args)
+    transformer = createtransformer(transformers[t_index], transformer_args)
     push!(new_transformers, transformer)
     fit!(transformer, current_instances, labels)
     current_instances = transform!(transformer, current_instances)
@@ -200,8 +202,9 @@ function fit!(pipe::Pipeline, features::T, labels::Vector) where {T<:Union{Matri
   )
 end
 
-function transform!(pipe::Pipeline, features::T) where {T<:Union{Matrix,DataFrame}}
-  instances = convert(Matrix,features)
+function transform!(pipe::Pipeline, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+  #instances = convert(Matrix,features)
+  instances = copy(features)
   transformers = pipe.model[:transformers]
 
   current_instances = instances
@@ -230,10 +233,10 @@ mutable struct Wrapper <: Transformer
   end
 end
 
-function fit!(wrapper::Wrapper, features::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
+function fit!(wrapper::Wrapper, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   transformer_args = wrapper.args[:transformer_args]
-  transformer = create_transformer(
+  transformer = createtransformer(
     wrapper.args[:transformer],
     transformer_args
   )
@@ -249,9 +252,25 @@ function fit!(wrapper::Wrapper, features::T, labels::Vector) where {T<:Union{Mat
   )
 end
 
-function transform!(wrapper::Wrapper, instances::T) where {T<:Union{Matrix,DataFrame}}
+function transform!(wrapper::Wrapper, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
   transformer = wrapper.model[:transformer]
   return transform!(transformer, instances)
 end
+
+# Create transformer
+#
+# @param prototype Prototype transformer to base new transformer on.
+# @param options Additional options to override prototype's options.
+# @return New transformer.
+function createtransformer(prototype::Transformer, args=nothing)
+  new_args = copy(prototype.args)
+  if args != nothing
+    new_args = mergedict(new_args, args)
+  end
+
+  prototype_type = typeof(prototype)
+  return prototype_type(new_args)
+end
+
 
 end

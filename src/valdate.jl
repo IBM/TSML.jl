@@ -1,4 +1,6 @@
 # Convert a 1-D timeseries into sliding window matrix for ML training
+# using Plots
+
 mutable struct Matrifier <: Transformer
   model
   args
@@ -13,11 +15,16 @@ mutable struct Matrifier <: Transformer
   end
 end
 
-function fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector}}
+function fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector,DataFrame}}
+  typeof(xx) <: DataFrame || error("input is not a dataframe")
+  x = deepcopy(xx[:Value]) 
+  x isa Vector || error("data should be a vector")
   mtr.model = mtr.args
 end
 
-function transform!(mtr::Matrifier,x::T) where {T<:Union{Matrix,Vector}}
+function transform!(mtr::Matrifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
+  typeof(xx) <: DataFrame || error("input is not a dataframe")
+  x = deepcopy(xx[:Value]) 
   x isa Vector || error("data should be a vector")
   res=toMatrix(mtr,x)
   convert(Array{Float64},res)
@@ -68,7 +75,9 @@ mutable struct Dateifier <: Transformer
   end
 end
 
-function fit!(dtr::Dateifier,x::T,y::Vector=[]) where {T<:Union{Matrix,Vector}}
+function fit!(dtr::Dateifier,xx::T,y::Vector=[]) where {T<:Union{Matrix,Vector,DataFrame}}
+  typeof(xx) <: DataFrame || error("input not a dataframe")
+  x = deepcopy(xx[:Date]) 
   (eltype(x) <: DateTime || eltype(x) <: Date) || error("array element types are not dates")
   dtr.args[:lower] = minimum(x)
   dtr.args[:upper] = maximum(x)
@@ -76,7 +85,9 @@ function fit!(dtr::Dateifier,x::T,y::Vector=[]) where {T<:Union{Matrix,Vector}}
 end
 
 # transform to day of the month, day of the week, etc
-function transform!(dtr::Dateifier,x::T) where {T<:Union{Matrix,Vector}}
+function transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
+  typeof(xx) <: DataFrame || error("input not a dataframe")
+  x = deepcopy(xx[:Date])
   x isa Vector || error("data should be a vector")
   @assert eltype(x) <: DateTime || eltype(x) <: Date
   res=toMatrix(dtr,x)
@@ -128,7 +139,7 @@ function validdateval!(x::T) where {T<:DataFrame}
 end
 
 
-function fit!(dvmr::DateValgator,xx::T,y::Vector=[]) where {T<:DataFrame}
+function fit!(dvmr::DateValgator,xx::T,y::Vector=[]) where {T<:Union{Matrix,DataFrame}}
   x = deepcopy(xx)
   validdateval!(x)
   dvmr.model=dvmr.args
@@ -140,7 +151,7 @@ function transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
   grpby = typeof(dvmr.args[:dateinterval])
   sym = Symbol(grpby)
   x[sym] = round.(x[:Date],grpby)
-  res=by(x,sym,MeanValue = :Value=>skipmean)
+  res=by(x,sym,MeanValue = :Value=>skipmedian)
   rename!(res,Dict(names(res)[1]=>:Date,names(res)[2]=>:Value))
   res
 end
@@ -191,7 +202,7 @@ function fullaggregate!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   grpby = typeof(dvzr.args[:dateinterval])
   sym = Symbol(grpby)
   x[sym] = round.(x[:Date],grpby)
-  aggr = by(x,sym,MeanValue = :Value=>skipmean)
+  aggr = by(x,sym,MeanValue = :Value=>skipmedian)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
   lower = minimum(x[:Date])
   upper = maximum(x[:Date])
@@ -265,10 +276,10 @@ mutable struct DateValNNer <: Transformer
 
   function DateValNNer(args=Dict())
     default_args = Dict{Symbol,Any}(
+        :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
         :dateinterval => Dates.Hour(1),
-        :nnsize => 5,
-        :strict => true,
-        :missdirection => :reverse # or :forward
+        :nnsize => 1,
+        :strict => true
     )
     new(nothing,mergedict(default_args,args))
   end
@@ -287,27 +298,55 @@ function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   sym = Symbol(grpby)
   # aggregate by time period
   x[sym] = round.(x[:Date],grpby)
-  aggr = by(x,sym,MeanValue = :Value=>skipmean)
+  aggr = by(x,sym,MeanValue = :Value=>skipmedian)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
   lower = minimum(x[:Date])
   upper = maximum(x[:Date])
   #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dnnr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
+  missingcount = sum(ismissing.(joined[:Value])) 
+  dnnr.args[:missingcount] = missingcount
+  res = transform_worker!(dnnr,joined) 
+  count=1
+  if dnnr.args[:missdirection] == :symmetric
+    while sum(ismissing.(res[:Value])) > 0
+      res = transform_worker!(dnnr,res) 
+      count += 1
+    end
+  end
+  dnnr.args[:loopcount] = count
+  res
+end
+
+function transform_worker!(dnnr::DateValNNer,joinc::T) where {T<:DataFrame}
+  joined = deepcopy(joinc)
   maxrow = size(joined)[1]
 
   # to fill-in with nearest neighbors
   nnsize::Int64 = dnnr.args[:nnsize]
   themissing = findall(ismissing.(joined[:Value])) 
-  missed = (dnnr.args[:missdirection] == :reverse) ? (themissing |> reverse) : themissing
-  missingndx = DataFrame(Missed=missed)
-  # dealing with boundary exceptions, default to range until the maxrow
-  missingndx[:neighbors] = (x->((x+1>=maxrow) || (x+nnsize>=maxrow)) ? (x+1:maxrow) : (x+1:x+nnsize)).(missingndx[:Missed]) # NN ranges
-  #missingndx[:neighbors] = (x->(x+1:x+nnsize)).(missingndx[:Missed]) # NN ranges
+  # ==== symmetric nearest neighbor
+  missingndx = DataFrame()
+  if dnnr.args[:missdirection] == :symmetric
+    missed = themissing |> reverse
+    missingndx[:Missed] = missed
+    # get lower:upper range
+    missingndx[:neighbors] = map(missingndx[:Missed]) do m
+      lower = (m-nnsize >= 1) ? (m-nnsize) : 1
+      upper = (m+nnsize <= maxrow) ? m+nnsize : maxrow
+      lower:upper
+    end
+  else
+    # ===== reverse and forward
+    missed = (dnnr.args[:missdirection] == :reverse) ? (themissing |> reverse) : themissing
+    missingndx[:Missed] = missed
+    # dealing with boundary exceptions, default to range until the maxrow
+    missingndx[:neighbors] = (m->((m+1>=maxrow) || (m+nnsize>=maxrow)) ? (m+1:maxrow) : (m+1:m+nnsize)).(missingndx[:Missed]) # NN ranges
+  end
   #joined[missingndx[:Missed],:Value] = (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # iterate to each range
   missingvals::SubArray = @view joined[missingndx[:Missed],:Value] # get view of only missings
   missingvals .=  (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # replace with nn medians
-  #@show last(joined,5); @show sum(ismissing.(joined[:,:Value]));@show last(missingndx,5)
   dnnr.args[:strict] && (sum(ismissing.(joined[:,:Value])) == 0 || error("Nearest Neigbour algo failed to replace missings"))
   joined
 end
@@ -325,4 +364,51 @@ function datevalnnerrun()
   x[:MValue][ndxmissing] .= missing
   fit!(dnnr,x,y)
   transform!(dnnr,x)
+  dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),
+                          :nnsize=>1,:strict=>false,
+                          :missdirection => :symmetric))
+  Random.seed!(123)
+  v1=DateTime(2014,1,1,1,0):Dates.Hour(1):DateTime(2014,1,6,1,0)
+  val=Array{Union{Missing,Float64}}(sin.(-2π:0.1:2π)[1:length(v1)])
+  dat = deepcopy(val)
+  x=DataFrame(Date=v1,Value=dat)
+  ndx = Random.shuffle(1:length(v1))
+  x[ndx[1:50],:Value] = missing
+  #@show x
+  fit!(dlnr,x,[])
+  res = transform!(dlnr,x)
+  rmse = sqrt(mean(val .- res[:Value]).^2)
+  #@show res
+  @show rmse
+  @show dlnr.args
+  #plot([val,res[:Value]]) |> display
+  #(val,res)
+end
+
+mutable struct CSVDateValReader <: Transformer
+    model
+    args
+    function CSVDateValReader(args=Dict())
+        default_args = Dict(
+            :filename => "",
+            :dateformat => ""
+        )
+        new(nothing,mergedict(default_args,args))
+    end
+end
+function fit!(csvrdr::CSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+    fname = csvrdr.args[:filename]
+    fmt = csvrdr.args[:dateformat]
+    (fname != "" && fmt != "") || error("missing filename or date format")
+    model = csvrdr.args
+end
+
+function transform!(csvrdr::CSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+    fname = csvrdr.args[:filename]
+    fmt = csvrdr.args[:dateformat]
+    df = CSV.read(fname)
+    ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
+    rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
+    df[:Date] = DateTime.(df[:Date],fmt)
+    df
 end
