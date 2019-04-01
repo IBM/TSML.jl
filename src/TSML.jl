@@ -59,6 +59,9 @@ function testall()
     baselinerun()
     skkrun()
 end
+
+include("decisiontree.jl")
+using .DecisionTreeLearners
    
 
 end # module
