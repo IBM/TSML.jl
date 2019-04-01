@@ -278,7 +278,7 @@ mutable struct DateValNNer <: Transformer
     default_args = Dict{Symbol,Any}(
         :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
         :dateinterval => Dates.Hour(1),
-        :nnsize => 2,
+        :nnsize => 1,
         :strict => true
     )
     new(nothing,mergedict(default_args,args))

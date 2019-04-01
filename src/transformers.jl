@@ -43,7 +43,7 @@ mutable struct OneHotEncoder <: Transformer
   end
 end
 
-function fit!(ohe::OneHotEncoder, features::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
+function fit!(ohe::OneHotEncoder, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   # Obtain nominal columns
   nominal_columns = ohe.args[:nominal_columns]
@@ -67,7 +67,7 @@ function fit!(ohe::OneHotEncoder, features::T, labels::Vector) where {T<:Union{M
   )
 end
 
-function transform!(ohe::OneHotEncoder, features::T) where {T<:Union{Matrix,DataFrame}}
+function transform!(ohe::OneHotEncoder, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   nominal_columns = ohe.model[:nominal_columns]
   nominal_column_values_map = ohe.model[:nominal_column_values_map]
@@ -111,7 +111,7 @@ end
 #
 # Nominal columns are those that do not have Real type nor
 # do all their elements correspond to Real.
-function find_nominal_columns(features::T) where {T<:Union{Matrix,DataFrame}}
+function find_nominal_columns(features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   nominal_columns = Int[]
   for column in 1:size(instances, 2)
@@ -138,11 +138,11 @@ mutable struct Imputer <: Transformer
   end
 end
 
-function fit!(imp::Imputer, instances::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
+function fit!(imp::Imputer, instances::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   imp.model = imp.args
 end
 
-function transform!(imp::Imputer, features::T)  where {T<:Union{Matrix,DataFrame}}
+function transform!(imp::Imputer, features::T)  where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   new_instances = copy(instances)
   strategy = imp.model[:strategy]
@@ -180,7 +180,7 @@ mutable struct Pipeline <: Transformer
   end
 end
 
-function fit!(pipe::Pipeline, features::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
+function fit!(pipe::Pipeline, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   #instances=convert(Matrix,features)
   instances=copy(features)
   transformers = pipe.args[:transformers]
@@ -201,7 +201,7 @@ function fit!(pipe::Pipeline, features::T, labels::Vector) where {T<:Union{Matri
   )
 end
 
-function transform!(pipe::Pipeline, features::T) where {T<:Union{Matrix,DataFrame}}
+function transform!(pipe::Pipeline, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   #instances = convert(Matrix,features)
   instances = copy(features)
   transformers = pipe.model[:transformers]
@@ -232,7 +232,7 @@ mutable struct Wrapper <: Transformer
   end
 end
 
-function fit!(wrapper::Wrapper, features::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
+function fit!(wrapper::Wrapper, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   transformer_args = wrapper.args[:transformer_args]
   transformer = createtransformer(
@@ -251,7 +251,7 @@ function fit!(wrapper::Wrapper, features::T, labels::Vector) where {T<:Union{Mat
   )
 end
 
-function transform!(wrapper::Wrapper, instances::T) where {T<:Union{Matrix,DataFrame}}
+function transform!(wrapper::Wrapper, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
   transformer = wrapper.model[:transformer]
   return transform!(transformer, instances)
 end

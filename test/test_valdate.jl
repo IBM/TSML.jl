@@ -120,9 +120,11 @@ function test_dateifier()
   dtr = Dateifier(Dict())
   lower = DateTime(2017,1,1)
   upper = DateTime(2018,1,31)
-  x=lower:Dates.Day(1):upper |> collect
+  dat=lower:Dates.Day(1):upper |> collect 
+  vals = rand(length(dat))
+  x=DataFrame(Date=dat,Value=vals)
   y = x
-  fit!(dtr,x,y)
+  fit!(dtr,x,[])
   res = transform!(dtr,x)
   @test sum(size(res) .== (389,8)) == 2
   dtr.args[:stride]=2
@@ -136,21 +138,26 @@ end
 function test_matrifier()
   mtr = Matrifier(Dict(:ahead=>24,:size=>24,:stride=>5))
   sz = mtr.args[:size]
-  x=collect(1:100)
-  y=collect(1:100)
+  lower = DateTime(2017,1,1)
+  upper = DateTime(2017,1,5)
+  dat=lower:Dates.Hour(1):upper |> collect 
+  vals = 1:length(dat)
+  x = DataFrame(Date=dat,Value=vals)
+  y=[]
   fit!(mtr,x,y)
   res = transform!(mtr,x)
-  @test sum(size(res) .== (11,25)) == 2
+  @test sum(size(res) .== (10,25)) == 2
   mtr.args = Dict(:ahead=>24,:size=>24,:stride=>1)
   res = transform!(mtr,x)
-  @test sum(size(res) .== (53,25)) == 2
+  @test sum(size(res) .== (50,25)) == 2
   mtr.args = Dict(:ahead=>1,:size=>24,:stride=>12)
   res = transform!(mtr,x)
   @test sum(size(res) .== (6,25)) == 2
   dtr = Matrifier()
   fit!(dtr,x,y)
   res = transform!(dtr,x)
-  @test sum(size(res) .== (93,8)) == 2
+  res
+  @test sum(size(res) .== (90,8)) == 2
   dtr.args = Dict(:ahead=>-1,:size=>24,:stride=>12)
   @test_throws AssertionError transform!(dtr,x)
 end
@@ -160,17 +167,43 @@ end
 
 function test_pipeline()
   # start with aggregator in time period
+  #dtvalgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
+  #fit!(dtvalgator,XX,YY)
+  #res_dtvalgator =  transform!(dtvalgator,XX)
+  #@show first(res_dtvalgator,10)
+  ## replace missing with NN
+  #dtvalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:strict=>true,:nnsize=>1,:missdirection=>:symmetric))
+  #fit!(dtvalnner,res_dtvalgator,[])
+  #res_dtvalnner = transform!(dtvalnner,res_dtvalgator)
+  #@show first(res_dtvalnner,10)
   dtvalgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-  fit!(dtvalgator,XX,YY)
-  res_dtvalgator =  transform!(dtvalgator,XX)
-  @show res_dtvalgator
-  # replace missing with NN
-  dtvalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:strict=>true,:nnsize=>1))
-  fit!(dtvalnner,res_dtvalgator,[])
-  res_dtvalnner = transform!(dtvalnner,res_dtvalgator)
-  # slidewindow values and dates
-  # note: implement symmetric nearest neighbor where replace missing x with x-nnsize to x+nnsize
+  dtvalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:strict=>true,:nnsize=>1,:missdirection=>:symmetric))
+  dtr = Dateifier(Dict())
+  mtr = Matrifier(Dict())
+  TSML.TSMLTransformers.fit!(mtr,XX,YY)
+  ## try pipeline 
+  mydatepipeline = Pipeline(Dict(
+    :transformers => [
+	dtvalgator,
+	dtvalnner,
+	dtr
+    ]
+  ))
+  fit!(mydatepipeline,XX,YY)
+  date=transform!(mydatepipeline,XX)
+  myvalpipeline = Pipeline(Dict(
+    :transformers => [
+	dtvalgator,
+	dtvalnner,
+	mtr
+    ]
+  ))
+  fit!(myvalpipeline,XX,YY)
+  val=transform!(myvalpipeline,XX)
+  @test sum(size(val) .== size(date)) == 2
 end
-test_pipeline()
+@testset "Pipeline: check " begin
+  test_pipeline()
+end
 
 end
