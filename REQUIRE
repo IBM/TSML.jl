@@ -4,9 +4,10 @@ DataFrames
 PyCall
 RCall
 RDatasets
-Random
 Reexport
 StatsBase
-Test
 MLDataUtils
-Dates
+RDatasets
+DecisionTree
+MLBase
+MultivariateStats
