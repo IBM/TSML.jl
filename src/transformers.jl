@@ -15,10 +15,6 @@ export Imputer,Pipeline,SKLLearner,OneHotEncoder,Wrapper
 export Matrifier,Dateifier
 export DateValizer,DateValgator,DateValNNer,CSVDateValReader
 
-export matrifyrun,dateifierrun,
-       datevalgatorrun,datevalizerrun,
-       datevalnnerrun
-
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload

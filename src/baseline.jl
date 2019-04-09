@@ -6,14 +6,12 @@ using TSML.Utils
 import TSML.TSMLTypes.fit!
 import TSML.TSMLTypes.transform!
 
-export baselinerun
-export Baseline,
+export Baseline,Identity
        fit!,
        transform!
 
 
 using StatsBase: mode
-using RDatasets
 
 mutable struct Baseline <: TSLearner
     model
@@ -52,20 +50,6 @@ end
 
 function transform!(idy::Identity,x::Matrix)
     return x
-end
-
-
-
-function baselinerun()
-    iris=dataset("datasets","iris") 
-    instances=iris[:,1:4] |> Matrix
-    labels=iris[:,5] |> Vector
-    bl = Baseline()
-    show(fit!(bl,instances,labels));println()
-    show(transform!(bl,instances));println()
-    idy = Identity()
-    show(fit!(idy,instances,labels));println()
-    show(transform!(idy,instances));println()
 end
 
 end

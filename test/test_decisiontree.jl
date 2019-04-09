@@ -11,12 +11,11 @@ using Random
 using Statistics
 using Test
 using Dates
-using RDatasets
 
 
 function generateXY()
     Random.seed!(123)
-    iris = dataset("datasets","iris")
+    iris = getiris()
     indx = Random.shuffle(1:nrow(iris))
     features=iris[indx,1:4] 
     sp = iris[indx,5] |> Vector

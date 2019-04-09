@@ -49,15 +49,6 @@ function toMatrix(mtr::Transformer, x::Vector)
   mmatrix
 end
 
-function matrifyrun()
-  mtr = Matrifier(Dict(:ahead=>24,:size=>24,:stride=>1))
-  sz = mtr.args[:size]
-  x=collect(1:100)
-  y=collect(1:100)
-  println(fit!(mtr,x,y))
-  transform!(mtr,x)
-end
-
 ### ====
 
 # Convert a 1-D date series into sliding window matrix for ML training
@@ -105,15 +96,6 @@ function transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFram
   convert(Matrix{Int64},dt)
 end
 
-function dateifierrun()
-  dtr = Dateifier(Dict(:stride=>5))
-  lower = DateTime(2017,1,1)
-  upper = DateTime(2019,1,1)
-  x=lower:Dates.Hour(1):upper |> collect
-  y=lower:Dates.Hour(1):upper |> collect
-  fit!(dtr,x,y)
-  transform!(dtr,x)
-end
 
 ### ====
 
@@ -154,14 +136,6 @@ function transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
   res=by(x,sym,MeanValue = :Value=>skipmedian)
   rename!(res,Dict(names(res)[1]=>:Date,names(res)[2]=>:Value))
   res
-end
-
-function datevalgatorrun()
-  dtvl = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-  dte=DateTime(2014,1,1):Dates.Minute(1):DateTime(2016,1,1)
-  val = rand(length(dte))
-  fit!(dtvl,DataFrame(date=dte,values=val),[])
-  transform!(dtvl,DataFrame(date=dte,values=val))
 end
 
 ### ====
@@ -251,22 +225,6 @@ function transform!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   joined[:,[:Date,:Value]]
 end
 
-function datevalizerrun()
-  # test passing args from one structure to another
-  Random.seed!(123)
-  dvzr1 = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
-  dvzr2 = DateValizer(dvzr1.args)
-  dte=DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
-  val = Array{Union{Missing,Float64}}(rand(length(dte)))
-  y = []
-  x = DataFrame(MDate=dte,MValue=val)
-  nmissing=50000
-  ndxmissing=Random.shuffle(1:length(dte))[1:nmissing]
-  x[:MValue][ndxmissing] .= missing
-  fit!(dvzr2,x,y)
-  transform!(dvzr2,x)
-end
-
 ### ====
 
 # fill-in missings with nearest-neighbors median
@@ -349,40 +307,6 @@ function transform_worker!(dnnr::DateValNNer,joinc::T) where {T<:DataFrame}
   missingvals .=  (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # replace with nn medians
   dnnr.args[:strict] && (sum(ismissing.(joined[:,:Value])) == 0 || error("Nearest Neigbour algo failed to replace missings"))
   joined
-end
-
-function datevalnnerrun()
-  # test passing args from one structure to another
-  Random.seed!(123)
-  dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:nnsize=>3))
-  dte=DateTime(2014,1,1):Dates.Hour(1):DateTime(2016,1,1)
-  val = Array{Union{Missing,Float64}}(rand(length(dte)))
-  y = []
-  x = DataFrame(MDate=dte,MValue=val)
-  nmissing=10
-  ndxmissing=Random.shuffle(1:length(dte))[1:nmissing]
-  x[:MValue][ndxmissing] .= missing
-  fit!(dnnr,x,y)
-  transform!(dnnr,x)
-  dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),
-                          :nnsize=>1,:strict=>false,
-                          :missdirection => :symmetric))
-  Random.seed!(123)
-  v1=DateTime(2014,1,1,1,0):Dates.Hour(1):DateTime(2014,1,6,1,0)
-  val=Array{Union{Missing,Float64}}(sin.(-2π:0.1:2π)[1:length(v1)])
-  dat = deepcopy(val)
-  x=DataFrame(Date=v1,Value=dat)
-  ndx = Random.shuffle(1:length(v1))
-  x[ndx[1:50],:Value] = missing
-  #@show x
-  fit!(dlnr,x,[])
-  res = transform!(dlnr,x)
-  rmse = sqrt(mean(val .- res[:Value]).^2)
-  #@show res
-  @show rmse
-  @show dlnr.args
-  #plot([val,res[:Value]]) |> display
-  #(val,res)
 end
 
 mutable struct CSVDateValReader <: Transformer

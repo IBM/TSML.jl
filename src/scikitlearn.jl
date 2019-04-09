@@ -8,8 +8,6 @@ import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
 using TSML.Utils
 
-using RDatasets
-
 using PyCall
 
 const ENS=pyimport("sklearn.ensemble") 
@@ -115,7 +113,7 @@ function transform!(skl::SKLearner, x::T) where {T<:Union{Vector,Matrix}}
 end
 
 function skkrun()
-    iris=dataset("datasets","iris")
+    iris=getiris()
     instances=iris[:,1:4] |> Matrix
     labels=iris[:,5] |> Vector
     model1 = SKLearner(Dict(:learner=>"LinearSVC",:impl_args=>Dict(:max_iter=>5000)))

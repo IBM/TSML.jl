@@ -3,11 +3,9 @@ module CaretLearners
 export CaretLearner,fit!,transform!
 export caretrun
 
-
-using RDatasets
-
 using TSML.TSMLTypes
 using TSML.Utils
+using DataFrames
 
 import TSML.TSMLTypes.fit!   # importing to overload
 import TSML.TSMLTypes.transform! # importing to overload
@@ -61,7 +59,7 @@ end
 
 function caretrun()
     crt = CaretLearner(Dict(:learner=>"rf",:fitControl=>"trainControl(method='cv')")) 
-    iris=dataset("datasets","iris")
+    iris=getiris()
     x=iris[:,1:4]  |> Matrix
     y=iris[:,5] |> Vector
     fit!(crt,x,y)
