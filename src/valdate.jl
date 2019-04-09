@@ -336,3 +336,32 @@ function transform!(csvrdr::CSVDateValReader,x::T=[]) where {T<:Union{DataFrame,
     df[:Date] = DateTime.(df[:Date],fmt)
     df
 end
+
+mutable struct CSVDateValWriter <: Transformer
+    model
+    args
+    function CSVDateValWriter(args=Dict())
+        default_args = Dict(
+            :filename => "",
+            :dateformat => ""
+        )
+        new(nothing,mergedict(default_args,args))
+    end
+end
+
+function fit!(csvwtr::CSVDateValWriter,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+    fname = csvwtr.args[:filename]
+    fmt = csvwtr.args[:dateformat]
+    (fname != "" && fmt != "") || error("missing filename or date format")
+    model = csvwtr.args
+end
+
+function transform!(csvwtr::CSVDateValWriter,x::T) where {T<:Union{DataFrame,Vector,Matrix}}
+    fname = csvwtr.args[:filename]
+    fmt = csvwtr.args[:dateformat]
+    df = deepcopy(x)
+    ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
+    rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
+    eltype(df[:Date]) <: DateTime || error("Date format error")
+    df |> CSV.write(fname)
+end
