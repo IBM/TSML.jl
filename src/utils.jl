@@ -1,10 +1,11 @@
 module Utils
 
-export mergedict
+export mergedict, getiris
 export skipmean,skipmedian,skipstd
 
 using Statistics
 using DataFrames
+using CSV
 
 function skipmean(x::T) where {T<:Union{AbstractArray,DataFrame}} 
   if length(collect(skipmissing(x))) == 0
@@ -43,6 +44,11 @@ function mergedict(first::Dict, second::Dict)
     end
   end
   return target
+end
+
+function getiris()
+  iris = CSV.read(joinpath(Base.@__DIR__,"../data","iris.csv"))
+  return iris
 end
 
 

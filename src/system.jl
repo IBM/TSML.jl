@@ -51,8 +51,15 @@ function check_r_dep()
 end
 
 ## Check system for python dependencies.
-const LIB_SKL_AVAILABLE = check_py_dep("scikit-learn")
-const LIB_CRT_AVAILABLE = check_r_dep()
-#const LIB_SKL_AVAILABLE = false
-#const LIB_CRT_AVAILABLE = false
+if "LOAD_SK_CARET" in keys(ENV) && ENV["LOAD_SK_CARET"] == "true"
+  LIB_SKL_AVAILABLE = check_py_dep("scikit-learn")
+  LIB_CRT_AVAILABLE = check_r_dep()
+elseif "LOAD_SK_CARET" in keys(ENV) && ENV["LOAD_SK_CARET"] == "false"
+  LIB_SKL_AVAILABLE = false
+  LIB_CRT_AVAILABLE = false
+else
+  LIB_SKL_AVAILABLE = check_py_dep("scikit-learn")
+  LIB_CRT_AVAILABLE = check_r_dep()
+end
+
 end # module

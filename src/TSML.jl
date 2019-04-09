@@ -1,5 +1,12 @@
 module TSML
-__precompile__(false)
+
+if  "LOAD_SK_CARET" in keys(ENV) &&  ENV["LOAD_SK_CARET"] == "true" # to disable precompile for binary libs
+    __precompile__(false)
+elseif "LOAD_SK_CARET" in keys(ENV) &&  ENV["LOAD_SK_CARET"] == "false"
+    __precompile__(true) # no binary libs
+else
+    __precompile__(false) # assume default has binary libs
+end
 
 export greet
 export testall
@@ -30,7 +37,6 @@ export prun
 
 include("transformers.jl")
 using .TSMLTransformers
-export trfrun
 
 include("baseline.jl")
 using .BaselineAlgos
@@ -51,14 +57,6 @@ end
 include("multilearner.jl")
 using .MultiLearners
 
-function testall()
-    typerun()
-    mrun()
-    prun()
-    trfrun()
-    baselinerun()
-    skkrun()
-end
 
 include("decisiontree.jl")
 using .DecisionTreeLearners

@@ -1,12 +1,11 @@
 module DataProc
 export mrun
 export prun
+using TSML.Utils
 
 using DataFrames
-using RDatasets
 
-
-iris=dataset("datasets","iris")
+iris=getiris()
 
 function mrun()
 	iris |> x-> first(x,5)
