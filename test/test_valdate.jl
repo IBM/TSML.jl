@@ -198,8 +198,8 @@ end
 end
 
 function test_csvreaderwriter()
-  csvreader = CSVDateValReader(Dict(:filename=>"../data/testdata.csv",:dateformat=>"d/m/y H:M"))
-  csvwtr = CSVDateValWriter(Dict(:filename=>"../data/testdata_output.csv",:dateformat=>"d/m/y H:M"))
+  csvreader = CSVDateValReader(Dict(:filename=>joinpath(@__DIR__,"../data/testdata.csv"),:dateformat=>"d/m/y H:M"))
+  csvwtr = CSVDateValWriter(Dict(:filename=>joinpath(@__DIR__,"../data/testdata_output.csv"),:dateformat=>"d/m/y H:M"))
   filter1 = DateValgator()
   filter2 = DateValNNer(Dict(:nnsize=>1))
   mypipeline = Pipeline(Dict(
