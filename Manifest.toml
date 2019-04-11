@@ -297,6 +297,12 @@ git-tree-sha1 = "5484e5ede2a4137b9643f4d646e8e7b87b794415"
 uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "0.1.1"
 
+[[JLD]]
+deps = ["Compat", "FileIO", "HDF5", "LegacyStrings", "Profile", "Random"]
+git-tree-sha1 = "95fd5d7f129918a75d0535aaaf5b8e235e6e0b0b"
+uuid = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
+version = "0.9.1"
+
 [[JSON]]
 deps = ["Dates", "Distributed", "Mmap", "Sockets", "Test", "Unicode"]
 git-tree-sha1 = "1f7a25b53ec67f5e9422f1f551ee216503f4a0fa"
@@ -305,15 +311,21 @@ version = "0.20.0"
 
 [[JuliaInterpreter]]
 deps = ["CodeTracking", "Dates", "Distributed", "InteractiveUtils", "Mmap", "Random", "SHA", "Test", "UUIDs"]
-git-tree-sha1 = "9234d36f3837f0071e209ed338a01e48b1423940"
+git-tree-sha1 = "3446fc94431daec86574672a748696485d3c0487"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.4.1"
+version = "0.5.0"
 
 [[LearnBase]]
 deps = ["LinearAlgebra", "SparseArrays", "StatsBase", "Test"]
 git-tree-sha1 = "c4b5da6d68517f46f70ed5157b28336b56cd2ff3"
 uuid = "7f8f8fb0-2700-5f03-b4bd-41f8cfc144b6"
 version = "0.2.2"
+
+[[LegacyStrings]]
+deps = ["Compat"]
+git-tree-sha1 = "d4b9bde2694c552fe579cc4462733f1ce08733fe"
+uuid = "1b4a561d-cfcb-5daf-8433-43fcf8b4bea3"
+version = "0.4.1"
 
 [[LibCURL]]
 deps = ["BinaryProvider", "Libdl", "Printf", "Test"]
@@ -567,9 +579,9 @@ version = "0.5.2"
 
 [[Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "InteractiveUtils", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Pkg", "REPL", "Random", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "cdf9eba89e1ea2c312db1aa426adebb27431a4bd"
+git-tree-sha1 = "a7ebe7fe509094c58aaa03c613c6162ac8490bc8"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "2.1.0"
+version = "2.1.2"
 
 [[Rsvg]]
 deps = ["BinDeps", "Cairo", "Compat", "Homebrew", "Libdl", "WinRPM"]
