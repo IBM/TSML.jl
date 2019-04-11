@@ -1,6 +1,11 @@
 module DataReaders
 using Queryverse
+using DataFrames
 using HDF5
+using JLD
+using BSON
+using Feather
+using Dates
 
 export DataReader, fit!, transform!
 export Transformer
