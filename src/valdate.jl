@@ -17,14 +17,14 @@ end
 
 function fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input is not a dataframe")
-  x = deepcopy(xx[:Value]) 
+  x = deepcopy(xx[:Value])
   x isa Vector || error("data should be a vector")
   mtr.model = mtr.args
 end
 
 function transform!(mtr::Matrifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input is not a dataframe")
-  x = deepcopy(xx[:Value]) 
+  x = deepcopy(xx[:Value])
   x isa Vector || error("data should be a vector")
   res=toMatrix(mtr,x)
   convert(Array{Float64},res)
@@ -32,7 +32,7 @@ end
 
 function toMatrix(mtr::Transformer, x::Vector)
   stride=mtr.args[:stride];sz=mtr.args[:size];ahead=mtr.args[:ahead]
-  @assert stride>0 && sz>0 && ahead > 0 
+  @assert stride>0 && sz>0 && ahead > 0
   xlength = length(x)
   xlength > sz || error("data too short for the given size of sliding window")
   ndx=collect(xlength:-1:1)
@@ -68,7 +68,7 @@ end
 
 function fit!(dtr::Dateifier,xx::T,y::Vector=[]) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input not a dataframe")
-  x = deepcopy(xx[:Date]) 
+  x = deepcopy(xx[:Date])
   (eltype(x) <: DateTime || eltype(x) <: Date) || error("array element types are not dates")
   dtr.args[:lower] = minimum(x)
   dtr.args[:upper] = maximum(x)
@@ -219,7 +219,7 @@ function transform!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   # find indices of missing
   missingndx = findall(ismissing.(joined[:Value]))
   jmndx=joined[missingndx,sym] .+ 1 # get time period index of missing, convert 0 index time to 1 index
-  missingvals::SubArray = @view joined[missingndx,:Value] 
+  missingvals::SubArray = @view joined[missingndx,:Value]
   missingvals .= medians[jmndx,:Value] # replace missing with median value
   sum(ismissing.(joined[:,:Value])) == 0 || error("Aggregation by time period failed to replace missings")
   joined[:,[:Date,:Value]]
@@ -263,13 +263,13 @@ function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dnnr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
-  missingcount = sum(ismissing.(joined[:Value])) 
+  missingcount = sum(ismissing.(joined[:Value]))
   dnnr.args[:missingcount] = missingcount
-  res = transform_worker!(dnnr,joined) 
+  res = transform_worker!(dnnr,joined)
   count=1
   if dnnr.args[:missdirection] == :symmetric
     while sum(ismissing.(res[:Value])) > 0
-      res = transform_worker!(dnnr,res) 
+      res = transform_worker!(dnnr,res)
       count += 1
     end
   end
@@ -283,7 +283,7 @@ function transform_worker!(dnnr::DateValNNer,joinc::T) where {T<:DataFrame}
 
   # to fill-in with nearest neighbors
   nnsize::Int64 = dnnr.args[:nnsize]
-  themissing = findall(ismissing.(joined[:Value])) 
+  themissing = findall(ismissing.(joined[:Value]))
   # ==== symmetric nearest neighbor
   missingndx = DataFrame()
   if dnnr.args[:missdirection] == :symmetric

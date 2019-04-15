@@ -67,5 +67,9 @@ include("datareader.jl")
 using .DataReaders
 export datareaderrun
 
+include("datawriter.jl")
+using .DataWriters
+export datawriterrun
+
 
 end # module

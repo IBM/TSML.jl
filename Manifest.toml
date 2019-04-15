@@ -190,6 +190,12 @@ git-tree-sha1 = "ad00b79cca4bb3eabb4209217859c553af4401f5"
 uuid = "8f5d6c58-4d21-5cfd-889c-e3ad7ee6a615"
 version = "0.9.1"
 
+[[Feather]]
+deps = ["Arrow", "CategoricalArrays", "DataFrames", "Dates", "FlatBuffers", "Mmap", "Random", "Tables", "Test"]
+git-tree-sha1 = "9b5a2052d63d2dd6e208bf3438af175fdd8334c1"
+uuid = "becb17da-46f6-5d3c-ad1b-1c5fe96bc73c"
+version = "0.5.1"
+
 [[FeatherFiles]]
 deps = ["Arrow", "DataValues", "FeatherLib", "FileIO", "IterableTables", "IteratorInterfaceExtensions", "TableShowUtils", "TableTraits", "TableTraitsUtils", "Test"]
 git-tree-sha1 = "a2f2b57b23be259d7839bebae2b8f7bba4851a9b"
@@ -445,9 +451,9 @@ version = "0.0.8"
 
 [[OrderedCollections]]
 deps = ["Random", "Serialization", "Test"]
-git-tree-sha1 = "85619a3f3e17bb4761fe1b1fd47f0e979f964d5b"
+git-tree-sha1 = "c4c13474d23c60d20a67b217f1d7f22a40edf8f1"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
-version = "1.0.2"
+version = "1.1.0"
 
 [[Parameters]]
 deps = ["Markdown", "OrderedCollections", "REPL", "Test"]

@@ -14,7 +14,7 @@ function check_py_dep(package::AbstractString)
   try
     pyimport(package)
   catch
-    try 
+    try
       Conda.add(package)
       is_available = true
     catch
@@ -49,6 +49,7 @@ function check_r_dep()
   end
   return is_available
 end
+
 
 ## Check system for python dependencies.
 if "LOAD_SK_CARET" in keys(ENV) && ENV["LOAD_SK_CARET"] == "true"
