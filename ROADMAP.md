@@ -32,6 +32,7 @@ __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 - StatFilter : Transformer - scalar stats for data quality characterization
 - MonotonicFilter : Transformer - convert monotonic data using finite difference operator
 - Module for automatic classification of TS data type
+- XGBoost wrapper
 - API wrapper for KITT interaction
 - API wrapper for E2D interaction
 - Webserver module to receive/process/output data
