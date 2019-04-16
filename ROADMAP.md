@@ -13,14 +13,14 @@ __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 - DateValizer : Transformer - replace missings with medians grouped by datetime period
 - DateValgator : Transformer - Aggregate values grouped by datetime period
 
-### Release v1.0.1 (Convert TS to matrix form for ML training/prediction/classification)
+### Release v1.0.1 (Matrify TS for ML workflow)
 - Matrifier : Transformer - transform vector of values into matrix by sliding windows
 - Dateifier : Transformer - get the date boundaries in the sliding windows to correspond with matrifier output
 - DateValNNer : Transformer - nearest neighbor replacement of missing data
 - CSVDateValReader : Transformer - CSV reader
 - CSVDateValWriter : Transformer - CSV writer
 
-### Release v1.0.2 (Ensemble wrappers)
+### Release v1.0.2 (Ensemble Wrappers)
 - RandomForest : TSLearner - RF regression/classification wrapper
 - PrunedTree : TSLearner - decision tree regression/classification wrapper
 - Adaboost : TSLearner - Adaboost regression/classification wrapper
