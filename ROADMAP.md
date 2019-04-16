@@ -20,7 +20,7 @@ __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 - CSVDateValReader : Transformer - CSV reader
 - CSVDateValWriter : Transformer - CSV writer
 
-### Release v1.0.2 (Ensemble Wrappers)
+### Release v1.0.2 (Ensemble wrappers)
 - RandomForest : TSLearner - RF regression/classification wrapper
 - PrunedTree : TSLearner - decision tree regression/classification wrapper
 - Adaboost : TSLearner - Adaboost regression/classification wrapper
