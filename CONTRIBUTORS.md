@@ -10,4 +10,4 @@ We use GitHub issue tracker for any issue/bug reporting and discussion.
 ## Contributors
 - Paulito Palmes (data types, algorithm, pipeline, and workflow)
 - Joern Ploennigs (KITT/E2D interaction)
-- Niall Brady (test data, data quality assessment)
+- Niall Brady (test data, data quality assessment, data identification)
