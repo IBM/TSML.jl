@@ -20,12 +20,12 @@ __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 - CSVDateValReader : Transformer - CSV reader
 - CSVDateValWriter : Transformer - CSV writer
 
-### Release v1.0.2 (Ensemble wrappers)
+### Release v1.0.2 (Ensemble wrappers, multiformat data readers/writers)
 - RandomForest : TSLearner - RF regression/classification wrapper
 - PrunedTree : TSLearner - decision tree regression/classification wrapper
 - Adaboost : TSLearner - Adaboost regression/classification wrapper
 - DataReader : Transformer - hdf5/feather/jld/csv multiformat reader
-- DataWriter : Transformer - hdf5/feather/jld/csv multiforma writer
+- DataWriter : Transformer - hdf5/feather/jld/csv multiformat writer
 - Dockerization - dockerized notebook tutorial and dockerized TSML
 
 ## Future Work (Higher-level reasoning and integration APIs)
