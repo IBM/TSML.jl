@@ -1,4 +1,5 @@
 # Roadmap
+__Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 
 ### Release v1.0.0
 - Transformer - abstract class with fit! and transform! interfaces to be overloaded
