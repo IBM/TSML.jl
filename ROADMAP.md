@@ -2,8 +2,8 @@
 __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 
 ### Release v1.0.0 (Base data structures and ML wrappers)
-- Transformer - abstract class with fit! and transform! interfaces to be overloaded
-- TSLearner : Transformer - learners for classification/prediction with fit! function for training and transform! for prediction
+- Transformer - abstract class with _fit_ and _transform_ interfaces to be overloaded
+- TSLearner : Transformer - learners for classification/prediction with _fit_ function for training and _transform_ for prediction
 - Baseline : TSLearner - base learner (returns the mode and usually the worst case)
 - CaretLearner : TSLearner - API wrapper to expose caret regression/classification libs
 - SKLearner : TSLearner - API wrapper to expose scikitlearn regression/classification libs
