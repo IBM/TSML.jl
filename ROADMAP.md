@@ -2,8 +2,8 @@
 __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 
 ### Release v1.0.0 (Base data structures and ML wrappers)
-- Transformer - abstract class with fit! and transform! interfaces to be overloaded
-- TSLearner : Transformer - learners for classification/prediction with fit! function for training and transform! for prediction
+- Transformer - abstract class with __fit__ and __transform__ interfaces to be overloaded
+- TSLearner : Transformer - learners for classification/prediction with __fit__ function for training and __transform__ for prediction
 - Baseline : TSLearner - base learner (returns the mode and usually the worst case)
 - CaretLearner : TSLearner - API wrapper to expose caret regression/classification libs
 - SKLearner : TSLearner - API wrapper to expose scikitlearn regression/classification libs
@@ -20,12 +20,12 @@ __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 - CSVDateValReader : Transformer - CSV reader
 - CSVDateValWriter : Transformer - CSV writer
 
-### Release v1.0.2 (Ensemble wrappers)
+### Release v1.0.2 (Ensemble wrappers, multiformat data readers/writers)
 - RandomForest : TSLearner - RF regression/classification wrapper
 - PrunedTree : TSLearner - decision tree regression/classification wrapper
 - Adaboost : TSLearner - Adaboost regression/classification wrapper
 - DataReader : Transformer - hdf5/feather/jld/csv multiformat reader
-- DataWriter : Transformer - hdf5/feather/jld/csv multiforma writer
+- DataWriter : Transformer - hdf5/feather/jld/csv multiformat writer
 - Dockerization - dockerized notebook tutorial and dockerized TSML
 
 ## Future Work (Higher-level reasoning and integration APIs)
