@@ -8,9 +8,6 @@ import TSML.TSMLTypes.transform!
 using TSML.Utils
 
 using Random
-using RDatasets
-
-
 import DecisionTree
 DT = DecisionTree
 
@@ -74,7 +71,7 @@ end
 
 function ptreerun()
   Random.seed!(125)
-  data = dataset("datasets","iris")
+  data = getiris()
   features = data[:,1:4]
   sp = data[:Species] |> Vector
   pt = PrunedTree()
@@ -138,7 +135,7 @@ end
 
 function rfrun()
   Random.seed!(123)
-  data = dataset("datasets","iris")
+  data = getiris()
   features = data[:,1:4]
   sp = data[:Species] |> Vector
   rf = RandomForest()
@@ -198,7 +195,7 @@ end
 
 function adarun()
   Random.seed!(123)
-  data = dataset("datasets","iris")
+  data = getiris()
   features = data[:,1:4]
   sp = data[:Species] |> Vector
   ada = Adaboost()

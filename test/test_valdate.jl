@@ -197,8 +197,9 @@ end
   test_pipeline()
 end
 
-function test_csvreader()
-  csvreader = CSVDateValReader(Dict(:filename=>"../data/testdata.csv",:dateformat=>"d/m/y H:M"))
+function test_csvreaderwriter()
+  csvreader = CSVDateValReader(Dict(:filename=>joinpath(@__DIR__,"../data/testdata.csv"),:dateformat=>"d/m/y H:M"))
+  csvwtr = CSVDateValWriter(Dict(:filename=>joinpath(@__DIR__,"../data/testdata_output.csv"),:dateformat=>"d/m/y H:M"))
   filter1 = DateValgator()
   filter2 = DateValNNer(Dict(:nnsize=>1))
   mypipeline = Pipeline(Dict(
@@ -218,9 +219,16 @@ function test_csvreader()
   fit!(filter2,res1,[])
   res2=transform!(filter2,res1)
   @test mypipeline.args[:transformers][3].args[:missingcount] == filter2.args[:missingcount]
+  mypipeline = Pipeline(Dict(
+	:transformers => [csvreader,filter1,filter2,csvwtr]
+    )
+  )
+  fit!(mypipeline)
+  transform!(mypipeline)
+  @test filesize(csvwtr.args[:filename]) == 239220
 end
-@testset "CSVDateValReader: reading csv with Date,Value columns" begin
-  test_csvreader()
+@testset "CSVDateValReaderWriter: reading csv with Date,Value columns" begin
+  test_csvreaderwriter()
 end
 
 

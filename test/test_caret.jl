@@ -7,9 +7,8 @@ using TSML.CaretLearners
 using Random
 using Test
 using RCall
-using RDatasets
 
-const IRIS = dataset("datasets","iris")
+const IRIS = getiris()
 const X = IRIS[:,1:4] |> Matrix
 const Y = IRIS[:,5] |> Vector
 

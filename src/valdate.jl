@@ -17,14 +17,14 @@ end
 
 function fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input is not a dataframe")
-  x = deepcopy(xx[:Value]) 
+  x = deepcopy(xx[:Value])
   x isa Vector || error("data should be a vector")
   mtr.model = mtr.args
 end
 
 function transform!(mtr::Matrifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input is not a dataframe")
-  x = deepcopy(xx[:Value]) 
+  x = deepcopy(xx[:Value])
   x isa Vector || error("data should be a vector")
   res=toMatrix(mtr,x)
   convert(Array{Float64},res)
@@ -32,7 +32,7 @@ end
 
 function toMatrix(mtr::Transformer, x::Vector)
   stride=mtr.args[:stride];sz=mtr.args[:size];ahead=mtr.args[:ahead]
-  @assert stride>0 && sz>0 && ahead > 0 
+  @assert stride>0 && sz>0 && ahead > 0
   xlength = length(x)
   xlength > sz || error("data too short for the given size of sliding window")
   ndx=collect(xlength:-1:1)
@@ -47,15 +47,6 @@ function toMatrix(mtr::Transformer, x::Vector)
     ctr+=1
   end
   mmatrix
-end
-
-function matrifyrun()
-  mtr = Matrifier(Dict(:ahead=>24,:size=>24,:stride=>1))
-  sz = mtr.args[:size]
-  x=collect(1:100)
-  y=collect(1:100)
-  println(fit!(mtr,x,y))
-  transform!(mtr,x)
 end
 
 ### ====
@@ -77,7 +68,7 @@ end
 
 function fit!(dtr::Dateifier,xx::T,y::Vector=[]) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input not a dataframe")
-  x = deepcopy(xx[:Date]) 
+  x = deepcopy(xx[:Date])
   (eltype(x) <: DateTime || eltype(x) <: Date) || error("array element types are not dates")
   dtr.args[:lower] = minimum(x)
   dtr.args[:upper] = maximum(x)
@@ -105,15 +96,6 @@ function transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFram
   convert(Matrix{Int64},dt)
 end
 
-function dateifierrun()
-  dtr = Dateifier(Dict(:stride=>5))
-  lower = DateTime(2017,1,1)
-  upper = DateTime(2019,1,1)
-  x=lower:Dates.Hour(1):upper |> collect
-  y=lower:Dates.Hour(1):upper |> collect
-  fit!(dtr,x,y)
-  transform!(dtr,x)
-end
 
 ### ====
 
@@ -154,14 +136,6 @@ function transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
   res=by(x,sym,MeanValue = :Value=>skipmedian)
   rename!(res,Dict(names(res)[1]=>:Date,names(res)[2]=>:Value))
   res
-end
-
-function datevalgatorrun()
-  dtvl = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-  dte=DateTime(2014,1,1):Dates.Minute(1):DateTime(2016,1,1)
-  val = rand(length(dte))
-  fit!(dtvl,DataFrame(date=dte,values=val),[])
-  transform!(dtvl,DataFrame(date=dte,values=val))
 end
 
 ### ====
@@ -245,26 +219,10 @@ function transform!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   # find indices of missing
   missingndx = findall(ismissing.(joined[:Value]))
   jmndx=joined[missingndx,sym] .+ 1 # get time period index of missing, convert 0 index time to 1 index
-  missingvals::SubArray = @view joined[missingndx,:Value] 
+  missingvals::SubArray = @view joined[missingndx,:Value]
   missingvals .= medians[jmndx,:Value] # replace missing with median value
   sum(ismissing.(joined[:,:Value])) == 0 || error("Aggregation by time period failed to replace missings")
   joined[:,[:Date,:Value]]
-end
-
-function datevalizerrun()
-  # test passing args from one structure to another
-  Random.seed!(123)
-  dvzr1 = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
-  dvzr2 = DateValizer(dvzr1.args)
-  dte=DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
-  val = Array{Union{Missing,Float64}}(rand(length(dte)))
-  y = []
-  x = DataFrame(MDate=dte,MValue=val)
-  nmissing=50000
-  ndxmissing=Random.shuffle(1:length(dte))[1:nmissing]
-  x[:MValue][ndxmissing] .= missing
-  fit!(dvzr2,x,y)
-  transform!(dvzr2,x)
 end
 
 ### ====
@@ -305,13 +263,13 @@ function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dnnr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
-  missingcount = sum(ismissing.(joined[:Value])) 
+  missingcount = sum(ismissing.(joined[:Value]))
   dnnr.args[:missingcount] = missingcount
-  res = transform_worker!(dnnr,joined) 
+  res = transform_worker!(dnnr,joined)
   count=1
   if dnnr.args[:missdirection] == :symmetric
     while sum(ismissing.(res[:Value])) > 0
-      res = transform_worker!(dnnr,res) 
+      res = transform_worker!(dnnr,res)
       count += 1
     end
   end
@@ -325,7 +283,7 @@ function transform_worker!(dnnr::DateValNNer,joinc::T) where {T<:DataFrame}
 
   # to fill-in with nearest neighbors
   nnsize::Int64 = dnnr.args[:nnsize]
-  themissing = findall(ismissing.(joined[:Value])) 
+  themissing = findall(ismissing.(joined[:Value]))
   # ==== symmetric nearest neighbor
   missingndx = DataFrame()
   if dnnr.args[:missdirection] == :symmetric
@@ -349,40 +307,6 @@ function transform_worker!(dnnr::DateValNNer,joinc::T) where {T<:DataFrame}
   missingvals .=  (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # replace with nn medians
   dnnr.args[:strict] && (sum(ismissing.(joined[:,:Value])) == 0 || error("Nearest Neigbour algo failed to replace missings"))
   joined
-end
-
-function datevalnnerrun()
-  # test passing args from one structure to another
-  Random.seed!(123)
-  dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:nnsize=>3))
-  dte=DateTime(2014,1,1):Dates.Hour(1):DateTime(2016,1,1)
-  val = Array{Union{Missing,Float64}}(rand(length(dte)))
-  y = []
-  x = DataFrame(MDate=dte,MValue=val)
-  nmissing=10
-  ndxmissing=Random.shuffle(1:length(dte))[1:nmissing]
-  x[:MValue][ndxmissing] .= missing
-  fit!(dnnr,x,y)
-  transform!(dnnr,x)
-  dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),
-                          :nnsize=>1,:strict=>false,
-                          :missdirection => :symmetric))
-  Random.seed!(123)
-  v1=DateTime(2014,1,1,1,0):Dates.Hour(1):DateTime(2014,1,6,1,0)
-  val=Array{Union{Missing,Float64}}(sin.(-2π:0.1:2π)[1:length(v1)])
-  dat = deepcopy(val)
-  x=DataFrame(Date=v1,Value=dat)
-  ndx = Random.shuffle(1:length(v1))
-  x[ndx[1:50],:Value] = missing
-  #@show x
-  fit!(dlnr,x,[])
-  res = transform!(dlnr,x)
-  rmse = sqrt(mean(val .- res[:Value]).^2)
-  #@show res
-  @show rmse
-  @show dlnr.args
-  #plot([val,res[:Value]]) |> display
-  #(val,res)
 end
 
 mutable struct CSVDateValReader <: Transformer
@@ -411,4 +335,33 @@ function transform!(csvrdr::CSVDateValReader,x::T=[]) where {T<:Union{DataFrame,
     rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
     df[:Date] = DateTime.(df[:Date],fmt)
     df
+end
+
+mutable struct CSVDateValWriter <: Transformer
+    model
+    args
+    function CSVDateValWriter(args=Dict())
+        default_args = Dict(
+            :filename => "",
+            :dateformat => ""
+        )
+        new(nothing,mergedict(default_args,args))
+    end
+end
+
+function fit!(csvwtr::CSVDateValWriter,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+    fname = csvwtr.args[:filename]
+    fmt = csvwtr.args[:dateformat]
+    (fname != "" && fmt != "") || error("missing filename or date format")
+    model = csvwtr.args
+end
+
+function transform!(csvwtr::CSVDateValWriter,x::T) where {T<:Union{DataFrame,Vector,Matrix}}
+    fname = csvwtr.args[:filename]
+    fmt = csvwtr.args[:dateformat]
+    df = deepcopy(x)
+    ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
+    rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
+    eltype(df[:Date]) <: DateTime || error("Date format error")
+    df |> CSV.write(fname)
 end
