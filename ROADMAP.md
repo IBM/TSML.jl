@@ -25,7 +25,7 @@ __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 - PrunedTree : TSLearner - decision tree regression/classification wrapper
 - Adaboost : TSLearner - Adaboost regression/classification wrapper
 - DataReader : Transformer - hdf5/feather/jld/csv multiformat reader
-- DataWriter : Transformer - hdf5/feather/jld/csv multiforma writer
+- DataWriter : Transformer - hdf5/feather/jld/csv multiformat writer
 - Dockerization - dockerized notebook tutorial and dockerized TSML
 
 ## Future Work (Higher-level reasoning and integration APIs)
