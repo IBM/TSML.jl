@@ -1,9 +1,10 @@
 module DataReaders
-using Queryverse
+using FileIO
+using CSVFiles
+using FeatherFiles
 using DataFrames
 using HDF5
 using JLD
-using Feather
 using Parquet
 using Dates
 
