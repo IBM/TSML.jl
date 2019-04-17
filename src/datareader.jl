@@ -2,6 +2,7 @@ module DataReaders
 using FileIO
 using CSVFiles
 using FeatherFiles
+using Feather
 using DataFrames
 using HDF5
 using JLD
