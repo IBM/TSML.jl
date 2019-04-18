@@ -1,7 +1,7 @@
 name = "TSML"
 uuid = "198dc43e-9e51-5cd7-9d40-d9794d335912"
 authors = ["Paulito Palmes <ppalmes@gmail.com>"]
-version = "1.0.5"
+version = "1.0.6"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
