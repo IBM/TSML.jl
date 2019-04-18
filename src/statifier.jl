@@ -31,14 +31,17 @@ mutable struct Statifier <: Transformer
 end
 
 function fit!(st::Statifier, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  typeof(features) <: Vector || error("Statifier.fit!: data should be a vector")
+  typeof(features) <: DataFrame || error("Statifier.fit!: data should be a dataframe: Date,Val ")
+  ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   st.model = st.args
 end
 
 function transform!(st::Statifier, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   features != [] || return DataFrame()
-  typeof(features) <: Vector || error("Statifier.fit!: data should be a vector")
-  fstat = fullstat(features)
+  typeof(features) <: DataFrame || error("Statifier.fit!: data should be a dataframe: Date,Val ")
+  ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
+  sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
+  fstat = fullstat(features[:Value])
   if st.args[:processmissing] == true
     # full namedtuple: stat1,stat2,bstat
     hcat(fstat...)
@@ -64,7 +67,8 @@ function fullstat(dat::Vector)
   df1=DataFrame(median=lsm.median,mean=lsm.mean,q25=lsm.q25,q75=lsm.q75)
   df2=DataFrame(kurtosis=lks,skewness=lsk,variation=lvar,entropy=lentropy,
             autocor=lautocor,pacf=lpacf)
-  df3=DataFrame(bmedian=lbrle.bmedian,bmean=lbrle.bmean,bq25=lbrle.bq25,bq75=lbrle.bq75)
+  df3=DataFrame(bmedian=lbrle.bmedian,bmean=lbrle.bmean,bq25=lbrle.bq25,bq75=lbrle.bq75,
+                bmiss=lbrle.bmiss,bmin=lbrle.bmin,bmax=lbrle.bmax)
   return (stat1=df1,stat2=df2,bstat=df3)
 end
 
@@ -84,26 +88,7 @@ function rlestatmissingblocks(dat::Vector{T}) where {T<:Union{AbstractFloat,Inte
   indx=findall(x->x == dummy,_rle[1])
   blocks = _rle[2][indx]
   _sm = summarystats(blocks)
-  #maxblock = maximum(blocks)
-  #meanblock = mean(blocks)
-  #medianblock = mad(blocks,normalize=true)
-  #return (maxblock = maxblock, meanblock=meanblock,medianblock=medianblock)
-  return (bq25=_sm.q25,bmean=_sm.mean,bmedian=_sm.median,bq75=_sm.q75)
+  return (bq25=_sm.q25,bmean=_sm.mean,bmedian=_sm.median,bq75=_sm.q75,bmax=_sm.max,bmin=_sm.min,bmiss=_sm.nmiss)
 end
-
-function statifierrun()
-  Random.seed!(123)
-  dat=[missing;rand(1:10,3);missing;missing;missing;rand(1:5,3)]
-  statfier = Statifier(Dict(:processmissing=>false))
-  fit!(statfier,dat)
-  res=transform!(statfier,dat)
-  @show res
-  statfier = Statifier(Dict(:processmissing=>true))
-  fit!(statfier,dat)
-  res=transform!(statfier,dat)
-  @show res
-  return nothing
-end
-
 
 end
