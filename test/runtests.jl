@@ -7,6 +7,7 @@ using TSML.System
 include("test_valdate.jl")
 include("test_decisiontree.jl")
 include("test_readerwriter.jl")
+include("test_statifier.jl")
 
 if LIB_SKL_AVAILABLE
     include("test_scikitlearn.jl")

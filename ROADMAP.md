@@ -29,7 +29,7 @@ __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 - Dockerization - dockerized notebook tutorial and dockerized TSML
 
 ## Future Work (Higher-level reasoning and integration APIs)
-- StatFilter <: Transformer - scalar stats for data quality characterization
+- Statifier <: Transformer - scalar stats for data quality characterization
 - MonotonicFilter <: Transformer - convert monotonic data using finite difference operator
 - Module for automatic classification of TS data type
 - XGBoost wrapper
