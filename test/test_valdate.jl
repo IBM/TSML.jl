@@ -10,7 +10,7 @@ using Random
 using Statistics
 using DataFrames
 using Dates
-using MLDataUtils
+#using MLDataUtils
 using Test
 
 function generateXY()
@@ -198,8 +198,8 @@ end
 end
 
 function test_csvreaderwriter()
-  csvreader = CSVDateValReader(Dict(:filename=>joinpath(@__DIR__,"../data/testdata.csv"),:dateformat=>"d/m/y H:M"))
-  csvwtr = CSVDateValWriter(Dict(:filename=>joinpath(@__DIR__,"../data/testdata_output.csv"),:dateformat=>"d/m/y H:M"))
+  csvreader = CSVDateValReader(Dict(:filename=>joinpath(dirname(pathof(TSML)),"../data/testdata.csv"),:dateformat=>"d/m/y H:M"))
+  csvwtr = CSVDateValWriter(Dict(:filename=>joinpath(dirname(pathof(TSML)),"../data/testdata_output.csv"),:dateformat=>"d/m/y H:M"))
   filter1 = DateValgator()
   filter2 = DateValNNer(Dict(:nnsize=>1))
   mypipeline = Pipeline(Dict(

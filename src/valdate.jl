@@ -135,8 +135,8 @@ function transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
   x[sym] = round.(x[:Date],grpby)
   aggr=by(x,sym,MeanValue = :Value=>skipmedian)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
-  lower = minimum(x[:Date])
-  upper = maximum(x[:Date])
+  lower = round(minimum(x[:Date]),grpby)
+  upper = round(maximum(x[:Date]),grpby)
   #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dvmr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
@@ -263,8 +263,8 @@ function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   x[sym] = round.(x[:Date],grpby)
   aggr = by(x,sym,MeanValue = :Value=>skipmedian)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
-  lower = minimum(x[:Date])
-  upper = maximum(x[:Date])
+  lower = round(minimum(x[:Date]),grpby)
+  upper = round(maximum(x[:Date]),grpby)
   #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dnnr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
