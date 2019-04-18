@@ -71,5 +71,9 @@ include("datawriter.jl")
 using .DataWriters
 export datawriterrun
 
+include("statifier.jl")
+using .Statifiers
+export fullstat, statifierrun
+
 
 end # module
