@@ -18,7 +18,7 @@ Machine learning functions in TSML are wrappers to the corresponding Scikit-lear
 Below is an example of the pipeline workflow: 
 
 ```
-# Setup source data and filters to aggregate and impute hourly aggregate
+# Setup source data and filters to aggregate and impute hourly
 fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
 csvfilter = DataReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
 valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
