@@ -34,6 +34,8 @@ mpipeline1 = Pipeline(Dict(
 )
 fit!(mpipeline1)
 respipe1 = transform!(mpipeline1)
+
+# Show statistics including blocks of missing data stats
 @show respipe1
 ```
 
@@ -45,5 +47,7 @@ mpipeline2 = Pipeline(Dict(
 )
 fit!(mpipeline2)
 respipe2 = transform!(mpipeline2)
+
+# Show statistics including blocks of missing data stats
 @show respipe2
 ```
