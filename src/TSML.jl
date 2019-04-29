@@ -76,4 +76,9 @@ using .Statifiers
 export fullstat, statifierrun
 
 
+include("monotonicer.jl")
+using .Monotonicers
+export monotonicerrun
+
+
 end # module
