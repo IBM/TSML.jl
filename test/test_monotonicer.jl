@@ -65,10 +65,12 @@ function test_basicmonotonicer()
   )
   fit!(mpipeline5)
   respipe5 = transform!(mpipeline5)
-  val1 = respipe3[1,:] |> Vector
-  val2 = respipe5[1,:] |> Vector
-  ok = (!isnan).(val1)
-  @test sum( val1[ok].== val2[ok]) == length(val1[ok])
+  val1 = respipe3[1,3:end] |> Vector
+  val2 = respipe5[1,3:end] |> Vector
+  ok1 = (!isnan).(val1)
+  ok2 = (!isnan).(val2)
+  @test sum( val1[ok1].== val2[ok2]) == length(val1[ok1])
+
 end
 @testset "Monotonicer: readcsv |> valgator |> valnner |> mono |> stfier" begin
   test_basicmonotonicer()
