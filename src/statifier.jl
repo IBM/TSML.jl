@@ -1,9 +1,10 @@
 module Statifiers
 
-using StatsBase: std, skewness, kurtosis, variation, sem, mad,  entropy, summarystats, autocor, pacf, rle
+using StatsBase: std, skewness, kurtosis, variation, sem, mad,  entropy, summarystats, autocor, pacf, rle, quantile
 using Dates
 using DataFrames
 using Random
+using Statistics
 
 export fit!,transform!
 export Statifier
@@ -42,17 +43,35 @@ function transform!(st::Statifier, features::T=[]) where {T<:Union{Vector,Matrix
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
   fstat = fullstat(features[:Value])
+  timestat = timevalstat(features)
   if st.args[:processmissing] == true
     # full namedtuple: stat1,stat2,bstat
-    hcat(fstat...)
+    hcat(timestat,fstat...)
   else
-    hcat(fstat.stat1,fstat.stat2)
+    hcat(timestat,fstat.stat1,fstat.stat2)
   end
+end
+
+function timevalstat(features::DataFrame)
+  ldates=features[:Date] |> skipmissing |> collect
+  totalhours = sum(diff(ldates)).value/1000/3600 # to hours
+  lcount = length(ldates)
+  timestart=first(features[:Date])
+  timeend=last(features[:Date])
+  sfreq = totalhours/lcount
+  dftime = DataFrame(TStart=timestart,TEnd=timeend,SFreq=sfreq)
 end
 
 function fullstat(dat::Vector)
   data = skipmissing(dat) |> collect
+  lcount = length(data)
+  lmax = maximum(data)
+  lmin = minimum(data)
   lsm = summarystats(data)
+  q1 = quantile(data,0.1)
+  q2 = quantile(data,0.2)
+  q8 = quantile(data,0.8)
+  q9 = quantile(data,0.9)
   lks = kurtosis(data)
   lsk = skewness(data)
   lvar = variation(data)
@@ -64,11 +83,13 @@ function fullstat(dat::Vector)
   lautocor = autocor(data,_autolags) .|> abs2 |> sum |> sqrt
   lpacf = pacf(data,_pacflags) .|> abs2 |> sum |> sqrt
   lbrle = rlestatmissingblocks(dat)
-  df1=DataFrame(median=lsm.median,mean=lsm.mean,q25=lsm.q25,q75=lsm.q75)
+  df1=DataFrame(count=lcount,max=lmax,min=lmin,median=lsm.median,
+                mean=lsm.mean,q1=q1,q2=q2,q25=lsm.q25,
+                q75=lsm.q75,q8=q8,q9=q9)
   df2=DataFrame(kurtosis=lks,skewness=lsk,variation=lvar,entropy=lentropy,
             autocor=lautocor,pacf=lpacf)
   df3=DataFrame(bmedian=lbrle.bmedian,bmean=lbrle.bmean,bq25=lbrle.bq25,bq75=lbrle.bq75,
-                bmiss=lbrle.bmiss,bmin=lbrle.bmin,bmax=lbrle.bmax)
+                bmin=lbrle.bmin,bmax=lbrle.bmax)
   return (stat1=df1,stat2=df2,bstat=df3)
 end
 
