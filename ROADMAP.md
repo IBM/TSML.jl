@@ -28,9 +28,11 @@ __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 - DataWriter <: Transformer - hdf5/feather/jld/csv multiformat writer
 - Dockerization - dockerized notebook tutorial and dockerized TSML
 
-## Future Work (Higher-level reasoning and integration APIs)
+## Pre-release v1.0.3
 - Statifier <: Transformer - scalar stats for data quality characterization
 - MonotonicFilter <: Transformer - convert monotonic data using finite difference operator
+
+## Future Work (Higher-level reasoning and integration APIs)
 - Module for automatic classification of TS data type
 - XGBoost wrapper
 - API wrapper for KITT interaction
