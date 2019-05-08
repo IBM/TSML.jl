@@ -13,10 +13,12 @@ using Dates
 using Test
 
 function test_readerwriter()
-    gcdims::Tuple = (8761,2)
-    ssum = 97564.44999999998
-    resdf::DataFrame=DataFrame()
-    fname = joinpath(dirname(pathof(TSML)),"../data/testdateval.csv")
+    gcdims = (8761,2)
+    ssum = 97564.45
+    resdf=DataFrame()
+    datapath=joinpath(dirname(pathof(TSML)),"../data")
+    basefilename = "testdateval"
+    fname = joinpath(datapath,basefilename*".csv")
     lcsv=DataReader(Dict(:filename=>fname))
     fit!(lcsv)
     dateval=transform!(lcsv)
@@ -61,6 +63,11 @@ function test_readerwriter()
     resdf = transform!(wjld)
     @test sum(size(resdf) .== gcdims) == 2
     @test sum(resdf[:Value]) == ssum
+    # cleanup 
+    rm(csvname,force=true)
+    rm(hdf5name,force=true)
+    rm(jldname,force=true)
+    rm(feathername,force=true)
 end
 @testset "Data Readers/Writers: csv,hdf5,feather,jld" begin
     test_readerwriter()
