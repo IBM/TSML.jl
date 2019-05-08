@@ -38,6 +38,8 @@ mutable struct TSClassifier <: TSLearner
     default_args = Dict(
       # training directory
       :trdirectory => "",
+      :tstdirectory => "",
+      :modeldirectory => "",
       :feature_range => 3:20,
       :juliarfmodelname => "juliarfmodel.serialized",
       # Output to train against
@@ -57,8 +59,14 @@ mutable struct TSClassifier <: TSLearner
         :min_purity_increase => 0.0
       )
     )
-    new(nothing, mergedict(default_args, args))
+    mergedargs=mergedict(default_args, args)
+    ispathnotempty(mergedargs) || (@show default_args; error("empty training/testing/modeling directory"))
+    new(nothing, mergedargs)
   end
+end
+
+function ispathnotempty(margs::Dict)
+  return margs[:trdirectory] != "" && margs[:tstdirectory] != "" && margs[:modeldirectory] != ""
 end
 
 @enum TSType begin
@@ -95,7 +103,7 @@ end
 function getStats(ldirname::AbstractString)
   ldirname != "" || error("directory name empty")
   mfiles = readdir(ldirname) |> x->filter(y->match(r".csv",y) != nothing,x)
-  mfiles != [] || error("empty directory")
+  mfiles != [] || error("empty csv directory")
   trdata = DataFrame()
   for file in mfiles
     df=getfilestat(ldirname,file)
@@ -107,6 +115,8 @@ end
 # get the stats of each file, collect as dataframe, train
 function fit!(tsc::TSClassifier, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   ldirname = tsc.args[:trdirectory]
+  mdirname = tsc.args[:modeldirectory]
+  modelfname=tsc.args[:juliarfmodelname]
   trdata = getStats(ldirname)
   rfmodel = RandomForest(tsc.args)
   xfeatures = tsc.args[:feature_range]
@@ -114,7 +124,7 @@ function fit!(tsc::TSClassifier, features::T=[], labels::Vector=[]) where {T<:Un
   Y=trdata[:,end]
   fit!(rfmodel,X,Y)
   #pred = transform!(rfmodel,X); @show pred
-  serializedmodel = joinpath(ldirname,tsc.args[:juliarfmodelname])
+  serializedmodel = joinpath(mdirname,modelfname)
   open(serializedmodel,"w") do file
     serialize(file,rfmodel)
   end
@@ -123,15 +133,17 @@ function fit!(tsc::TSClassifier, features::T=[], labels::Vector=[]) where {T<:Un
 end
 
 function transform!(tsc::TSClassifier, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  ldirname = tsc.args[:trdirectory]
+  ldirname = tsc.args[:tstdirectory]
+  mdirname = tsc.args[:modeldirectory]
+  modelfname=tsc.args[:juliarfmodelname]
   trdata = getStats(ldirname)
   xfeatures = tsc.args[:feature_range]
   X=trdata[:,xfeatures]
   mfeatures=tsc.args[:features]
   (sum(names(X) .== mfeatures ) == length(mfeatures)) || error("features mismatch")
-  serializedmodel = joinpath(ldirname,tsc.args[:juliarfmodelname])
+  serializedmodel = joinpath(mdirname,modelfname)
   if isfile(serializedmodel)
-    @info "loading model from file..."
+    @info "loading model from file: "*serializedmodel
     model=open(serializedmodel,"r") do file
       deserialize(file)
     end
