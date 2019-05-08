@@ -26,7 +26,7 @@ using TSML.DataReaders
 
 using DataFrames
 using Dates
-using HDF5, FileIO
+using Serialization
 
 export TSClassifier, fit!, transform!
 
@@ -39,7 +39,7 @@ mutable struct TSClassifier <: TSLearner
       # training directory
       :trdirectory => "",
       :feature_range => 3:20,
-      :juliarfmodelname => "juliarfmodel.feather",
+      :juliarfmodelname => "juliarfmodel.serialized",
       # Output to train against
       # (:class).
       :output => :class,
@@ -115,7 +115,9 @@ function fit!(tsc::TSClassifier, features::T=[], labels::Vector=[]) where {T<:Un
   fit!(rfmodel,X,Y)
   #pred = transform!(rfmodel,X); @show pred
   serializedmodel = joinpath(ldirname,tsc.args[:juliarfmodelname])
-  rfmodel |> save(serializedmodel)
+  open(serializedmodel,"w") do file
+    serialize(file,rfmodel)
+  end
   tsc.args[:features] = names(X)
   tsc.model = rfmodel
 end
@@ -130,7 +132,9 @@ function transform!(tsc::TSClassifier, features::T=[]) where {T<:Union{Vector,Ma
   serializedmodel = joinpath(ldirname,tsc.args[:juliarfmodelname])
   if isfile(serializedmodel)
     @info "loading model from file..."
-    model = load(serializedmodel)
+    model=open(serializedmodel,"r") do file
+      deserialize(file)
+    end
   else
     model= tsc.model
   end
