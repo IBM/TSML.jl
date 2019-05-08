@@ -11,7 +11,8 @@ using TSML.TSClassifiers: TSClassifier
 using Test
 
 function test_tsclassifier()
-  @test_throws ErrorException  TSClassifier(Dict()) 
+  tscl=TSClassifier(Dict()) 
+  @test_throws ErrorException fit!(tscl)
   trdirname = joinpath(dirname(pathof(TSML)),"../data/tsclassification/training")
   tstdirname = joinpath(dirname(pathof(TSML)),"../data/tsclassification/testing")
   modeldirname = joinpath(dirname(pathof(TSML)),"../data/tsclassification/model")

@@ -60,7 +60,6 @@ mutable struct TSClassifier <: TSLearner
       )
     )
     mergedargs=mergedict(default_args, args)
-    ispathnotempty(mergedargs) || (@show default_args; error("empty training/testing/modeling directory"))
     new(nothing, mergedargs)
   end
 end
@@ -114,6 +113,7 @@ end
 
 # get the stats of each file, collect as dataframe, train
 function fit!(tsc::TSClassifier, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+  ispathnotempty(tsc.args) || error("empty training/testing/modeling directory")
   ldirname = tsc.args[:trdirectory]
   mdirname = tsc.args[:modeldirectory]
   modelfname=tsc.args[:juliarfmodelname]
