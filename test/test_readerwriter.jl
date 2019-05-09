@@ -13,15 +13,17 @@ using Dates
 using Test
 
 function test_readerwriter()
-    gcdims::Tuple = (8761,2)
-    ssum = 97564.44999999998
-    resdf::DataFrame=DataFrame()
-    fname = joinpath(dirname(pathof(TSML)),"../data/testdateval.csv")
+    gcdims = (8761,2)
+    ssum = 97564.0
+    resdf=DataFrame()
+    datapath=joinpath(dirname(pathof(TSML)),"../data")
+    basefilename = "testdateval"
+    fname = joinpath(datapath,basefilename*".csv")
     lcsv=DataReader(Dict(:filename=>fname))
     fit!(lcsv)
     dateval=transform!(lcsv)
     @test sum(size(dateval) .== gcdims ) == 2
-    @test sum(dateval[:Value]) == ssum
+    @test sum(dateval[:Value]) |> round == ssum
     csvname = replace(fname,"test"=>"out")
     wcsv = DataWriter(Dict(:filename=>csvname))
     fit!(wcsv)
@@ -30,7 +32,7 @@ function test_readerwriter()
     fit!(pcsv)
     resdf=transform!(pcsv)
     @test sum(size(resdf) .== gcdims) == 2
-    @test sum(resdf[:Value]) == ssum
+    @test sum(resdf[:Value]) |> round == ssum
     # check hdf5
     hdf5name = replace(fname,"csv"=>"h5")
     lhdf5 = DataWriter(Dict(:filename=>hdf5name))
@@ -40,7 +42,7 @@ function test_readerwriter()
     fit!(whdf5)
     resdf = transform!(whdf5)
     @test sum(size(resdf) .== gcdims) == 2
-    @test sum(resdf[:Value]) == ssum
+    @test sum(resdf[:Value]) |> round == ssum
     # check feather
     feathername = replace(fname,"csv"=>"feather")
     lfeather = DataWriter(Dict(:filename=>feathername))
@@ -50,7 +52,7 @@ function test_readerwriter()
     fit!(wfeather)
     resdf = transform!(wfeather)
     @test sum(size(resdf) .== gcdims) == 2
-    @test sum(resdf[:Value]) == ssum
+    @test sum(resdf[:Value]) |> round == ssum
     # check jld
     jldname = replace(fname,"csv"=>"jld")
     ljld = DataWriter(Dict(:filename=>jldname))
@@ -60,7 +62,12 @@ function test_readerwriter()
     fit!(wjld)
     resdf = transform!(wjld)
     @test sum(size(resdf) .== gcdims) == 2
-    @test sum(resdf[:Value]) == ssum
+    @test sum(resdf[:Value]) |> round == ssum
+    # cleanup 
+    rm(csvname,force=true)
+    rm(hdf5name,force=true)
+    rm(jldname,force=true)
+    rm(feathername,force=true)
 end
 @testset "Data Readers/Writers: csv,hdf5,feather,jld" begin
     test_readerwriter()

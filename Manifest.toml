@@ -14,10 +14,10 @@ uuid = "9e28174c-4ba2-5203-b857-d8d62c4213ee"
 version = "0.8.10"
 
 [[BinaryProvider]]
-deps = ["Libdl", "Pkg", "SHA", "Test"]
-git-tree-sha1 = "055eb2690182ebc31087859c3dd8598371d3ef9e"
+deps = ["Libdl", "SHA"]
+git-tree-sha1 = "c7361ce8a2129f20b0e05a89f7070820cfed6648"
 uuid = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
-version = "0.5.3"
+version = "0.5.4"
 
 [[Blosc]]
 deps = ["BinaryProvider", "CMakeWrapper", "Compat", "Libdl"]
@@ -39,9 +39,9 @@ version = "1.1.1"
 
 [[CMakeWrapper]]
 deps = ["BinDeps", "CMake", "Libdl", "Parameters", "Test"]
-git-tree-sha1 = "2b43d451639984e3571951cc687b8509b0a86c6d"
+git-tree-sha1 = "16d4acb3d37dc05b714977ffefa8890843dc8985"
 uuid = "d5fb7624-851a-54ee-a528-d3f3bac0b4a0"
-version = "0.2.2"
+version = "0.2.3"
 
 [[CSTParser]]
 deps = ["LibGit2", "Test", "Tokenize"]
@@ -247,10 +247,10 @@ uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.20.0"
 
 [[JuliaInterpreter]]
-deps = ["CodeTracking", "Dates", "Distributed", "InteractiveUtils", "Mmap", "Random", "SHA", "Test", "UUIDs"]
-git-tree-sha1 = "3446fc94431daec86574672a748696485d3c0487"
+deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
+git-tree-sha1 = "553281260578bb50d6d550977f438754e7e93397"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.5.0"
+version = "0.5.1"
 
 [[LearnBase]]
 deps = ["LinearAlgebra", "SparseArrays", "StatsBase", "Test"]
@@ -543,9 +543,9 @@ version = "0.4.0"
 
 [[Tables]]
 deps = ["IteratorInterfaceExtensions", "LinearAlgebra", "Requires", "TableTraits", "Test"]
-git-tree-sha1 = "e2abd466ca2f00a1bb8cb80024d59745cc8f91a6"
+git-tree-sha1 = "9e748316f5aa7b7753c90de612ef98fe8b0ea297"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "0.2.0"
+version = "0.2.1"
 
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]

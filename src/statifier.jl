@@ -81,7 +81,7 @@ function fullstat(dat::Vector)
   _autolags = 1:minimum([24,length(data)-1])
   _pacflags = 1:minimum([24,div(length(data),2)-1])
   lautocor = autocor(data,_autolags) .|> abs2 |> sum |> sqrt
-  lpacf = pacf(data,_pacflags) .|> abs2 |> sum |> sqrt
+  lpacf = pacf(data,_pacflags;method=:yulewalker) .|> abs2 |> sum |> sqrt
   lbrle = rlestatmissingblocks(dat)
   df1=DataFrame(count=lcount,max=lmax,min=lmin,median=lsm.median,
                 mean=lsm.mean,q1=q1,q2=q2,q25=lsm.q25,
