@@ -20,7 +20,7 @@ __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 - CSVDateValReader <: Transformer - CSV reader
 - CSVDateValWriter <: Transformer - CSV writer
 
-### Release v1.0.2 (Ensemble wrappers, multiformat data readers/writers)
+### Release v1.0.6 (Ensemble wrappers, multiformat data readers/writers)
 - RandomForest <: TSLearner - RF regression/classification wrapper
 - PrunedTree <: TSLearner - decision tree regression/classification wrapper
 - Adaboost <: TSLearner - Adaboost regression/classification wrapper
@@ -28,12 +28,14 @@ __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 - DataWriter <: Transformer - hdf5/feather/jld/csv multiformat writer
 - Dockerization - dockerized notebook tutorial and dockerized TSML
 
-## Pre-release v1.0.3
+## Release v1.0.7
 - Statifier <: Transformer - scalar stats for data quality characterization
 - MonotonicFilter <: Transformer - convert monotonic data using finite difference operator
+- TSClassifier <: Transformer - automatic classification of TS data type
+- High-level wrapper for CLI automation and interfacing with other programs in the docker/shell
+- Dockerized branch for Kubernetes deployment
 
 ## Future Work (Higher-level reasoning and integration APIs)
-- Module for automatic classification of TS data type
 - XGBoost wrapper
 - API wrapper for KITT interaction
 - API wrapper for E2D interaction
