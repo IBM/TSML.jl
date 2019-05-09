@@ -34,4 +34,32 @@ end
   test_tsclassifier()
 end
 
+function test_realdatatsclassifier()
+
+  tscl=TSClassifier(Dict()) 
+  @test_throws ErrorException fit!(tscl)
+  trdirname = joinpath(dirname(pathof(TSML)),"../data/realdatatsclassification/training")
+  tstdirname = joinpath(dirname(pathof(TSML)),"../data/realdatatsclassification/testing")
+  modeldirname = joinpath(dirname(pathof(TSML)),"../data/realdatatsclassification/model")
+
+  tscl = TSClassifier(Dict(:trdirectory=>trdirname,
+			   :tstdirectory=>tstdirname,
+			   :modeldirectory=>modeldirname,
+			   :num_trees=>30))
+  modelfname = joinpath(tscl.args[:modeldirectory],tscl.args[:juliarfmodelname])
+  fit!(tscl)
+  @test isfile(modelfname)
+  @test length(transform!(tscl)) > 0
+  # cleanup model directory
+  #if isdir(modeldirname)
+  #  rm(modelfname,force=true)
+  #end
+end
+
+@testset "TSClassifier" begin
+  test_realdatatsclassifier()
+end
+
+
+
 end
