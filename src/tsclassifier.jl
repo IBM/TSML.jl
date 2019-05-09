@@ -109,14 +109,16 @@ function getStats(ldirname::AbstractString)
   ldirname != "" || error("directory name empty")
   mfiles = readdir(ldirname) |> x->filter(y->match(r".csv",y) != nothing,x)
   mfiles != [] || error("empty csv directory")
-  file = pop!(mfiles)
-  @info "getting stats of "*file
-  trdata=getfilestat(ldirname,file)
+  trdata = DataFrame()
   for file in mfiles
-    @info "getting stats of "*file
-    df=getfilestat(ldirname,file)
-    append!(trdata,df)
-    #trdata = vcat(trdata,df)
+    try
+      df=getfilestat(ldirname,file)
+      trdata = vcat(trdata,df)
+      @info "getting stats of "*file
+    catch
+      @info "skipping due to error "*file
+      continue
+    end
   end
   return trdata
 end
