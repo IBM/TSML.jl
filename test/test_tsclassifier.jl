@@ -44,6 +44,7 @@ function test_realdatatsclassifier()
   tscl = TSClassifier(Dict(:trdirectory=>trdirname,
 			   :tstdirectory=>tstdirname,
 			   :modeldirectory=>modeldirname,
+			   :feature_range => 6:20,
 			   :num_trees=>30))
   modelfname = joinpath(tscl.args[:modeldirectory],tscl.args[:juliarfmodelname])
   fit!(tscl)

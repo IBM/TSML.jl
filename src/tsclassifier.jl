@@ -24,6 +24,7 @@ using TSML.DecisionTreeLearners: RandomForest
 using TSML.Statifiers
 using TSML.DataReaders
 
+using CSV
 using DataFrames
 using Dates
 using Serialization
@@ -40,7 +41,7 @@ mutable struct TSClassifier <: TSLearner
       :trdirectory => "",
       :tstdirectory => "",
       :modeldirectory => "",
-      :feature_range => 3:20,
+      :feature_range => 6:20,
       :juliarfmodelname => "juliarfmodel.serialized",
       # Output to train against
       # (:class).
@@ -127,17 +128,17 @@ function fit!(tsc::TSClassifier, features::T=[], labels::Vector=[]) where {T<:Un
   mdirname = tsc.args[:modeldirectory]
   modelfname=tsc.args[:juliarfmodelname]
   trdata = getStats(ldirname)
-  @show trdata
   rfmodel = RandomForest(tsc.args)
   xfeatures = tsc.args[:feature_range]
   X=trdata[:,xfeatures]
   Y=trdata[:,:dtype]
   fit!(rfmodel,X,Y)
-  #pred = transform!(rfmodel,X); @show pred
   serializedmodel = joinpath(mdirname,modelfname)
   open(serializedmodel,"w") do file
     serialize(file,rfmodel)
   end
+  trstatfname = joinpath(mdirname,modelfname*".csv")
+  trdata |> CSV.write(trstatfname)
   tsc.args[:features] = names(X)
   tsc.model = rfmodel
 end
