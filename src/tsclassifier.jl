@@ -72,6 +72,10 @@ end
   temperature = 1
   weather = 2
   footfall = 3
+  AirOffTemp = 4
+  Energy = 5
+  Pressure = 6
+  RetTemp = 7
 end
 
 # return stat of a file
@@ -94,6 +98,7 @@ function getfilestat(ldirname::AbstractString,lfname::AbstractString)
   fit!(mpipeline)
   df = transform!(mpipeline)
   df[:dtype]=dtype
+  df[:fname]=lfname
   return (df)
 end
 
@@ -103,10 +108,14 @@ function getStats(ldirname::AbstractString)
   ldirname != "" || error("directory name empty")
   mfiles = readdir(ldirname) |> x->filter(y->match(r".csv",y) != nothing,x)
   mfiles != [] || error("empty csv directory")
-  trdata = DataFrame()
+  file = pop!(mfiles)
+  @info "getting stats of "*file
+  trdata=getfilestat(ldirname,file)
   for file in mfiles
+    @info "getting stats of "*file
     df=getfilestat(ldirname,file)
-    trdata = vcat(trdata,df)
+    append!(trdata,df)
+    #trdata = vcat(trdata,df)
   end
   return trdata
 end
@@ -118,10 +127,11 @@ function fit!(tsc::TSClassifier, features::T=[], labels::Vector=[]) where {T<:Un
   mdirname = tsc.args[:modeldirectory]
   modelfname=tsc.args[:juliarfmodelname]
   trdata = getStats(ldirname)
+  @show trdata
   rfmodel = RandomForest(tsc.args)
   xfeatures = tsc.args[:feature_range]
   X=trdata[:,xfeatures]
-  Y=trdata[:,end]
+  Y=trdata[:,:dtype]
   fit!(rfmodel,X,Y)
   #pred = transform!(rfmodel,X); @show pred
   serializedmodel = joinpath(mdirname,modelfname)
@@ -150,7 +160,8 @@ function transform!(tsc::TSClassifier, features::T=[]) where {T<:Union{Vector,Ma
   else
     model= tsc.model
   end
-  transform!(model,X)
+  mpred = transform!(model,X)
+  return DataFrame(fname=trdata[:fname],predtype=mpred)
 end
 
 end # module
