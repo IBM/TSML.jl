@@ -28,7 +28,7 @@ __Authored by__: _Paulito P. Palmes_ ([ppalmes-ibm](https://github.com/ppalmes))
 - DataWriter <: Transformer - hdf5/feather/jld/csv multiformat writer
 - Dockerization - dockerized notebook tutorial and dockerized TSML
 
-## Release v1.0.7
+## Release v1.0.7 (TS auto classification, monotonic data detection/normalization)
 - Statifier <: Transformer - scalar stats for data quality characterization
 - MonotonicFilter <: Transformer - convert monotonic data using finite difference operator
 - TSClassifier <: Transformer - automatic classification of TS data type
