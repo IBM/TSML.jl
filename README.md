@@ -1,6 +1,6 @@
 # TSML (Time Series Machine Learning)
 
-Julia 1.0: [![Build Status](https://travis-ci.com/IBM/TSML.jl.svg?branch=master)](https://travis-ci.com/IBM/TSML.jl)
+Julia 1.0: [![Build Status](https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master)](https://travis-ci.org/ppalmes/TSML.jl)
 
 
 TSML (Time Series Machine Learning) is package for Time Series data processing, classification, and prediction. It combines ML libraries from Python's ScikitLearn, R's Caret, and Julia using a common API and allows seamless ensembling and integration of heterogenous ML libraries to create complex models for robust time-series prediction.
@@ -15,4 +15,39 @@ TSML uses a pipeline which iteratively calls the __fit__ and __transform__ famil
 
 Machine learning functions in TSML are wrappers to the corresponding Scikit-learn, Caret, and native Julia ML libraries. There are more than hundred classifiers and regression functions available using a common API. 
 
-Below is an example of the pipeline workflow: (todo) 
+Below is an example of the pipeline workflow: 
+
+```
+# Setup source data and filters to aggregate and impute hourly
+fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
+csvfilter = DataReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
+valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
+valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
+stfier = Statifier(Dict(:processmissing=>true))
+```
+
+```
+# Setup pipeline without imputation and run
+mpipeline1 = Pipeline(Dict(
+  :transformers => [csvfilter,valgator,stfier]
+ )
+)
+fit!(mpipeline1)
+respipe1 = transform!(mpipeline1)
+
+# Show statistics including blocks of missing data stats
+@show respipe1
+```
+
+```
+# Add imputation in the pipeline and rerun
+mpipeline2 = Pipeline(Dict(
+  :transformers => [csvfilter,valgator,valnner,stfier]
+ )
+)
+fit!(mpipeline2)
+respipe2 = transform!(mpipeline2)
+
+# Show statistics including blocks of missing data stats
+@show respipe2
+```
