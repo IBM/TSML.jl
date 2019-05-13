@@ -1,6 +1,3 @@
-using Pkg
-Pkg.activate("..")
-
 using Documenter, TSML
 
 using TSML.DecisionTreeLearners

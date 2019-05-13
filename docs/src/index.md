@@ -29,9 +29,15 @@ for robust time-series pre-processing and prediction/classification.
 TSML is in the Julia Official package registry. 
 The latest release can be installed at the Julia 
 prompt using Julia's package management:
-
 ```julia
 julia> ]add TSML
+```
+
+or
+
+```julia
+julia> using Pkg
+julia> pkg"add TSML"
 ```
 
 or
@@ -56,8 +62,8 @@ time-series processing. To use them, it is standard in TSML code to have the
 following declared at the topmost part of your application:
 
 ```julia
-julia> using TSML 
-julia> using TSML.TSMLTransformers
-julia> using TSML.TSMLTypes
-julia> using TSML.Utils
+using TSML 
+using TSML.TSMLTransformers
+using TSML.TSMLTypes
+using TSML.Utils
 ```
