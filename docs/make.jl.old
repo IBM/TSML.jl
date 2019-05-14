@@ -1,0 +1,24 @@
+using Pkg
+using Documenter
+
+ENV["LOAD_SK_CARET"] = "true"
+
+Pkg.activate("..")
+
+using TSML
+
+makedocs(
+	modules = [TSML,DecisionTreeLearners,SKLearners],
+	clean = false,
+    sitename="TSML.jl",
+	pages = Any[
+		"Home" => "index.md",
+		"Library" => Any[
+			"DecisionTree" =>"lib/decisiontree.md",
+			"SKLearners" =>"lib/sklearn.md"
+		]
+	],
+	format = Documenter.HTML(
+	  prettyurls = get(ENV, "CI", nothing) == "true"
+	)
+)
