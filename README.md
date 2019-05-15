@@ -1,10 +1,12 @@
 # TSML (Time Series Machine Learning)
 
-TSML Documentation: https://ibm.github.io/TSML.jl/
-If redirection doesn't work, documentation links is: https://ibm.github.io/TSML.jl/docs/build/
+TSML on Julia 1.0: [![Build Status](https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master)](https://travis-ci.org/ppalmes/TSML.jl)
 
-Julia 1.0: [![Build Status](https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master)](https://travis-ci.org/ppalmes/TSML.jl)
+TSML Documentation/Tutorial: https://ibm.github.io/TSML.jl/
 
+Alternative link to the documentation: https://ibm.github.io/TSML.jl/docs/build/
+
+### Overview
 
 TSML (Time Series Machine Learning) is package for Time Series data processing, classification, and prediction. It combines ML libraries from Python's ScikitLearn, R's Caret, and Julia using a common API and allows seamless ensembling and integration of heterogenous ML libraries to create complex models for robust time-series prediction.
 
