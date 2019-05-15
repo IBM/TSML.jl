@@ -1,6 +1,7 @@
 # TSML (Time Series Machine Learning)
 
-TSML Documentation: https://ibm.github.io/TSML.jl/docs/build/
+TSML Documentation: https://ibm.github.io/TSML.jl/
+If redirection doesn't work, documentation links is: https://ibm.github.io/TSML.jl/docs/build/
 
 Julia 1.0: [![Build Status](https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master)](https://travis-ci.org/ppalmes/TSML.jl)
 
