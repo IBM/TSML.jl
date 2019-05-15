@@ -22,10 +22,6 @@ julia> using Pkg
 julia> Pkg.add("TSML")
 ```
 
-## Documentation
-- [**Stable**](https://ibm.github.io/TSML.jl/)
-- [**Alternative link**](https://ibm.github.io/TSML.jl/docs/build/)
-
 ## Feature Requests and Contributions
 
 We welcome contributions, feature requests, and suggestions. Here is the link to open an [issue][issues-url] for any problems you encounter. If you want to contribute, please follow the guidelines in [contributors page][contrib-url].
