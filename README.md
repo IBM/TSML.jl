@@ -1,6 +1,6 @@
 # TSML 
 
-*A Julia package for time series data processing, classification, clustering and prediction*
+*A Julia package for time series data processing, classification, clustering, and prediction*
 
 | **Documentation**                                                               | **Build Status**                                                                                |
 |:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
