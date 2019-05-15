@@ -1,9 +1,13 @@
-# TSML (Time Series Machine Learning)
+# TSML 
 
-TSML on Julia 1.0: [![Build Status](https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master)](https://travis-ci.org/ppalmes/TSML.jl)
+*A Julia package for time series data processing, classification, clustering and prediction*
+
+| **Documentation**                                                               | **Build Status**                                                                                |
+|:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
+| [![][docs-stable-img]][docs-stable-url] | Julia 1.0: [![][travis-img]][travis-url] |
 
 ## Installation
-TSML is included in the Julia package repository. TSML can be installed from the `julia>` REPL by typing
+TSML is part of the Julia package repository. It can be installed from the `julia>` REPL by typing
 `]` to enter into the `pkg>` REPL mode and run:
 
 ```
@@ -20,6 +24,15 @@ julia> Pkg.add("TSML")
 ## Documentation
 - [**Stable**](https://ibm.github.io/TSML.jl/)
 - [**Alternative link**](https://ibm.github.io/TSML.jl/docs/build/)
+
+## Questions and Contributions
+
+Any usage questions can be posted in:
+- [Julia Slack](https://julialang.org/community/) 
+- [Gitter TSML Community][gitter-url]
+- [Julia Discourse forum][discourse-tag-url]
+
+We welcome contributions, feature requests, and suggestions. Here is the link to open an [issue][issues-url] for any problems you encounter. If you want to contribute, please follow the guidelines in [contributors page][contrib-url].
 
 ## Overview
 
@@ -71,3 +84,23 @@ respipe2 = transform!(mpipeline2)
 # Show statistics including blocks of missing data stats
 @show respipe2
 ```
+
+
+[contrib-url]: https://github.com/IBM/TSML.jl/blob/master/CONTRIBUTORS.md
+[discourse-tag-url]: https://discourse.julialang.org/tags/TSML
+[gitter-url]: https://gitter.im/TSMLearning/community
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://ibm.github.io/TSML.jl/docs/build/
+[travis-img]: https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/ppalmes/TSML.jl
+[issues-url]: https://github.com/IBM/TSML.jl/issues
+
+<!--
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://ibm.github.io/TSML.jl/
+[appveyor-img]: 
+[appveyor-url]:
+[codecov-img]: 
+[codecov-url]: 
+-->
