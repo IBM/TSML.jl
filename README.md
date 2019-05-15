@@ -2,11 +2,26 @@
 
 TSML on Julia 1.0: [![Build Status](https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master)](https://travis-ci.org/ppalmes/TSML.jl)
 
-TSML Documentation/Tutorial: https://ibm.github.io/TSML.jl/
+## Installation
+TSML is included in the Julia package repository. TSML can be installed from the `julia>` REPL by typing
+`]` to enter into the `pkg>` REPL mode and run:
 
-Alternative link to the documentation: https://ibm.github.io/TSML.jl/docs/build/
+```
+pkg> add TSML
+```
 
-### Overview
+or by using the `Pkg` API:
+
+```
+julia> using Pkg
+julia> Pkg.add("TSML")
+```
+
+## Documentation
+- [**Stable**](https://ibm.github.io/TSML.jl/)
+- [**Alternative link**](https://ibm.github.io/TSML.jl/docs/build/)
+
+## Overview
 
 TSML (Time Series Machine Learning) is package for Time Series data processing, classification, and prediction. It combines ML libraries from Python's ScikitLearn, R's Caret, and Julia using a common API and allows seamless ensembling and integration of heterogenous ML libraries to create complex models for robust time-series prediction.
 
