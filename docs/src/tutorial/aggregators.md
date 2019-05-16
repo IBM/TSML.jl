@@ -6,9 +6,9 @@ Author = "Paulito P. Palmes"
 
 The package assumes a two-column table composed of `Dates` and `Values`. 
 The first part of the workflow aggregates values based on the specified 
-date/time interval which minimizes occurence of missing values and noise. 
-The aggregated data is then left-joined to the complete sequence of dates 
-in a specified date/time interval. Remaining missing values are replaced 
+date-time interval which minimizes occurence of missing values and noise. 
+The aggregated data is then left-joined to the complete sequence of  `DateTime` 
+in a specified date-time interval. Remaining missing values are replaced 
 by `k` nearest neighbors where `k` is the symmetric distance from the location 
 of missing value. This replacement algo is called several times until there 
 are no more missing values.
