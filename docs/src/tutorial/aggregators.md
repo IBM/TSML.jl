@@ -4,17 +4,17 @@ Author = "Paulito P. Palmes"
 
 # Aggregators and Imputers
 
-The package assumes a two-column input composed of Dates and Values. 
+The package assumes a two-column table composed of `Dates` and `Values`. 
 The first part of the workflow aggregates values based on the specified 
 date/time interval which minimizes occurence of missing values and noise. 
 The aggregated data is then left-joined to the complete sequence of dates 
 in a specified date/time interval. Remaining missing values are replaced 
-by k nearest neighbors where k is the symmetric distance from the location 
-of missing value. This approach can be called several times until there 
+by `k` nearest neighbors where `k` is the symmetric distance from the location 
+of missing value. This replacement algo is called several times until there 
 are no more missing values.
 
-Let us create Date, Value input with some missing values and apply TSML functions
-to normalize/clean the data:
+Let us create a Date, Value table with some missing values and output the first
+15 rows. We will then apply some TSML functions to normalize/clean the data:
 
 ```@example 1
 using Random, Dates, DataFrames
@@ -28,17 +28,14 @@ function generateDataWithMissing()
    df[:Value][gndxmissing] .= missing
    return df
 end
-```
 
-Let's output the first 20 rows:
-
-```@example 1
 X = generateDataWithMissing()
-first(X,20)
+first(X,15)
 ```
 ## DateValgator
-You'll notice several blocks of missing with reading frequency every 15 minutes. 
-Let's aggregate our dataset by taking the hourly median using the `DateValgator` transformer.
+You'll notice several blocks of missing in the table above with reading frequency of every 15 minutes. 
+To minimize noise and lessen the occurrence of missing values,
+let's aggregate our dataset by taking the hourly median using the `DateValgator` transformer.
 
 ```@example 1
 using TSML
@@ -50,13 +47,29 @@ using TSML: DateValgator
 dtvlgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
 fit!(dtvlgator,X)
 results = transform!(dtvlgator,X)
-first(results,20)
+first(results,10)
 ```
 
-Missing values are now reduced because of the aggregation applied using
-`DateValgator` transformer. TSML transformers support the two main functions:
-`fit!` and `transform!`. `DateValgator fit!` performs initial setups of necessary parameters
-and validation of arguments while its `transform!` contains the algorithm for aggregation.
+The occurrence of missing values is now reduced because of the hourly aggregation. While
+the default is hourly aggregation, you can easily change it by using a different interval
+in the argument during instance creation. Below indicates every 30 minutes interval.
+
+```
+dtvlgator = DateValgator(Dict(:dateinterval=>Dates.Minute(30)))
+```
+
+`DateValgator` is one of the several TSML transformers to preprocess and clean the 
+time series data. In order to create additional transformers to extend TSML, 
+each transformer must overload the two `Transformer` functions:`fit!` and `transform!`. 
+`DateValgator` `fit!` performs initial setups of necessary parameters
+and validation of arguments while its `transform!` function contains the algorithm 
+for aggregation. 
+
+For machine learning prediction and classification transformer, 
+`fit!` function is equivalent to ML training or parameter optimization, 
+while the `transform!` function is for doing the actual prediction.
+The later part of the tutorial will provide an example how to add a `Transformer` to
+extend the functionality of TSML.
 
 ## DateValNNer
 
@@ -71,18 +84,22 @@ using TSML: DateValNNer
 datevalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
 fit!(datevalnner, X)
 results = transform!(datevalnner,X)
-first(results,20)
+first(results,10)
 ```
 
 After running the `DateValNNer`, it's guaranteed that there will be no more
-missing data. 
+missing data unless the input are all missing data.
 
 ## DateValizer
 
 One more imputer to replace missing data is `DateValizer`. It computes the hourly
-median over 24 hours and use the hour => median mapping 
-to replace missing data with the hour as the key. Below is a sample
-workflow to replace missing data in X with the hourly medians.
+median over 24 hours and use the `hour => median` hashmap learned
+to replace missing data using `hour` as the key. In this implementation, `fit!`
+function is doing the training of parameters by computing the medians and save it
+for the `transform!` function to use for imputation. It is possible that the
+hashmap can contain missing values in cases where the pooled hourly median in
+a particular hour have all missing data.
+Below is a sample workflow to replace missing data in X with the hourly medians.
 
 ```@example 1
 using TSML: DateValizer
@@ -90,7 +107,5 @@ using TSML: DateValizer
 datevalizer = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
 fit!(datevalizer, X)
 results = transform!(datevalizer,X)
-first(results,20)
+first(results,10)
 ```
-
-

@@ -22,6 +22,7 @@ for robust time-series pre-processing and prediction/classification.
 - TS date/val matrix conversion of 1-d TS using sliding windows for ML input
 - Pipeline API allows high-level description of the processing workflow
 - Easily extensible architecture by using just two main interfaces: fit and transform
+- Support for hundreds of external ML libs from Scikitlearn and Caret by using common API wrappers for PyCall and RCall
 
 
 ## Installation
