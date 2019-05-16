@@ -23,7 +23,6 @@ function test_realdatatsclassifier()
 			   :modeldirectory=>modeldirname,
 			   :feature_range => 6:20,
 			   :num_trees=>10))
-  modelfname = joinpath(tscl.args[:modeldirectory],tscl.args[:juliarfmodelname])
   fit!(tscl)
   
   dfresults = transform!(tscl)

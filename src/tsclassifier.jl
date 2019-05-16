@@ -135,6 +135,7 @@ function fit!(tsc::TSClassifier, features::T=[], labels::Vector=[]) where {T<:Un
   X=trdata[:,xfeatures]
   Y=trdata[:,:dtype]
   fit!(rfmodel,X,Y)
+  mkpath(mdirname)
   serializedmodel = joinpath(mdirname,modelfname)
   open(serializedmodel,"w") do file
     serialize(file,rfmodel)

@@ -12,7 +12,7 @@ makedocs(modules = [TSML,DecisionTreeLearners],
          "tutorial/pipeline.md",
          "tutorial/statistics.md",
          "tutorial/monotonic.md",
-         "tutorial/tsdetectors.md"
+         "tutorial/tsclassifier.md"
       ],
       "Manual" => Any[
          "Date Processing" => "man/dateproc.md",
