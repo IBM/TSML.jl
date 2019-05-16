@@ -4,11 +4,11 @@ Author = "Paulito P. Palmes"
 
 # Pipeline
 
-Instead of calling `fit!` and `transform!` to process time-series data, we can
-use the `Pipeline` transformer which does this automatically by iterating the transformers
-passed throught its argument and calling `fit!` and `transform` repeatedly for each transformer.
+Instead of calling `fit!` and `transform!` for each transformer to process time series data, we can
+use the `Pipeline` transformer which does this automatically by iterating through the transformers
+and calling `fit!` and `transform!` repeatedly for each transformer in its argument.
 
-Let's have a function to generate dataframe with missing data.
+Let's start again by having a function to generate a time series dataframe with some missing data.
 
 ```@example pipeline
 using Random, Dates, DataFrames
@@ -24,7 +24,7 @@ function generateDataWithMissing()
 end
 
 X = generateDataWithMissing()
-first(X,20)
+first(X,15)
 ```
 
 ## Workflow of Pipeline
@@ -57,15 +57,15 @@ first(results,10)
 ```
 
 Using the `Pipeline` transformer, it becomes straightforward to process the
-time-series data. It also becomes trivial to extend TSML functionality by
+time series data. It also becomes trivial to extend TSML functionality by
 adding more transformers and making sure each support the `fit!` and `transform!`
 interfaces. Any new transformer can then be easily added to the `Pipeline` workflow 
-without invasively changing existing codes.
+without invasively changing the existing codes.
 
 ## Extending TSML
 
-To illustrate how simple it is to add a new transformer, below illustrates 
-extending TSML to support CSV reading which will then be added in the pipeline:
+To illustrate how simple it is to add a new transformer, below extends
+TSML by adding `CSVReader` transformer and added in the pipeline to process CSV data:
 
 ```@example pipeline
 using TSML.TSMLTypes
@@ -104,10 +104,11 @@ function transform!(csvrdr::CSVReader,x::T=[]) where {T<:Union{DataFrame,Vector,
 end
 ```
 
-
-Instead of passing input X, we will add an instance of the 
-`CSVReader` at the start of the array of transformers in the pipeline 
-to read the data and pass its output to the other transformers for processing.
+Instead of passing table X that contains the time series, we will add 
+an instance of the`CSVReader` at the start of the array of transformers in the pipeline 
+to read the csv data. CSVReader `transform!` function converts the csv time series table
+into a dataframe, which will be consumed by the next transformer in the pipeline 
+for processing.
 
 ```@example pipeline
 fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
