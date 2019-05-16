@@ -1,16 +1,43 @@
-# TSML (Time Series Machine Learning)
+# TSML 
 
-TSML on Julia 1.0: [![Build Status](https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master)](https://travis-ci.org/ppalmes/TSML.jl)
+*A Julia package for time series data processing, classification, clustering, and prediction*
 
-TSML Documentation/Tutorial: https://ibm.github.io/TSML.jl/
+| **Documentation**                                                               | **Build Status**                                                                                |
+|:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
+| [![][docs-stable-img]][docs-stable-url] | Julia 1.0: [![][travis-img]][travis-url] |
 
-Alternative link to the documentation: https://ibm.github.io/TSML.jl/docs/build/
+## Installation
+- TSML is part of the Julia package repository
+- It can be installed from the `julia>` REPL by typing
+`]` to enter into the `pkg>` REPL mode and run:
 
-### Overview
+```
+pkg> add TSML
+```
+
+or by using the `Pkg` API:
+
+```
+julia> using Pkg
+julia> Pkg.add("TSML")
+```
+
+## Feature Requests and Contributions
+
+We welcome contributions, feature requests, and suggestions. Here is the link to open an [issue][issues-url] for any problems you encounter. If you want to contribute, please follow the guidelines in [contributors page][contrib-url].
+
+## Help usage
+
+Usage questions can be posted in:
+- [Julia Slack](https://julialang.org/community/) 
+- [Gitter TSML Community][gitter-url]
+- [Julia Discourse forum][discourse-tag-url]
+
+## Overview
 
 TSML (Time Series Machine Learning) is package for Time Series data processing, classification, and prediction. It combines ML libraries from Python's ScikitLearn, R's Caret, and Julia using a common API and allows seamless ensembling and integration of heterogenous ML libraries to create complex models for robust time-series prediction.
 
-The package assumes a two-column input composed of Dates and Values. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by k nearest neighbors where k is the symmetric distance from the location of missing value. This approach can be called several times until there are no more missing values.
+The package assumes a two-column table composed of Dates and Values. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by k nearest neighbors where k is the symmetric distance from the location of missing value. This approach can be called several times until there are no more missing values.
 
 The next part extracts the date features and convert the values into matrix form parameterized by the _size_ and _stride_ of the sliding window representing the dimension of the input for ML training and prediction.
 
@@ -56,3 +83,23 @@ respipe2 = transform!(mpipeline2)
 # Show statistics including blocks of missing data stats
 @show respipe2
 ```
+
+
+[contrib-url]: https://github.com/IBM/TSML.jl/blob/master/CONTRIBUTORS.md
+[discourse-tag-url]: https://discourse.julialang.org/
+[gitter-url]: https://gitter.im/TSMLearning/community
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://ibm.github.io/TSML.jl/docs/build/
+[travis-img]: https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/ppalmes/TSML.jl
+[issues-url]: https://github.com/IBM/TSML.jl/issues
+
+<!--
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://ibm.github.io/TSML.jl/
+[appveyor-img]: 
+[appveyor-url]:
+[codecov-img]: 
+[codecov-url]: 
+-->
