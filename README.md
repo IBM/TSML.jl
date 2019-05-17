@@ -4,10 +4,11 @@
 
 | **Documentation**                                                               | **Build Status**                                                                                |
 |:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
-| [![][docs-stable-img]][docs-stable-url] | Julia 1.0: [![][travis-img]][travis-url] |
+| [![][docs-dev-img]][docs-dev-url] |  [![][travis-img]][travis-url] |
 
 ## Installation
 - TSML is part of the Julia package repository
+- TSML is tested to run in Julia 1.0 
 - It can be installed from the `julia>` REPL by typing
 `]` to enter into the `pkg>` REPL mode and run:
 
@@ -103,6 +104,8 @@ Usage questions can be posted in:
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://ibm.github.io/TSML.jl/latest/
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://ibm.github.io/TSML.jl/dev/
 [travis-img]: https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/ppalmes/TSML.jl
 [issues-url]: https://github.com/IBM/TSML.jl/issues
