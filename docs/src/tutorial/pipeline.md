@@ -8,9 +8,9 @@ Instead of calling `fit!` and `transform!` for each transformer to process time 
 use the `Pipeline` transformer which does this automatically by iterating through the transformers
 and calling `fit!` and `transform!` repeatedly for each transformer in its argument.
 
-Let's start again by having a function to generate a time series dataframe with some missing data.
+Let's start again by using a function to generate a time series dataframe with some missing data.
 
-```@example pipeline
+```@setup pipeline
 using Random, Dates, DataFrames
 function generateDataWithMissing()
    Random.seed!(123)
@@ -22,7 +22,9 @@ function generateDataWithMissing()
    df[:Value][gndxmissing] .= missing
    return df
 end
+```
 
+```@example pipeline
 X = generateDataWithMissing()
 first(X,15)
 ```

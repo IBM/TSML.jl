@@ -2,7 +2,7 @@
 Author = "Paulito P. Palmes"
 ```
 
-# Aggregators and Imputers
+# [Aggregators and Imputers](@id aggregators_imputers)
 
 The package assumes a two-column table composed of `Dates` and `Values`. 
 The first part of the workflow aggregates values based on the specified 
@@ -14,7 +14,8 @@ of missing value. This replacement algo is called several times until there
 are no more missing values.
 
 Let us create a Date, Value table with some missing values and output the first
-15 rows. We will then apply some TSML functions to normalize/clean the data:
+15 rows. We will then apply some TSML functions to normalize/clean the data.
+Below is the code of the `generateDataWithMissing()` function:
 
 ```@example 1
 using Random, Dates, DataFrames
