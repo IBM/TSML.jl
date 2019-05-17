@@ -3,3 +3,4 @@
 .ipynb_checkpoints
 *.serialized
 *.serialized.*
+docs/build/
