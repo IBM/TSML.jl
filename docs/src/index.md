@@ -76,3 +76,38 @@ using TSML.TSMLTransformers
 using TSML.TSMLTypes
 using TSML.Utils
 ```
+
+## Tutorial Outline
+```@contents
+Pages = [
+  "tutorial/aggregators.md",
+  "tutorial/pipeline.md",
+  "tutorial/statistics.md",
+  "tutorial/monotonic.md",
+  "tutorial/tsclassifier.md"
+]
+Depth = 3
+```
+
+
+## Manual Outline
+```@contents
+Pages = [
+  "man/dateproc.md",
+  "man/valueproc.md",
+  "man/aggregation.md",
+  "man/imputation.md",
+  "man/monotonic.md",
+  "man/tsclassification.md",
+  "man/cli.md"
+]
+Depth = 3
+```
+
+## External Library
+```@contents
+Pages = ["lib/decisiontree.md"]
+```
+
+```@index
+```
