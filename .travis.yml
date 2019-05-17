@@ -66,14 +66,8 @@ jobs:
     - stage: "Documentation"
       julia: 1.0
       os: linux
-      # disable global before_script in order not to install Compose twice
-      before_script:
       script:
-        - |
-          julia --color=yes --project=docs/ -e'
-            using Pkg
-            Pkg.develop(PackageSpec(path=pwd()))
-            Pkg.instantiate()
-            include("docs/make.jl")
-          '
+        - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()));
+                                               Pkg.instantiate()'
+        - julia --project=docs/ docs/make.jl
       after_success: skip
