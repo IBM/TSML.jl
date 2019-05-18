@@ -93,7 +93,8 @@ function transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFram
   dt[:doq]=Dates.dayofquarter.(endpoints)
   dt[:qoy]=Dates.quarterofyear.(endpoints)
   dtr.args[:header] = names(dt)
-  convert(Matrix{Int64},dt)
+  #convert(Matrix{Int64},dt)
+  return dt
 end
 
 

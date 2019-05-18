@@ -29,30 +29,31 @@ upper = DateTime(2017,1,5)
 dat=lower:Dates.Hour(1):upper |> collect
 vals = 1:length(dat)
 x = DataFrame(Date=dat,Value=vals)
-first(x,5)
+last(x,5)
 ```
 
 Let us create an instance of Matrifier passing the size of row,
 stride, and steps ahead to predict:
 
 ```@example matrify
-mtr = Matrifier(Dict(:ahead=>24,:size=>24,:stride=>5))
+mtr = Matrifier(Dict(:ahead=>6,:size=>6,:stride=>3))
 fit!(mtr,x)
 res = transform!(mtr,x)
+first(res,5)
 ```
 
 In this example, we have hourly values. We indicated in the 
 `Matrifier` to generate a matrix where the size of each row
-is 24 hours, steps ahead for prediction is 24 hours and the
-stride of 5 hours.
+is 6 hours, steps ahead for prediction is 6 hours and the
+stride of 5 hours. There are 7 columns because the last column
+indicates the value indicated by the steps `ahead` argument.
 
-Let us try to make a matrix with the size of 12 hours, ahead of
-1 hour, and stride of 6 hours:
+Let us try to make a matrix with the size of 6 hours, ahead of
+2 hour, and stride of 3 hours:
 
 ```@example matrify
-mtr = Matrifier(Dict(:ahead=>1,:size=>12,:stride=>6))
+mtr = Matrifier(Dict(:ahead=>2,:size=>6,:stride=>3))
 fit!(mtr,x)
 res = transform!(mtr,x)
+first(res,5)
 ```
-
-
