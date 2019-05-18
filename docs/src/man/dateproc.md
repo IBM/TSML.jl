@@ -3,9 +3,10 @@ Author = "Paulito P. Palmes"
 ```
 
 # Date Preprocessing
-Extracting the Date features in a Date, Value table follows
-similar workflow with the Value preprocessing in the previous
-section. The main difference is we are only interested on the
+Extracting the Date features in a `Date,Value` table follows
+similar workflow with the [value preprocessing](@ref valueprep) 
+of the previous section. The main difference 
+is we are only interested on the
 date corresponding to the last column of the values generated
 by the `Matrifier`. This last column contains the values before 
 the prediction happens and the dates corresponding to these
@@ -39,7 +40,7 @@ res = transform!(mtr,x)
 first(res,5)
 ```
 
-The output extract automatically several date features
+The model `transform!` output extracts automatically several date features
 such as year, month, day, hour, week, day of the week, 
 day of quarter, quarter of year.
 
@@ -48,7 +49,7 @@ day of quarter, quarter of year.
 You can then combine the outputs in both the `Matrifier` and `Datefier` 
 as input features to a machine learning model. Below is an example of the
 workflow where the code extracts the Date and Value features combining them
-to form a matrix of features for the machine learning model.
+to form a matrix of features as input to a machine learning model.
 
 ```@example dateifier
 commonargs = Dict(:ahead=>3,:size=>5,:stride=>2)

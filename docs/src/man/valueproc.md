@@ -2,7 +2,7 @@
 Author = "Paulito P. Palmes"
 ```
 
-# Value Preprocessing
+# [Value Preprocessing](@id valueprep)
 In order to process 1-D TS as input for ML model, it has to
 be converted into Matrix form where each row represents a 
 slice of 1-D TS representing daily/hourly/weekly pattern
@@ -46,11 +46,11 @@ first(res,5)
 In this example, we have hourly values. We indicated in the 
 `Matrifier` to generate a matrix where the size of each row
 is 6 hours, steps ahead for prediction is 6 hours and the
-stride of 5 hours. There are 7 columns because the last column
+stride of 3 hours. There are 7 columns because the last column
 indicates the value indicated by the steps `ahead` argument.
 
-Let us try to make a matrix with the size of 6 hours, ahead of
-2 hour, and stride of 3 hours:
+Let us try to make a matrix with the size of 6 hours, steps ahead of
+2 hours, and a stride of 3 hours:
 
 ```@example matrify
 mtr = Matrifier(Dict(:ahead=>2,:size=>6,:stride=>3))
