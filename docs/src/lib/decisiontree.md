@@ -5,10 +5,18 @@ Author = "Paulito Palmes"
 # [DecisionTreeLearners](@id lib_decisiontree)
 Creates an API wrapper for DecisionTrees for pipeline workflow.
 
+## Index
 ```@index
-Modules = [DecisionTreeLearners]
+Modules = [TSML.DecisionTreeLearners]
 ```
 
+## AutoDocs
 ```@autodocs
-Modules = [DecisionTreeLearners]
+Modules = [TSML.DecisionTreeLearners]
+```
+
+## Docs
+```@docs
+TSML.DecisionTreeLearners.fit!
+TSML.DecisionTreeLearners.transform!
 ```

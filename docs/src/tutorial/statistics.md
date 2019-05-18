@@ -4,10 +4,10 @@ Author = "Paulito P. Palmes"
 
 # Statistical Metrics
 
-Let us again start generating an artificial data with missing values which we 
-will use in our tutorial below.
+Let us again start generating an artificial data with missing values 
+using the `generateDataWithMissing()` described in the beginning of tutorial.
 
-```@example stat
+```@setup stat
 using Random, Dates, DataFrames
 function generateDataWithMissing()
    Random.seed!(123)
@@ -19,7 +19,8 @@ function generateDataWithMissing()
    df[:Value][gndxmissing] .= missing
    return df
 end
-
+```
+```@example stat
 X = generateDataWithMissing()
 first(X,15)
 ```

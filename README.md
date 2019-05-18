@@ -4,7 +4,7 @@
 
 | **Documentation**                                                               | **Build Status**                                                                                |
 |:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
-| [![][docs-stable-img]][docs-stable-url] | Julia 1.0: [![][travis-img]][travis-url] |
+| [![][docs-dev-img]][docs-dev-url] |  [![][travis-img]][travis-url] |
 
 ## Installation
 - TSML is part of the Julia package repository
@@ -22,16 +22,17 @@ julia> using Pkg
 julia> Pkg.add("TSML")
 ```
 
-## Feature Requests and Contributions
+## Package Features
 
-We welcome contributions, feature requests, and suggestions. Here is the link to open an [issue][issues-url] for any problems you encounter. If you want to contribute, please follow the guidelines in [contributors page][contrib-url].
-
-## Help usage
-
-Usage questions can be posted in:
-- [Julia Slack](https://julialang.org/community/) 
-- [Gitter TSML Community][gitter-url]
-- [Julia Discourse forum][discourse-tag-url]
+- TS aggregation based on date-time interval
+- TS imputation based on symmetric Nearest Neighbors
+- TS statistical metrics for data quality assessment
+- TS classification for automatic data discovery
+- TS ML with more than 100+ libraries from caret, scikitlearn, and julia
+- TS date-val matrix conversion of 1-d TS using sliding windows for ML input
+- Pipeline API for high-level workflow processing
+- Easily extensible architecture relying just two main interfaces: fit and transform
+- Common API wrappers for ML libs from PyCall and RCall
 
 ## Overview
 
@@ -84,13 +85,26 @@ respipe2 = transform!(mpipeline2)
 @show respipe2
 ```
 
+## Feature Requests and Contributions
+
+We welcome contributions, feature requests, and suggestions. Here is the link to open an [issue][issues-url] for any problems you encounter. If you want to contribute, please follow the guidelines in [contributors page][contrib-url].
+
+## Help usage
+
+Usage questions can be posted in:
+- [Julia Slack](https://julialang.org/community/) 
+- [Gitter TSML Community][gitter-url]
+- [Julia Discourse forum][discourse-tag-url]
+
 
 [contrib-url]: https://github.com/IBM/TSML.jl/blob/master/CONTRIBUTORS.md
 [discourse-tag-url]: https://discourse.julialang.org/
 [gitter-url]: https://gitter.im/TSMLearning/community
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://ibm.github.io/TSML.jl/docs/build/
+[docs-stable-url]: https://ibm.github.io/TSML.jl/latest/
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://ibm.github.io/TSML.jl/dev/
 [travis-img]: https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/ppalmes/TSML.jl
 [issues-url]: https://github.com/IBM/TSML.jl/issues

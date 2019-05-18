@@ -18,6 +18,12 @@ export PrunedTree,
        transform!
 
 # Pruned CART decision tree.
+
+"""
+    PrunedTree <: TSLearner
+
+Blah
+"""
 mutable struct PrunedTree <: TSLearner
   model
   args
@@ -44,6 +50,12 @@ mutable struct PrunedTree <: TSLearner
   end
 end
 
+"""
+    fit!(tree::PrunedTree, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
+
+blah blah
+blah blah
+"""
 function fit!(tree::PrunedTree, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   instances = features
   if typeof(features) <: DataFrame
@@ -61,6 +73,13 @@ function fit!(tree::PrunedTree, features::T, labels::Vector) where {T<:Union{Vec
   tree.model = DT.prune_tree(tree.model, impl_args[:purity_threshold])
 end
 
+
+"""
+    transform!(tree::PrundTree, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
+
+blah blah
+blah blah
+"""
 function transform!(tree::PrunedTree, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   instances = features
   if typeof(features) <: DataFrame
@@ -83,6 +102,12 @@ ptreerun()
 
 
 # Random forest (CART).
+
+"""
+    RandomForest <: TSLearner
+
+Blah
+"""
 mutable struct RandomForest <: TSLearner
   model
   args
@@ -107,6 +132,13 @@ mutable struct RandomForest <: TSLearner
   end
 end
 
+
+"""
+    fit!(forest::RandomForest, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
+
+blah blah
+blah blah
+"""
 function fit!(forest::RandomForest, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   instances = features
   if typeof(features) <: DataFrame
@@ -125,6 +157,13 @@ function fit!(forest::RandomForest, features::T, labels::Vector) where {T<:Union
   )
 end
 
+
+"""
+    transform!(forest::RandomForest, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
+
+blah blah
+blah blah
+"""
 function transform!(forest::RandomForest, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   instances = features
   if typeof(features) <: DataFrame
@@ -147,6 +186,12 @@ rfrun()
 
 
 # Adaboosted decision stumps.
+
+"""
+    Adaboost <: TSLearner
+
+Blah
+"""
 mutable struct Adaboost <: TSLearner
   model
   args
@@ -165,6 +210,13 @@ mutable struct Adaboost <: TSLearner
   end
 end
 
+
+"""
+    fit!(adaboost::Adaboost, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
+
+blah blah
+blah blah
+"""
 function fit!(adaboost::Adaboost, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   instance = features
   if typeof(features) <: DataFrame
@@ -183,6 +235,11 @@ function fit!(adaboost::Adaboost, features::T, labels::Vector) where {T<:Union{V
   )
 end
 
+"""
+    transform!(adaboost::Adaboost, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
+
+blah blah
+"""
 function transform!(adaboost::Adaboost, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   instance = features
   if typeof(features) <: DataFrame
