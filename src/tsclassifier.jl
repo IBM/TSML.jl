@@ -91,7 +91,7 @@ function getfilestat(ldirname::AbstractString,lfname::AbstractString)
   csvfilter = DataReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
   valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
   valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
-  stfier = Statifier(Dict(:processmissing=>true))
+  stfier = Statifier(Dict(:processmissing=>false))
   mpipeline = Pipeline(Dict(
       :transformers => [csvfilter,valgator,valnner,stfier]
      )
