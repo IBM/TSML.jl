@@ -28,8 +28,8 @@ function transform!(mtr::Matrifier,xx::T) where {T<:Union{Matrix,Vector,DataFram
   x isa Vector || error("data should be a vector")
   mtype = eltype(x)
   res=toMatrix(mtr,x)
-  resarray=convert(Array{mtype},res)
-  resarray |> DataFrame
+  resarray=convert(Array{mtype},res) |> DataFrame
+  rename!(resarray,names(resarray)[end] => :output)
 end
 
 function toMatrix(mtr::Transformer, x::Vector)
