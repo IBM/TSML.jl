@@ -32,6 +32,7 @@ x = DataFrame(Date=dat,Value=vals)
 last(x,5)
 ```
 
+## Matrifier
 Let us create an instance of Matrifier passing the size of row,
 stride, and steps ahead to predict:
 

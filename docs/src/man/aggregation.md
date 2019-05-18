@@ -10,7 +10,7 @@ their median. For example, grouping hourly can be carried out
 by passing this argument: `:dateinterval => Dates.Hour(1)`
 
 Let's start by generating an artificial data with sample
-frequencey every 5 minutes and print the first 15 rows.
+frequencey every 5 minutes and print the first 10 rows.
 
 ```@example datevalgator
 using Dates, DataFrames
