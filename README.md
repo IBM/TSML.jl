@@ -8,7 +8,6 @@
 
 ## Installation
 - TSML is part of the Julia package repository
-- TSML is tested to run in Julia 1.0 
 - It can be installed from the `julia>` REPL by typing
 `]` to enter into the `pkg>` REPL mode and run:
 
