@@ -59,7 +59,7 @@ function timevalstat(features::DataFrame)
   timestart=first(features[:Date])
   timeend=last(features[:Date])
   sfreq = totalhours/lcount
-  dftime = DataFrame(TStart=timestart,TEnd=timeend,SFreq=sfreq)
+  dftime = DataFrame(tstart=timestart,tend=timeend,sfreq=sfreq)
 end
 
 function fullstat(dat::Vector)

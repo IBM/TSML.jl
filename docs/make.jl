@@ -1,6 +1,5 @@
 using Documenter, TSML
 
-
 makedocs(
   source = "src",
   build = "build",
@@ -22,9 +21,6 @@ makedocs(
       "Date PreProcessing" => "man/dateproc.md",
       "Aggregation" => "man/aggregation.md",
       "Imputation" => "man/imputation.md",
-      "Monotonic Detection" => "man/monotonic.md",
-      "TS Classification" => "man/tsclassification.md",
-      "CLI Wrappers" => "man/cli.md"
     ],
     "Library" => Any[
       "Decision Tree" => "lib/decisiontree.md"

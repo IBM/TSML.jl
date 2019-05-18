@@ -28,6 +28,7 @@ x = DataFrame(Date=dat,Value=vals)
 first(x,5)
 ```
 
+## Dateifier
 Let us create an instance of `Dateifier` passing the size of row,
 stride, and steps ahead to predict:
 
@@ -41,6 +42,8 @@ first(res,5)
 The output extract automatically several date features
 such as year, month, day, hour, week, day of the week, 
 day of quarter, quarter of year.
+
+## ML Features: Matrifier and Datefier 
 
 You can then combine the outputs in both the `Matrifier` and `Datefier` 
 as input features to a machine learning model. Below is an example of the
