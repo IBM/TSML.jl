@@ -26,8 +26,10 @@ function transform!(mtr::Matrifier,xx::T) where {T<:Union{Matrix,Vector,DataFram
   typeof(xx) <: DataFrame || error("input is not a dataframe")
   x = deepcopy(xx[:Value])
   x isa Vector || error("data should be a vector")
+  mtype = eltype(x)
   res=toMatrix(mtr,x)
-  convert(Array{Float64},res)
+  resarray=convert(Array{mtype},res)
+  resarray |> DataFrame
 end
 
 function toMatrix(mtr::Transformer, x::Vector)
@@ -93,7 +95,8 @@ function transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFram
   dt[:doq]=Dates.dayofquarter.(endpoints)
   dt[:qoy]=Dates.quarterofyear.(endpoints)
   dtr.args[:header] = names(dt)
-  convert(Matrix{Int64},dt)
+  #convert(Matrix{Int64},dt)
+  return dt
 end
 
 
