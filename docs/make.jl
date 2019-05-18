@@ -1,6 +1,5 @@
-using Documenter
+using Documenter, TSML
 
-using TSML
 
 makedocs(
   source = "src",
