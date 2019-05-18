@@ -22,7 +22,7 @@ makedocs(
       "Aggregation" => "man/aggregation.md",
       "Imputation" => "man/imputation.md",
     ],
-    "Library" => Any[
+    "ML Library" => Any[
       "Decision Tree" => "lib/decisiontree.md"
       #"Scikit Learners" => "lib/sklearn.md",
       #"Caret Learners" => "lib/caretlearn.md"

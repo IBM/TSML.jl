@@ -93,18 +93,15 @@ Depth = 3
 ## Manual Outline
 ```@contents
 Pages = [
-  "man/dateproc.md",
   "man/valueproc.md",
+  "man/dateproc.md",
   "man/aggregation.md",
   "man/imputation.md",
-  "man/monotonic.md",
-  "man/tsclassification.md",
-  "man/cli.md"
 ]
 Depth = 3
 ```
 
-## External Library
+## ML Library
 ```@contents
 Pages = ["lib/decisiontree.md"]
 ```
