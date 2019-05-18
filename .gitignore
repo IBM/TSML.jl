@@ -5,3 +5,4 @@
 *.serialized.*
 Manifest.toml
 docs/build/
+testdata_output.csv
