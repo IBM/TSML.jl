@@ -43,7 +43,7 @@ function test_statifier()
   )
   fit!(mpipeline0)
   respipe0 = transform!(mpipeline0)
-  @test round(respipe0[1,:SFreq],digits=2) ==  0.18
+  @test round(respipe0[1,:sfreq],digits=2) ==  0.18
   #@test respipe1[1,3:end] |> Vector |> sum |> x->round(x,digits=5) == -106687.08093
   vals = respipe0[1,3:end]
   @test (vals[(!isnan).(vals)] |> sum |> x->round(x,sigdigits=2)) == -1.3e6
