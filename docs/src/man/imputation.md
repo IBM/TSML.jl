@@ -21,7 +21,7 @@ certain date-time interval grouping.
 The `:missdirection` indicates the imputation direction and the extent of neighborhood. Symmetric
 implies getting info from both sides of the missing data. `:forward` direction starts
 imputing from the top while the `:reverse` starts from the bottom. Please refer to 
-[Aggregators and Imputers](@ref aggregators_imputers) for examples.
+[Aggregators and Imputers](@ref aggregators_imputers) for other examples.
 
 ```@setup impute
 using Random
@@ -98,4 +98,30 @@ sum(ismissing.(symmetricres[:Value]))
 ```
 
 ## DateValizer
-`DateValizer`
+`DateValizer` operates on the principle that there is a reqularity of patterns
+in a specific time period such that replacing values is just a matter of 
+extracting which time period it belongs and used the pooled median in that time
+period to replace the missing data. The default time period for `DateValizer`
+is hourly. In a more advanced implementation, we can add daily, hourly, and weekly 
+periods but it will require much larger hash table. Additional grouping criteria 
+can result into smaller subgroups which may contain 100% missing in some
+of these subgroups resulting to imputation failure. `DateValizer` only depends
+on the `:dateinterval => Dates.Hour(1)`  argument with default value of hourly.
+Please refer to [Aggregators and Imputers](@ref aggregators_imputers) for more examples.
+
+Let's try hourly, daily, and monthly median as the basis of imputation:
+```@repl impute
+hourlyzer = DateValizer(Dict(:dateinterval => Dates.Hour(1)))
+monthlyzer = DateValizer(Dict(:dateinterval => Dates.Month(1)))
+dailyzer = DateValizer(Dict(:dateinterval => Dates.Day(1)))
+
+fit!(hourlyzer,X)
+hourlyres = transform!(hourlyzer,X)
+
+fit!(dailyzer,X)
+dailyres = transform!(dailyzer,X)
+
+fit!(monthlyzer,X)
+monthlyres = transform!(monthlyzer,X)
+```
+

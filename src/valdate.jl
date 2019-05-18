@@ -166,9 +166,10 @@ end
 function getMedian(t::Type{T},xx::DataFrame) where {T<:Union{TimePeriod,DatePeriod}}
   x = deepcopy(xx)
   sgp = Symbol(t)
-  fn = Dict(Dates.Hour=>Dates.hour,
+  fn = Dict(Dates.Second=>Dates.second,
             Dates.Minute=>Dates.minute,
-            Dates.Second=>Dates.second,
+            Dates.Hour=>Dates.hour,
+            Dates.Day=>Dates.day,
             Dates.Month=>Dates.month)
   try
     x[sgp]=fn[t].(x[:Date])
@@ -218,6 +219,7 @@ function transform!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   fn = Dict(Dates.Hour=>Dates.hour,
             Dates.Minute=>Dates.minute,
             Dates.Second=>Dates.second,
+            Dates.Day => Dates.day,
             Dates.Month=>Dates.month)
   try
     joined[sym]=fn[grpby].(joined[:Date])
