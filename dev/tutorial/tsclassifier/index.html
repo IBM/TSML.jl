@@ -14,7 +14,7 @@ tscl = TSClassifier(Dict(:trdirectory=&gt;trdirname,
           :modeldirectory=&gt;modeldirname,
           :feature_range =&gt; 6:20,
           :num_trees=&gt;20)
-       )</code></pre><p>Time to train our <code>TSClassifier</code> to learn the mapping between extracted stats features with the  TS type.</p><pre><code class="language-julia">fit!(tscl)</code></pre><pre><code class="language-none">RandomForest(Ensemble of Decision Trees
+       )</code></pre><p>Time to train our <code>TSClassifier</code> to learn the mapping between extracted stats features with the  TS type.</p><pre><code class="language-julia">fit!(tscl)</code></pre><pre><code class="language-none">TSML.DecisionTreeLearners.RandomForest(Ensemble of Decision Trees
 Trees:      10
 Avg Leaves: 4.0
 Avg Depth:  2.5, Dict{Symbol,Any}(:tstdirectory=&gt;&quot;/home/travis/build/IBM/TSML.jl/src/../data/realdatatsclassification/testing&quot;,:output=&gt;:class,:modeldirectory=&gt;&quot;/home/travis/build/IBM/TSML.jl/src/../data/realdatatsclassification/model&quot;,:juliarfmodelname=&gt;&quot;juliarfmodel.serialized&quot;,:feature_range=&gt;6:20,:impl_args=&gt;Dict{Symbol,Real}(:max_depth=&gt;-1,:purity_threshold=&gt;1.0,:num_subfeatures=&gt;0,:min_samples_split=&gt;2,:min_samples_leaf=&gt;1,:num_trees=&gt;10,:min_purity_increase=&gt;0.0,:partial_sampling=&gt;0.7),:trdirectory=&gt;&quot;/home/travis/build/IBM/TSML.jl/src/../data/realdatatsclassification/training&quot;,:num_trees=&gt;20))</code></pre><p>We can examine the extracted features saved by the model that is used for its training.</p><pre><code class="language-julia">using CSV, DataFrames
