@@ -41,3 +41,27 @@ first(res,5)
 The output extract automatically several date features
 such as year, month, day, hour, week, day of the week, 
 day of quarter, quarter of year.
+
+You can then combine the outputs in both the `Matrifier` and `Datefier` 
+as input features to a machine learning model. Below is an example of the
+workflow where the code extracts the Date and Value features combining them
+to form a matrix of features for the machine learning model.
+
+```@example dateifier
+commonargs = Dict(:ahead=>3,:size=>5,:stride=>2)
+dtr = Dateifier(commonargs)
+mtr = Matrifier(commonargs)
+
+lower = DateTime(2017,1,1)
+upper = DateTime(2018,1,31)
+dat=lower:Dates.Day(1):upper |> collect
+vals = rand(length(dat))
+X = DataFrame(Date=dat,Value=vals)
+
+fit!(mtr,X)
+valuematrix = transform!(mtr,X)
+fit!(dtr,X)
+datematrix = transform!(dtr,X)
+mlfeatures = hcat(datematrix,valuematrix)
+first(mlfeatures,5)
+```
