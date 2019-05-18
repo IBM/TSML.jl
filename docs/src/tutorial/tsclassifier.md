@@ -56,6 +56,8 @@ The files in testing directory doesn't need to be labeled but we use the labelin
 a way to validate the effectiveness of the classifier. The labels will be used as the
 groundtruth during prediction/classification.
 
+## TSClassifier
+
 Let us now setup an instance of the `TSClassifier` and pass the arguments containing
 the directory locations of files for training, testing, and modeling.
 

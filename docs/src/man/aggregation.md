@@ -20,6 +20,9 @@ gval = rand(length(gdate))
 df = DataFrame(Date=gdate,Value=gval)
 first(df,10)
 ```
+
+## DateValgator
+
 Let's apply the aggregator and try hourly, half hourly,
 and daily aggregates of the data.
 

@@ -21,8 +21,7 @@ makedocs(
       "Date PreProcessing" => "man/dateproc.md",
       "Aggregation" => "man/aggregation.md",
       "Imputation" => "man/imputation.md",
-      "Monotonic Detection" => "man/monotonic.md",
-      "TS Classification" => "man/tsclassification.md",
+      "Statistics" => "man/statistics.md",
       "CLI Wrappers" => "man/cli.md"
     ],
     "Library" => Any[
