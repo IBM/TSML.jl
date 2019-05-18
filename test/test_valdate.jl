@@ -225,7 +225,7 @@ function test_csvreaderwriter()
   )
   fit!(mypipeline)
   transform!(mypipeline)
-  @test filesize(csvwtr.args[:filename]) == 239220
+  @test filesize(csvwtr.args[:filename]) > 209220
 end
 @testset "CSVDateValReaderWriter: reading csv with Date,Value columns" begin
   test_csvreaderwriter()

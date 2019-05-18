@@ -1,10 +1,14 @@
-using Documenter, TSML
+using Documenter
 
-using TSML.DecisionTreeLearners
-   
-makedocs(modules = [TSML,DecisionTreeLearners],
-  clean = false,
+using TSML
+
+makedocs(
+  source = "src",
+  build = "build",
+  modules = [TSML],
+  clean = true,
   sitename = "TSML Documentation",
+  doctest = false,
   pages = Any[
     "HOME" => "index.md",
     "Tutorial" => Any[
