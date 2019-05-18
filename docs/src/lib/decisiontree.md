@@ -14,9 +14,3 @@ Modules = [TSML.DecisionTreeLearners]
 ```@autodocs
 Modules = [TSML.DecisionTreeLearners]
 ```
-
-## Docs
-```@docs
-TSML.DecisionTreeLearners.fit!
-TSML.DecisionTreeLearners.transform!
-```

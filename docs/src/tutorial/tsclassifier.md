@@ -88,7 +88,8 @@ mdirname = tscl.args[:modeldirectory]
 modelfname=tscl.args[:juliarfmodelname]
 
 trstatfname = joinpath(mdirname,modelfname*".csv")
-CSV.read(trstatfname) |> DataFrame
+res = CSV.read(trstatfname) |> DataFrame
+first(res,5)
 ```
 
 Let's check the accuracy of prediction with the test data using the `transform!` function.
