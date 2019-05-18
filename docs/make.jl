@@ -1,6 +1,5 @@
 using Documenter, TSML
 
-
 makedocs(
   source = "src",
   build = "build",
