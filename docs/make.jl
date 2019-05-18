@@ -18,8 +18,8 @@ makedocs(
        "tutorial/tsclassifier.md"
     ],
     "Manual" => Any[
-      "Date Processing" => "man/dateproc.md",
       "Value Processing" => "man/valueproc.md",
+      "Date Processing" => "man/dateproc.md",
       "Aggregation" => "man/aggregation.md",
       "Imputation" => "man/imputation.md",
       "Monotonic Detection" => "man/monotonic.md",
