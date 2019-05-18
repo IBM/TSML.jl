@@ -35,11 +35,11 @@ hourlyagg = DateValgator(Dict(:dateinterval => Dates.Hour(1)))
 halfhourlyagg = DateValgator(Dict(:dateinterval => Dates.Minute(30)))
 dailyagg = DateValgator(Dict(:dateinterval => Dates.Day(1)))
 
-fit!(hourlyagg,df)
-hourlyres = transform!(hourlyagg,df)
-
 fit!(halfhourlyagg,df)
 halfhourlyres = transform!(halfhourlyagg,df)
+
+fit!(hourlyagg,df)
+hourlyres = transform!(hourlyagg,df)
 
 fit!(dailyagg,df)
 dailyres = transform!(dailyagg,df)
@@ -48,7 +48,7 @@ nothing #hide
 
 The first 5 rows of half-hourly, hourly, and daily aggregates:
 ```@repl datevalgator
-first(hourlyres, 5)
-first(halfhourlyres, 5)
-first(dailyres, 5)
+first(halfhourlyres,5)
+first(hourlyres,5)
+first(dailyres,5)
 ```
