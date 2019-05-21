@@ -8,7 +8,7 @@ module TSML
 #    __precompile__(false) # assume default has binary libs
 #end
 
-__precompile__(false) # assume default has binary libs
+#__precompile__(false) # assume default has binary libs
 
 export greet
 export testall
@@ -84,5 +84,9 @@ export tsmlrun
 
 include("tsclassifier.jl")
 using .TSClassifiers
+
+include("outliernicer.jl")
+using .Outliernicers
+export outliernicerrun
 
 end # module
