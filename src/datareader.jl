@@ -41,14 +41,14 @@ end
 function fit!(dtr::DataReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
     fname = dtr.args[:filename]
     fmt = dtr.args[:dateformat]
-    (fname != "" && fmt != "") || error("missing filename or date format")
+    (fname != "" && isfile(fname) && fmt != "") || error("missing filename or date format: (",fname,"), (",fmt,")")
     dtr.model = dtr.args
 end
 
 function transform!(dtr::DataReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
     fullname = dtr.args[:filename]
     fmt = dtr.args[:dateformat]
-    (fullname != "" && fmt != "") || error("missing filename or date format")
+    (fullname != "" && isfile(fullname) && fmt != "") || error("missing filename or date format: (",fullname,"), (",fmt,")")
     fname = basename(fullname)
     fname != "" || error("filename is empty")
     fn,ext=split(fname,".")

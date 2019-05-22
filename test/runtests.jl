@@ -9,6 +9,7 @@ include("test_statifier.jl")
 include("test_monotonicer.jl")
 include("test_cliwrapper.jl")
 include("test_tsclassifier.jl")
+include("test_outliernicer.jl")
 
 if LIB_SKL_AVAILABLE
     include("test_scikitlearn.jl")
