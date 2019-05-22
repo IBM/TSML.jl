@@ -9,10 +9,11 @@ using StatsBase: iqr, quantile, sample
 export fit!,transform!
 export Outliernicer
 
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
 import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
+
+using TSML.TSMLTypes
+using TSML.TSMLTransformers
 using TSML.Utils
 
 """
