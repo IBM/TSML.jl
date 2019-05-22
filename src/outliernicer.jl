@@ -4,20 +4,16 @@ using Dates
 using DataFrames
 using Random
 using Statistics
-using StatsBase: iqr, quantile
+using StatsBase: iqr, quantile, sample
 
 export fit!,transform!
 export Outliernicer
 
-export outliernicerrun
-
 using TSML.TSMLTypes
-using TSML.TSMLTransformers: DateValNNer
+using TSML.TSMLTransformers
 import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
 using TSML.Utils
-
-using TSML.DateValNNer
 
 """
     Outliernicer(Dict())
@@ -54,12 +50,14 @@ function transform!(st::Outliernicer, features::T) where {T<:Union{Vector,Matrix
   mfeatures=deepcopy(features)
   rvals = mfeatures[:Value]
   # compute the outlier range
+  # setup to store both missing and numbers
   mvals = Array{Union{Missing,eltype(rvals)},1}(missing,length(rvals))
   mvals .= rvals
-  miqr = iqr(rvals)
-  q25,q75 = quantile(rvals,[0.25,0.75])
+  crvals = skipmissing(rvals) # stat of non-missing
+  miqr = iqr(crvals)
+  q25,q75 = quantile(crvals,[0.25,0.75])
   lower=q25-miqr; upper=q75+miqr
-  missindx = findall(x -> (x > upper || x < lower),rvals) 
+  missindx = findall(x -> !ismissing(x) && (x > upper || x < lower),rvals) 
   mvals[missindx] .= missing
   mfeatures[:Value] = mvals
   # use ValNNer to replace missings
@@ -68,20 +66,6 @@ function transform!(st::Outliernicer, features::T) where {T<:Union{Vector,Matrix
   resdf = transform!(valnner,mfeatures)
   resdf[:Value] = collect(skipmissing(resdf[:Value])) 
   resdf
-end
-
-function outliernicerrun()
-  Random.seed!(123)
-  mdates = DateTime(2017,1,1):Dates.Hour(1):DateTime(2017,6,1)
-  mvals = rand(1:1000,length(mdates))
-  # create some outliers
-  soutliers = rand([500:10000;-10000:500],div(length(mdates),10))
-  soutndx = sample(1:length(mdates),length(soutliers))
-  mvals[soutndx] = soutliers
-  df = DataFrame(Date=mdates,Value=mvals)
-  outnicer = Outliernicer(Dict())
-  fit!(outnicer,df)
-  transform!(outnicer,df)
 end
 
 end
