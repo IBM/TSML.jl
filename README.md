@@ -2,9 +2,9 @@
 
 *A Julia package for time series data processing, classification, clustering, and prediction*
 
-| **Documentation**                                                               | **Build Status**                                                                                |
-|:-------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:|
-| [![][docs-dev-img]][docs-dev-url] |  [![][travis-img]][travis-url] |
+| **Documentation** | **Build Status** | **Help** |
+|:---:|:---:|:---:|
+| [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][travis-img]][travis-url] [![][codecov-img]][codecov-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
 
 ## Installation
 - TSML is part of the Julia package repository
@@ -100,6 +100,9 @@ Usage questions can be posted in:
 [contrib-url]: https://github.com/IBM/TSML.jl/blob/master/CONTRIBUTORS.md
 [discourse-tag-url]: https://discourse.julialang.org/
 [gitter-url]: https://gitter.im/TSMLearning/community
+[gitter-img]: https://badges.gitter.im/ppalmes/TSML.jl.svg
+[slack-img]: https://img.shields.io/badge/chat-on%20slack-yellow.svg
+[slack-url]: https://julialang.slack.com
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://ibm.github.io/TSML.jl/latest/
@@ -108,6 +111,9 @@ Usage questions can be posted in:
 [travis-img]: https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/ppalmes/TSML.jl
 [issues-url]: https://github.com/IBM/TSML.jl/issues
+
+[codecov-url]: https://codecov.io/gh/IBM/TSML.jl
+[codecov-img]: https://codecov.io/gh/IBM/TSML.jl/branch/master/graph/badge.svg
 
 <!--
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
