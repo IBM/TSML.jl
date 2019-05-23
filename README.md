@@ -8,6 +8,7 @@ alt="TSML Logo" width="300"></img> </div>
 
 ### TSML is a package for time series data processing, classification, clustering, and prediction written in [Julia](http://julialang.org/).
 
+The design/framework of this package is influenced heavily by Samuel Jenkins' [Orchestra.jl](https://github.com/svs14/Orchestra.jl) and Paulito Palmes [CombineML.jl](https://github.com/ppalmes/CombineML.jl) packages.
 
 ## Package Features
 
