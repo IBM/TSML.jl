@@ -1,10 +1,26 @@
-# TSML 
+<div align="center"> <img
+src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo5.png"
+alt="TSML Logo" width="210"></img> </div>
 
-*A Julia package for time series data processing, classification, clustering, and prediction*
+**TSML** is a package for time series data processing, classification, clustering, and prediction written in
+[Julia](http://julialang.org/).
+
 
 | **Documentation** | **Build Status** | **Help** |
 |:---:|:---:|:---:|
 | [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][travis-img]][travis-url] [![][codecov-img]][codecov-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
+
+## Package Features
+
+- TS aggregation based on date-time interval
+- TS imputation based on symmetric Nearest Neighbors
+- TS statistical metrics for data quality assessment
+- TS classification for automatic data discovery
+- TS ML with more than 100+ libraries from caret, scikitlearn, and julia
+- TS date-val matrix conversion of 1-d TS using sliding windows for ML input
+- Pipeline API for high-level workflow processing
+- Easily extensible architecture relying just two main interfaces: fit and transform
+- Common API wrappers for ML libs from PyCall and RCall
 
 ## Installation
 - TSML is part of the Julia package repository
@@ -21,18 +37,6 @@ or by using the `Pkg` API:
 julia> using Pkg
 julia> Pkg.add("TSML")
 ```
-
-## Package Features
-
-- TS aggregation based on date-time interval
-- TS imputation based on symmetric Nearest Neighbors
-- TS statistical metrics for data quality assessment
-- TS classification for automatic data discovery
-- TS ML with more than 100+ libraries from caret, scikitlearn, and julia
-- TS date-val matrix conversion of 1-d TS using sliding windows for ML input
-- Pipeline API for high-level workflow processing
-- Easily extensible architecture relying just two main interfaces: fit and transform
-- Common API wrappers for ML libs from PyCall and RCall
 
 ## Overview
 
