@@ -1,9 +1,12 @@
 [deps]
+AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DocumenterTools = "35a29f4d-8980-5a13-9543-d66fff28ecb8"
 Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+StatsMakie = "65254759-4cff-5aa5-8326-61ce017a8c70"
 TSML = "198dc43e-9e51-5cd7-9d40-d9794d335912"
