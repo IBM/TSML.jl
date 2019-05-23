@@ -1,5 +1,5 @@
 <div align="center"> <img
-src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo2.png"
+src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo13.png"
 alt="TSML Logo" width="300"></img> </div>
 
 | **Documentation** | **Build Status** | **Help** |
