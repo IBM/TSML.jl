@@ -98,28 +98,23 @@ Usage questions can be posted in:
 
 
 [contrib-url]: https://github.com/IBM/TSML.jl/blob/master/CONTRIBUTORS.md
+[issues-url]: https://github.com/IBM/TSML.jl/issues
+
 [discourse-tag-url]: https://discourse.julialang.org/
+
 [gitter-url]: https://gitter.im/TSMLearning/community
 [gitter-img]: https://badges.gitter.im/ppalmes/TSML.jl.svg
+
 [slack-img]: https://img.shields.io/badge/chat-on%20slack-yellow.svg
 [slack-url]: https://julialang.slack.com
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://ibm.github.io/TSML.jl/latest/
+[docs-stable-url]: https://ibm.github.io/TSML.jl/stable/
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
-[docs-dev-url]: https://ibm.github.io/TSML.jl/dev/
+[docs-dev-url]: https://ibm.github.io/TSML.jl/latest/
+
 [travis-img]: https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/ppalmes/TSML.jl
-[issues-url]: https://github.com/IBM/TSML.jl/issues
 
 [codecov-url]: https://codecov.io/gh/IBM/TSML.jl
 [codecov-img]: https://codecov.io/gh/IBM/TSML.jl/branch/master/graph/badge.svg
-
-<!--
-[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
-[docs-dev-url]: https://ibm.github.io/TSML.jl/
-[appveyor-img]: 
-[appveyor-url]:
-[codecov-img]: 
-[codecov-url]: 
--->
