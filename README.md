@@ -6,8 +6,7 @@ alt="TSML Logo" width="300"></img> </div>
 |:---:|:---:|:---:|
 | [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][travis-img]][travis-url] [![][codecov-img]][codecov-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
 
-**TSML** is a package for time series data processing, classification, clustering, and prediction written in
-[Julia](http://julialang.org/).
+### TSML is a package for time series data processing, classification, clustering, and prediction written in [Julia](http://julialang.org/).
 
 
 ## Package Features
