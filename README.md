@@ -27,13 +27,13 @@ The design/framework of this package is influenced heavily by Samuel Jenkins' [O
 - It can be installed from the `julia>` REPL by typing
 `]` to enter into the `pkg>` REPL mode and run:
 
-```
+```julia
 pkg> add TSML
 ```
 
 or by using the `Pkg` API:
 
-```
+```julia
 julia> using Pkg
 julia> Pkg.add("TSML")
 ```
@@ -54,19 +54,21 @@ Machine learning functions in TSML are wrappers to the corresponding Scikit-lear
 
 Below is an example of the pipeline workflow: 
 
-```
+- #### Setup different transformers
+```julia
 # Setup source data and filters to aggregate and impute hourly
 fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
-csvfilter = DataReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
-valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
-stfier = Statifier(Dict(:processmissing=>true))
+csvreader = DataReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
+valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1))) # aggregator
+valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))   # imputer
+stfier = Statifier(Dict(:processmissing=>true))             # get statistics
 ```
 
-```
+- #### Load csv data, aggregate, and get statistics
+```julia
 # Setup pipeline without imputation and run
 mpipeline1 = Pipeline(Dict(
-  :transformers => [csvfilter,valgator,stfier]
+  :transformers => [csvreader,valgator,stfier]
  )
 )
 fit!(mpipeline1)
@@ -76,10 +78,25 @@ respipe1 = transform!(mpipeline1)
 @show respipe1
 ```
 
-```
+ - #### Load csv data, aggregate, impute, and get statistics
+```julia
 # Add imputation in the pipeline and rerun
 mpipeline2 = Pipeline(Dict(
-  :transformers => [csvfilter,valgator,valnner,stfier]
+  :transformers => [csvreader,valgator,valnner,stfier]
+ )
+)
+fit!(mpipeline2)
+respipe2 = transform!(mpipeline2)
+
+# Show statistics including blocks of missing data stats
+@show respipe2
+```
+
+- #### Load csv data, aggregate, impute, and show output after imputation
+```julia
+# Add imputation in the pipeline and rerun
+mpipeline2 = Pipeline(Dict(
+  :transformers => [csvreader,valgator,valnner,stfier]
  )
 )
 fit!(mpipeline2)
