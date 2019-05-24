@@ -2,10 +2,24 @@ module Utils
 
 export mergedict, getiris
 export skipmean,skipmedian,skipstd
+export aggregatorclskipmissing
 
 using Statistics
 using DataFrames
 using CSV
+
+# closure to create aggregator closure with skipmissing features
+function aggregatorclskipmissing(fn::Function)
+  function skipagg(x::Union{AbstractArray,DataFrame})
+    if length(collect(skipmissing(x))) == 0
+      return missing
+    else
+      return fn(skipmissing(x))
+    end
+  end
+  return skipagg
+end
+
 
 function skipmean(x::T) where {T<:Union{AbstractArray,DataFrame}} 
   if length(collect(skipmissing(x))) == 0
