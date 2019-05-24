@@ -65,12 +65,18 @@ using TSML.Utils
 
 - #### Setup different transformers
 ```julia
+using TSML: DataReader, DateValgator, DateValNNer
+using TSML: Statifier, Monotonicer, Outliernicer
+
 # Setup source data and filters to aggregate and impute hourly
 fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
+
 csvreader = DataReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
 valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1))) # aggregator
 valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))   # imputer
 stfier = Statifier(Dict(:processmissing=>true))             # get statistics
+mono = Monotonicer(Dict()) # normalize monotonic data
+outnicer = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize outliers
 ```
 
 - #### Load csv data, aggregate, and get statistics
@@ -101,11 +107,25 @@ respipe2 = transform!(mpipeline2)
 @show respipe2
 ```
 
-- #### Load csv data, aggregate, impute, and show output after imputation
+- #### Load csv data, aggregate, impute, and normalize outliers
 ```julia
 # Add imputation in the pipeline and rerun
 mpipeline2 = Pipeline(Dict(
-  :transformers => [csvreader,valgator,valnner,stfier]
+  :transformers => [csvreader,valgator,valnner,outnicer]
+ )
+)
+fit!(mpipeline2)
+respipe2 = transform!(mpipeline2)
+
+# Show statistics including blocks of missing data stats
+@show respipe2
+```
+
+- #### Load csv data, aggregate, impute, and normalize monotonic data
+```julia
+# Add imputation in the pipeline and rerun
+mpipeline2 = Pipeline(Dict(
+  :transformers => [csvreader,valgator,valnner,mono]
  )
 )
 fit!(mpipeline2)
