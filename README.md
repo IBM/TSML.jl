@@ -23,12 +23,11 @@ The design/framework of this package is influenced heavily by Samuel Jenkins' [O
 - Common API wrappers for ML libs from PyCall and RCall
 
 ## Installation
-- TSML is part of the Julia package repository
-- It can be installed from the `julia>` REPL by typing
-`]` to enter into the `pkg>` REPL mode and run:
+TSML is in the Julia Official package registry. The latest release can be installed at the Julia prompt using Julia's package management which is triggered by pressing `]` at the julia prompt:
 
 ```julia
-pkg> add TSML
+julia> ]
+(v1.1) pkg> add TSML
 ```
 
 or by using the `Pkg` API:
@@ -52,7 +51,17 @@ TSML uses a pipeline which iteratively calls the __fit__ and __transform__ famil
 
 Machine learning functions in TSML are wrappers to the corresponding Scikit-learn, Caret, and native Julia ML libraries. There are more than hundred classifiers and regression functions available using a common API. 
 
-Below is an example of the pipeline workflow: 
+Below is an example of the pipeline workflow.
+
+Generally, you will need the different transformers and utils in TSML for time-series processing. To use them, it is standard in TSML code to have the following declared at the topmost part of your application:
+
+- #### Load TSML and supporting submodules
+```julia
+using TSML 
+using TSML.TSMLTransformers
+using TSML.TSMLTypes
+using TSML.Utils
+```
 
 - #### Setup different transformers
 ```julia
@@ -113,7 +122,7 @@ We welcome contributions, feature requests, and suggestions. Here is the link to
 ## Help usage
 
 Usage questions can be posted in:
-- [Julia Slack](https://julialang.org/community/) 
+- [Julia Community](https://julialang.org/community/) 
 - [Gitter TSML Community][gitter-url]
 - [Julia Discourse forum][discourse-tag-url]
 
@@ -129,6 +138,7 @@ Usage questions can be posted in:
 [slack-img]: https://img.shields.io/badge/chat-on%20slack-yellow.svg
 [slack-url]: https://julialang.slack.com
 
+
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://ibm.github.io/TSML.jl/stable/
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
@@ -137,5 +147,5 @@ Usage questions can be posted in:
 [travis-img]: https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/ppalmes/TSML.jl
 
-[codecov-url]: https://codecov.io/gh/IBM/TSML.jl
 [codecov-img]: https://codecov.io/gh/IBM/TSML.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/IBM/TSML.jl
