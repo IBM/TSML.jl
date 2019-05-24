@@ -1,6 +1,13 @@
 # Convert a 1-D timeseries into sliding window matrix for ML training
 # using Plots
 
+const gAggDict = Dict(
+    :median => Statistics.median,
+    :mean =>   Statistics.mean,
+    :maximum => Statistics.maximum,
+    :minimum => Statistics.minimum
+)
+
 mutable struct Matrifier <: Transformer
   model
   args
@@ -106,10 +113,10 @@ end
 mutable struct DateValgator <: Transformer
   model
   args
-
   function DateValgator(args=Dict())
     default_args = Dict{Symbol,Any}(
-        :dateinterval => Dates.Hour(1)
+        :dateinterval => Dates.Hour(1),
+        :aggregator => :median
     )
     new(nothing,mergedict(default_args,args))
   end
@@ -127,16 +134,25 @@ end
 function fit!(dvmr::DateValgator,xx::T,y::Vector=[]) where {T<:Union{Matrix,DataFrame}}
   x = deepcopy(xx)
   validdateval!(x)
+  aggr = dvmr.args[:aggregator] 
+  aggr in keys(gAggDict) || error("aggregator function passed is not recognized: ",aggr)
   dvmr.model=dvmr.args
 end
 
 function transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
   x = deepcopy(xx)
   validdateval!(x)
+  # make sure aggregator function exists
+  aggr = dvmr.args[:aggregator] 
+  aggr in keys(gAggDict) || error("aggregator function passed is not recognized: ",aggr)
+  # get the Statistics function
+  aggfn = gAggDict[aggr]
+  # pass the aggregator function to the generic aggregator function
+  fn = aggregatorclskipmissing(aggfn)
   grpby = typeof(dvmr.args[:dateinterval])
   sym = Symbol(grpby)
   x[sym] = round.(x[:Date],grpby)
-  aggr=by(x,sym,MeanValue = :Value=>skipmedian)
+  aggr=by(x,sym,MeanValue = :Value=>fn)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
   lower = round(minimum(x[:Date]),grpby)
   upper = round(maximum(x[:Date]),grpby)
@@ -247,7 +263,8 @@ mutable struct DateValNNer <: Transformer
         :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
         :dateinterval => Dates.Hour(1),
         :nnsize => 1,
-        :strict => true
+        :strict => true,
+        :aggregator => :median
     )
     new(nothing,mergedict(default_args,args))
   end
@@ -256,17 +273,26 @@ end
 function fit!(dnnr::DateValNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
   x = deepcopy(xx)
   validdateval!(x)
+  aggr = dnnr.args[:aggregator]
+  aggr in keys(gAggDict) || error("aggregator function passed is not recognized: ",aggr)
   dnnr.model=dnnr.args
 end
 
 function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   x = deepcopy(xx)
   validdateval!(x)
+  # make sure aggregator function exists
+  aggr = dnnr.args[:aggregator]
+  aggr in keys(gAggDict) || error("aggregator function pass is not recognized: ",aggr)
+  # get the Statistics function
+  aggfn = gAggDict[aggr]
+  # pass the aggregator function to the generic aggregator function
+  fn = aggregatorclskipmissing(aggfn)
   grpby = typeof(dnnr.args[:dateinterval])
   sym = Symbol(grpby)
   # aggregate by time period
   x[sym] = round.(x[:Date],grpby)
-  aggr = by(x,sym,MeanValue = :Value=>skipmedian)
+  aggr = by(x,sym,MeanValue = :Value=>fn)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
   lower = round(minimum(x[:Date]),grpby)
   upper = round(maximum(x[:Date]),grpby)
