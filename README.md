@@ -62,7 +62,6 @@ TSML uses a pipeline which iteratively calls the __fit__ and __transform__ famil
 
 Machine learning functions in TSML are wrappers to the corresponding Scikit-learn, Caret, and native Julia ML libraries. There are more than hundred classifiers and regression functions available using a common API. 
 
-Below is an example of the pipeline workflow.
 
 Generally, you will need the different transformers and utils in TSML for time-series processing. To use them, it is standard in TSML code to have the following declared at the topmost part of your application:
 
