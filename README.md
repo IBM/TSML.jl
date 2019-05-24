@@ -19,8 +19,8 @@ The design/framework of this package is influenced heavily by Samuel Jenkins' [O
 - TS machine learning models with more than 100+ libraries from caret, scikitlearn, and julia
 - TS date-value matrix conversion of 1-D TS using sliding windows for ML input
 - Pipeline API for high-level workflow processing
-- Easily extensible architecture relying just two main interfaces: fit and transform
-- Common API wrappers for ML libs from PyCall and RCall
+- Easily extensible architecture relying on just two interfaces: fit and transform
+- Common API wrappers for ML libs from JuliaML, PyCall, and RCall 
 
 ## Installation
 TSML is in the Julia Official package registry. The latest release can be installed at the Julia prompt using Julia's package management which is triggered by pressing `]` at the julia prompt:
