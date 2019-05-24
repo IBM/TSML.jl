@@ -30,12 +30,23 @@ julia> ]
 (v1.1) pkg> add TSML
 ```
 
-or by using the `Pkg` API:
+Or, equivalently, via the `Pkg` API:
 
 ```julia
 julia> using Pkg
 julia> Pkg.add("TSML")
 ```
+
+## Documentation
+
+- [**STABLE**][docs-stable-url] &mdash; **documentation of the most recently tagged version.**
+- [**DEVEL**][docs-dev-url] &mdash; *documentation of the in-development version.*
+
+## Project Status
+
+The package is tested against, and being developed for, Julia `1.0` and above on Linux and macOS.
+
+There is no support for Julia versions `0.4`, `0.5`, `0.6` and `0.7`.
 
 ## Overview
 
