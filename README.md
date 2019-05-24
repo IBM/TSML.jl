@@ -44,7 +44,7 @@ julia> Pkg.add("TSML")
 
 ## Project Status
 
-The package is tested against, and being developed for, Julia `1.0` and above on Linux and macOS.
+TSML is tested and actively developed on Julia `1.0` and above for Linux and macOS.
 
 There is no support for Julia versions `0.4`, `0.5`, `0.6` and `0.7`.
 
