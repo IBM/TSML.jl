@@ -53,17 +53,79 @@ function test_datevalgator()
     @test round(sum(skipmissing(res[:Value])),digits=2) == 6556.17
     @test sum(X1[:Value] .!== XX[:Value]) == 0
     @test sum(Y1 .!== YY) == 0
+
+    dtvlmean = DateValgator(Dict(
+	  :dateinterval=>Dates.Hour(1),
+	  :aggregator => :mean))
+    fit!(dtvlmean,XX,YY)
+    res = transform!(dtvlmean,XX)
+    @test sum(ismissing.(res[:Value])) == 4466
+    @test round(sum(skipmissing(res[:Value])),digits=2) == 6557.97
+
+    dtvlmax = DateValgator(Dict(
+	  :dateinterval=>Dates.Hour(1),
+	  :aggregator => :maximum))
+    fit!(dtvlmax,XX,YY)
+    res = transform!(dtvlmax,XX)
+    @test sum(ismissing.(res[:Value])) == 4466
+    @test round(sum(skipmissing(res[:Value])),digits=2) == 7599.95
+
+    dtvlmin = DateValgator(Dict(
+	  :dateinterval=>Dates.Hour(1),
+	  :aggregator => :minimum))
+    fit!(dtvlmin,XX,YY)
+    res = transform!(dtvlmin,XX)
+    @test sum(ismissing.(res[:Value])) == 4466
+    @test round(sum(skipmissing(res[:Value])),digits=2) == 5516.92
 end
 @testset "DateValgator: aggregate by timeperiod without filling missings" begin
     test_datevalgator()
 end
 
 function test_datevalnner()
-    dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(25),:nnsize=>10,:missdirection => :forward,:strict=>true))
+
+    dnnr = DateValNNer(Dict(
+	  :dateinterval=>Dates.Hour(1),
+	  :nnsize=>10,
+	  :missdirection => :symmetric,
+	  :strict=>true,
+	  :aggregator => :mean))
+    fit!(dnnr,XX,YY)
+    res=transform!(dnnr,XX)
+    @test sum(size(res) .== (17521,2)) == 2
+    @test round(sum(res[:Value]),digits=2) == 8807.28
+
+    dnnr = DateValNNer(Dict(
+	  :dateinterval=>Dates.Hour(1),
+	  :nnsize=>10,
+	  :missdirection => :symmetric,
+	  :strict=>true,
+	  :aggregator => :maximum))
+    fit!(dnnr,XX,YY)
+    res=transform!(dnnr,XX)
+    @test sum(size(res) .== (17521,2)) == 2
+    @test round(sum(res[:Value]),digits=2) == 10339.47
+    dnnr = DateValNNer(Dict(
+	  :dateinterval=>Dates.Hour(1),
+	  :nnsize=>10,
+	  :missdirection => :symmetric,
+	  :strict=>true,
+	  :aggregator => :minimum))
+    fit!(dnnr,XX,YY)
+    res=transform!(dnnr,XX)
+    @test sum(size(res) .== (17521,2)) == 2
+    @test round(sum(res[:Value]),digits=2) == 7290.01
+
+    dnnr = DateValNNer(Dict(
+	  :dateinterval=>Dates.Hour(25),
+	  :nnsize=>10,
+	  :missdirection => :forward,
+	  :strict=>true))
     fit!(dnnr,XX,YY)
     res=transform!(dnnr,XX)
     @test sum(size(res) .== (701,2)) == 2
     @test round(sum(res[:Value]),digits=2) == 350.57
+
     dnnr.args[:missdirection] = :reverse
     res=transform!(dnnr,XX)
     @test sum(size(res) .== (701,2)) == 2
@@ -74,9 +136,14 @@ function test_datevalnner()
     @test_throws ErrorException res=transform!(dnnr,XX) 
     dnnr.args[:missdirection] = :symmetric
     @test sum(size(transform!(dnnr,XX)) .== (17521,2)) == 2
+
     # testing boundaries
     Random.seed!(123)
-    dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:nnsize=>2,:missdirection => :forward,:strict=>true))
+    dlnr = DateValNNer(Dict(
+	    :dateinterval=>Dates.Hour(1),
+	    :nnsize=>2,
+	    :missdirection => :forward,
+	    :strict=>true))
     v1=DateTime(2014,1,1,1,0):Dates.Hour(1):DateTime(2014,1,3,1,0)
     val=Array{Union{Missing,Float64}}(rand(length(v1)))
     x=DataFrame(Date=v1,Value=val)
@@ -95,6 +162,7 @@ function test_datevalnner()
     defdnr=DateValNNer(Dict(:strict=>false))
     fit!(defdnr,XX,YY)
     @test sum((size(transform!(defdnr,XX))) .== (17521,2)) == 2
+
     # test with controlled locations of missings
     dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),
 			    :nnsize=>10,:strict=>false,
