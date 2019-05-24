@@ -16,8 +16,8 @@ The design/framework of this package is influenced heavily by Samuel Jenkins' [O
 - TS imputation based on symmetric Nearest Neighbors
 - TS statistical metrics for data quality assessment
 - TS classification for automatic data discovery
-- TS ML with more than 100+ libraries from caret, scikitlearn, and julia
-- TS date-val matrix conversion of 1-d TS using sliding windows for ML input
+- TS machine learning models with more than 100+ libraries from caret, scikitlearn, and julia
+- TS date-value matrix conversion of 1-D TS using sliding windows for ML input
 - Pipeline API for high-level workflow processing
 - Easily extensible architecture relying just two main interfaces: fit and transform
 - Common API wrappers for ML libs from PyCall and RCall
