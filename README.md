@@ -1,6 +1,6 @@
 <div align="center"> <img
 src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo13.png"
-alt="TSML Logo" width="300"></img> </div>
+alt="TSML Logo" width="250"></img> </div>
 
 | **Documentation** | **Build Status** | **Help** |
 |:---:|:---:|:---:|
