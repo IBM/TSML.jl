@@ -56,4 +56,7 @@ using .TSClassifiers
 include("outliernicer.jl")
 using .Outliernicers
 
+include("plotter.jl")
+using .Plotters
+
 end # module
