@@ -54,10 +54,8 @@ function transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,Da
 
   Plots.gr()
   if pltr.args[:interactive] == true
-    @info "interactive plot: use notebook interface"
     interactiveplot(df)
   else
-    @info "static plot"
     display(Plots.plot(df[:Date],df[:Value]))
   end
 end

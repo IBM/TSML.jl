@@ -114,9 +114,9 @@ function getStats(ldirname::AbstractString)
     try
       df=getfilestat(ldirname,file)
       trdata = vcat(trdata,df)
-      @info "getting stats of "*file
+      println("getting stats of "*file)
     catch
-      @info "skipping due to error "*file
+      println("skipping due to error "*file)
       continue
     end
   end
@@ -157,7 +157,7 @@ function transform!(tsc::TSClassifier, features::T=[]) where {T<:Union{Vector,Ma
   (sum(names(X) .== mfeatures ) == length(mfeatures)) || error("features mismatch")
   serializedmodel = joinpath(mdirname,modelfname)
   if isfile(serializedmodel)
-    @info "loading model from file: "*serializedmodel
+    println("loading model from file: "*serializedmodel)
     model=open(serializedmodel,"r") do file
       deserialize(file)
     end
