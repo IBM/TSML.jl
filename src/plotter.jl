@@ -56,7 +56,9 @@ function transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,Da
   if pltr.args[:interactive] == true
     interactiveplot(df)
   else
-    display(Plots.plot(df[:Date],df[:Value]))
+    plt = Plots.plot(df[:Date],df[:Value])
+    #display(plt)
+    plt
   end
 end
 
