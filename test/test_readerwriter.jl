@@ -35,39 +35,39 @@ function test_readerwriter()
     @test sum(size(resdf) .== gcdims) == 2
     @test sum(resdf[:Value]) |> round == ssum
     rm(csvname,force=true)
-    # check hdf5
-    hdf5name = replace(outputfname,"csv"=>"h5")
-    lhdf5 = DataWriter(Dict(:filename=>hdf5name))
-    fit!(lhdf5)
-    transform!(lhdf5,dateval)
-    whdf5 = DataReader(Dict(:filename=>hdf5name))
-    fit!(whdf5)
-    resdf = transform!(whdf5)
-    @test sum(size(resdf) .== gcdims) == 2
-    @test sum(resdf[:Value]) |> round == ssum
-    rm(hdf5name,force=true)
-    # check feather
-    feathername = replace(outputfname,"csv"=>"feather")
-    lfeather = DataWriter(Dict(:filename=>feathername))
-    fit!(lfeather)
-    transform!(lfeather,dateval)
-    wfeather = DataReader(Dict(:filename=>feathername))
-    fit!(wfeather)
-    resdf = transform!(wfeather)
-    @test sum(size(resdf) .== gcdims) == 2
-    @test sum(resdf[:Value]) |> round == ssum
-    rm(feathername,force=true)
-    # check jld
-    jldname = replace(outputfname,"csv"=>"jld")
-    ljld = DataWriter(Dict(:filename=>jldname))
-    fit!(ljld)
-    transform!(ljld,dateval)
-    wjld = DataReader(Dict(:filename=>jldname))
-    fit!(wjld)
-    resdf = transform!(wjld)
-    @test sum(size(resdf) .== gcdims) == 2
-    @test sum(resdf[:Value]) |> round == ssum
-    rm(jldname,force=true)
+#    # check hdf5
+#    hdf5name = replace(outputfname,"csv"=>"h5")
+#    lhdf5 = DataWriter(Dict(:filename=>hdf5name))
+#    fit!(lhdf5)
+#    transform!(lhdf5,dateval)
+#    whdf5 = DataReader(Dict(:filename=>hdf5name))
+#    fit!(whdf5)
+#    resdf = transform!(whdf5)
+#    @test sum(size(resdf) .== gcdims) == 2
+#    @test sum(resdf[:Value]) |> round == ssum
+#    rm(hdf5name,force=true)
+#    # check feather
+#    feathername = replace(outputfname,"csv"=>"feather")
+#    lfeather = DataWriter(Dict(:filename=>feathername))
+#    fit!(lfeather)
+#    transform!(lfeather,dateval)
+#    wfeather = DataReader(Dict(:filename=>feathername))
+#    fit!(wfeather)
+#    resdf = transform!(wfeather)
+#    @test sum(size(resdf) .== gcdims) == 2
+#    @test sum(resdf[:Value]) |> round == ssum
+#    rm(feathername,force=true)
+#    # check jld
+#    jldname = replace(outputfname,"csv"=>"jld")
+#    ljld = DataWriter(Dict(:filename=>jldname))
+#    fit!(ljld)
+#    transform!(ljld,dateval)
+#    wjld = DataReader(Dict(:filename=>jldname))
+#    fit!(wjld)
+#    resdf = transform!(wjld)
+#    @test sum(size(resdf) .== gcdims) == 2
+#    @test sum(resdf[:Value]) |> round == ssum
+#    rm(jldname,force=true)
 end
 @testset "Data Readers/Writers: csv,hdf5,feather,jld" begin
     test_readerwriter()
