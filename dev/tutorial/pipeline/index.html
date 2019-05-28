@@ -54,7 +54,7 @@ function transform!(csvrdr::CSVReader,x::T=[]) where {T&lt;:Union{DataFrame,Vect
     rename!(df,names(df)[1]=&gt;:Date,names(df)[2]=&gt;:Value)
     df[:Date] = DateTime.(df[:Date],fmt)
     df
-end</code></pre><pre><code class="language-none">transform! (generic function with 32 methods)</code></pre><p>Instead of passing table X that contains the time series, we will add  an instance of the<code>CSVReader</code> at the start of the array of transformers in the pipeline  to read the csv data. CSVReader <code>transform!</code> function converts the csv time series table into a dataframe, which will be consumed by the next transformer in the pipeline  for processing.</p><pre><code class="language-">fname = joinpath(dirname(pathof(TSML)),&quot;../data/testdata.csv&quot;)
+end</code></pre><pre><code class="language-none">transform! (generic function with 33 methods)</code></pre><p>Instead of passing table X that contains the time series, we will add  an instance of the<code>CSVReader</code> at the start of the array of transformers in the pipeline  to read the csv data. CSVReader <code>transform!</code> function converts the csv time series table into a dataframe, which will be consumed by the next transformer in the pipeline  for processing.</p><pre><code class="language-">fname = joinpath(dirname(pathof(TSML)),&quot;../data/testdata.csv&quot;)
 csvreader = CSVReader(Dict(:filename=&gt;fname,:dateformat=&gt;&quot;d/m/y H:M&quot;))
 fit!(csvreader)
 csvdata = transform!(csvreader)
