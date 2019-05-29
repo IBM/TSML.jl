@@ -8,11 +8,35 @@ lower = DateTime(2017,1,1)
 upper = DateTime(2017,1,5)
 dat=lower:Dates.Hour(1):upper |&gt; collect
 vals = 1:length(dat)
-x = DataFrame(Date=dat,Value=vals)
-last(x,5)</code></pre><table class="data-frame"><thead><tr><th></th><th>Date</th><th>Value</th></tr><tr><th></th><th>Dates…</th><th>Int64</th></tr></thead><tbody><p>5 rows × 2 columns</p><tr><th>1</th><td>2017-01-04T20:00:00</td><td>93</td></tr><tr><th>2</th><td>2017-01-04T21:00:00</td><td>94</td></tr><tr><th>3</th><td>2017-01-04T22:00:00</td><td>95</td></tr><tr><th>4</th><td>2017-01-04T23:00:00</td><td>96</td></tr><tr><th>5</th><td>2017-01-05T00:00:00</td><td>97</td></tr></tbody></table><h2><a class="nav-anchor" id="Matrifier-1" href="#Matrifier-1">Matrifier</a></h2><p>Let us create an instance of Matrifier passing the size of row, stride, and steps ahead to predict:</p><pre><code class="language-julia">mtr = Matrifier(Dict(:ahead=&gt;6,:size=&gt;6,:stride=&gt;3))
+x = DataFrame(Date=dat,Value=vals)</code></pre><pre><code class="language-julia-repl">julia&gt; last(x,5)
+5×2 DataFrames.DataFrame
+│ Row │ Date                │ Value │
+│     │ Dates.DateTime      │ Int64 │
+├─────┼─────────────────────┼───────┤
+│ 1   │ 2017-01-04T20:00:00 │ 93    │
+│ 2   │ 2017-01-04T21:00:00 │ 94    │
+│ 3   │ 2017-01-04T22:00:00 │ 95    │
+│ 4   │ 2017-01-04T23:00:00 │ 96    │
+│ 5   │ 2017-01-05T00:00:00 │ 97    │</code></pre><h2><a class="nav-anchor" id="Matrifier-1" href="#Matrifier-1">Matrifier</a></h2><p>Let us create an instance of Matrifier passing the size of row, stride, and steps ahead to predict:</p><pre><code class="language-julia">mtr = Matrifier(Dict(:ahead=&gt;6,:size=&gt;6,:stride=&gt;3))
 fit!(mtr,x)
-res = transform!(mtr,x)
-first(res,5)</code></pre><table class="data-frame"><thead><tr><th></th><th>x1</th><th>x2</th><th>x3</th><th>x4</th><th>x5</th><th>x6</th><th>output</th></tr><tr><th></th><th>Int64</th><th>Int64</th><th>Int64</th><th>Int64</th><th>Int64</th><th>Int64</th><th>Int64</th></tr></thead><tbody><p>5 rows × 7 columns</p><tr><th>1</th><td>86</td><td>87</td><td>88</td><td>89</td><td>90</td><td>91</td><td>97</td></tr><tr><th>2</th><td>83</td><td>84</td><td>85</td><td>86</td><td>87</td><td>88</td><td>94</td></tr><tr><th>3</th><td>80</td><td>81</td><td>82</td><td>83</td><td>84</td><td>85</td><td>91</td></tr><tr><th>4</th><td>77</td><td>78</td><td>79</td><td>80</td><td>81</td><td>82</td><td>88</td></tr><tr><th>5</th><td>74</td><td>75</td><td>76</td><td>77</td><td>78</td><td>79</td><td>85</td></tr></tbody></table><p>In this example, we have hourly values. We indicated in the  <code>Matrifier</code> to generate a matrix where the size of each row is 6 hours, steps ahead for prediction is 6 hours and the stride of 3 hours. There are 7 columns because the last column indicates the value indicated by the steps <code>ahead</code> argument.</p><p>Let us try to make a matrix with the size of 6 hours, steps ahead of 2 hours, and a stride of 3 hours:</p><pre><code class="language-julia">mtr = Matrifier(Dict(:ahead=&gt;2,:size=&gt;6,:stride=&gt;3))
+res = transform!(mtr,x)</code></pre><pre><code class="language-julia-repl">julia&gt; first(res,5)
+5×7 DataFrames.DataFrame
+│ Row │ x1    │ x2    │ x3    │ x4    │ x5    │ x6    │ output │
+│     │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64  │
+├─────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ 1   │ 86    │ 87    │ 88    │ 89    │ 90    │ 91    │ 97     │
+│ 2   │ 83    │ 84    │ 85    │ 86    │ 87    │ 88    │ 94     │
+│ 3   │ 80    │ 81    │ 82    │ 83    │ 84    │ 85    │ 91     │
+│ 4   │ 77    │ 78    │ 79    │ 80    │ 81    │ 82    │ 88     │
+│ 5   │ 74    │ 75    │ 76    │ 77    │ 78    │ 79    │ 85     │</code></pre><p>In this example, we have hourly values. We indicated in the  <code>Matrifier</code> to generate a matrix where the size of each row is 6 hours, steps ahead for prediction is 6 hours and the stride of 3 hours. There are 7 columns because the last column indicates the value indicated by the steps <code>ahead</code> argument.</p><p>Let us try to make a matrix with the size of 6 hours, steps ahead of 2 hours, and a stride of 3 hours:</p><pre><code class="language-julia">mtr = Matrifier(Dict(:ahead=&gt;2,:size=&gt;6,:stride=&gt;3))
 fit!(mtr,x)
-res = transform!(mtr,x)
-first(res,5)</code></pre><table class="data-frame"><thead><tr><th></th><th>x1</th><th>x2</th><th>x3</th><th>x4</th><th>x5</th><th>x6</th><th>output</th></tr><tr><th></th><th>Int64</th><th>Int64</th><th>Int64</th><th>Int64</th><th>Int64</th><th>Int64</th><th>Int64</th></tr></thead><tbody><p>5 rows × 7 columns</p><tr><th>1</th><td>90</td><td>91</td><td>92</td><td>93</td><td>94</td><td>95</td><td>97</td></tr><tr><th>2</th><td>87</td><td>88</td><td>89</td><td>90</td><td>91</td><td>92</td><td>94</td></tr><tr><th>3</th><td>84</td><td>85</td><td>86</td><td>87</td><td>88</td><td>89</td><td>91</td></tr><tr><th>4</th><td>81</td><td>82</td><td>83</td><td>84</td><td>85</td><td>86</td><td>88</td></tr><tr><th>5</th><td>78</td><td>79</td><td>80</td><td>81</td><td>82</td><td>83</td><td>85</td></tr></tbody></table><footer><hr/><a class="previous" href="../../tutorial/tsclassifier/"><span class="direction">Previous</span><span class="title">TS Data Discovery</span></a><a class="next" href="../dateproc/"><span class="direction">Next</span><span class="title">Date PreProcessing</span></a></footer></article></body></html>
+res = transform!(mtr,x)</code></pre><pre><code class="language-julia-repl">julia&gt; first(res,5)
+5×7 DataFrames.DataFrame
+│ Row │ x1    │ x2    │ x3    │ x4    │ x5    │ x6    │ output │
+│     │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64  │
+├─────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
+│ 1   │ 90    │ 91    │ 92    │ 93    │ 94    │ 95    │ 97     │
+│ 2   │ 87    │ 88    │ 89    │ 90    │ 91    │ 92    │ 94     │
+│ 3   │ 84    │ 85    │ 86    │ 87    │ 88    │ 89    │ 91     │
+│ 4   │ 81    │ 82    │ 83    │ 84    │ 85    │ 86    │ 88     │
+│ 5   │ 78    │ 79    │ 80    │ 81    │ 82    │ 83    │ 85     │</code></pre><footer><hr/><a class="previous" href="../../tutorial/tsclassifier/"><span class="direction">Previous</span><span class="title">TS Data Discovery</span></a><a class="next" href="../dateproc/"><span class="direction">Next</span><span class="title">Date PreProcessing</span></a></footer></article></body></html>
