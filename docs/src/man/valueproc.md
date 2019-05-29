@@ -29,6 +29,10 @@ upper = DateTime(2017,1,5)
 dat=lower:Dates.Hour(1):upper |> collect
 vals = 1:length(dat)
 x = DataFrame(Date=dat,Value=vals)
+nothing #hide
+```
+
+```@repl matrify
 last(x,5)
 ```
 
@@ -40,6 +44,10 @@ stride, and steps ahead to predict:
 mtr = Matrifier(Dict(:ahead=>6,:size=>6,:stride=>3))
 fit!(mtr,x)
 res = transform!(mtr,x)
+nothing #hide
+```
+
+```@repl matrify
 first(res,5)
 ```
 
@@ -56,5 +64,9 @@ Let us try to make a matrix with the size of 6 hours, steps ahead of
 mtr = Matrifier(Dict(:ahead=>2,:size=>6,:stride=>3))
 fit!(mtr,x)
 res = transform!(mtr,x)
+nothing #hide
+```
+
+```@repl matrify
 first(res,5)
 ```

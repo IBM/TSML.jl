@@ -1,6 +1,6 @@
 module Plotters
 
-import Plots
+using Plots
 using GR
 using Interact
 using DataFrames
@@ -15,6 +15,19 @@ using TSML.TSMLTypes
 using TSML.TSMLTransformers
 using TSML.Utils
 
+# setup plotting for publication
+function setupplot(pdfoutput::Bool)
+  Plots.gr()
+  fntsm = Plots.font("sans-serif", 8)
+  fntlg = Plots.font("sans-serif", 8)
+  Plots.default(titlefont=fntlg, guidefont=fntlg, tickfont=fntsm, legendfont=fntsm)
+  if pdfoutput == true 
+    Plots.default(size=(390,200)) #Plot canvas size
+  else
+    Plots.default(size=(500,300)) #Plot canvas size
+  end
+end
+
 """
     Plotter()
 
@@ -25,7 +38,8 @@ mutable struct Plotter <: Transformer
   args
   function Plotter(args=Dict())
     default_args = Dict(
-        :interactive => false
+        :interactive => false,
+        :pdfoutput => false
     )
     new(nothing, mergedict(default_args, args))
   end
@@ -52,18 +66,20 @@ function transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,Da
   ndxmissing = findall(x->ismissing(x),df[:Value])
   df[:Value][ndxmissing] .= NaN
 
+  setupplot(pltr.args[:pdfoutput])
   Plots.gr()
-  if pltr.args[:interactive] == true
+  if pltr.args[:interactive] == true && pltr.args[:pdfoutput] == false
     interactiveplot(df)
   else
-    Plots.plot(df[:Date],df[:Value];show=false);
+    pl=Plots.plot(df[:Date],df[:Value],xlabel="Date",ylabel="Value",legend=false,show=false);
+    return pl
   end
 end
 
 function interactiveplot(df::Union{Vector,Matrix,DataFrame})
   mlength = length(df[:Value])
   @manipulate for min in slider(1:mlength,label="min",value=1),max in slider(1:mlength,label="max",value=mlength)
-    Plots.plot(df[:Date][min:max],df[:Value][min:max];show=false);
+     Plots.plot(df[:Date][min:max],df[:Value][min:max],xlabel="Date",ylabel="Value",legend=false,show=false);
   end
 end
 

@@ -31,8 +31,8 @@ function generateDataWithMissing()
    return df
 end
 ```
-```@example stat
-X = generateDataWithMissing()
+```@repl stat
+X = generateDataWithMissing();
 first(X,15)
 ```
 
@@ -69,6 +69,11 @@ mypipeline = Pipeline(
 
 fit!(mypipeline,X)
 results = transform!(mypipeline,X)
+nothing #hide
+```
+
+```@repl stat
+show(results,allcols=true)
 ```
 
 ## Statifier for Non-Missing Values only
@@ -87,6 +92,11 @@ mypipeline = Pipeline(
 )
 fit!(mypipeline,X)
 results = transform!(mypipeline,X)
+nothing #hide
+```
+
+```@repl stat
+show(results,allcols=true)
 ```
 
 ## Statifier After Imputation
@@ -107,6 +117,11 @@ mypipeline = Pipeline(
 )
 fit!(mypipeline,X)
 results = transform!(mypipeline,X)
+nothing #hide
+```
+
+```@repl stat
+show(results,allcols=true)
 ```
 
 As we expected, the imputation is successful and there are no more missing values in the
@@ -127,6 +142,11 @@ mypipeline = Pipeline(
 )
 fit!(mypipeline,X)
 results = transform!(mypipeline,X)
+nothing #hide
+```
+
+```@repl stat
+show(results,allcols=true)
 ```
 
 Indeed, the imputation got rid of the missing values.

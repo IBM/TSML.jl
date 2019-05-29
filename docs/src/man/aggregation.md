@@ -20,8 +20,13 @@ gdate = DateTime(2014,1,1):Dates.Minute(5):DateTime(2014,5,1)
 gval = rand(length(gdate))
 
 df = DataFrame(Date=gdate,Value=gval)
+nothing #hide
+```
+
+```@repl datevalgator
 first(df,10)
 ```
+
 
 ## DateValgator
 

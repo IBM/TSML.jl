@@ -77,7 +77,7 @@ nothing #hide
 Time to train our `TSClassifier` to learn the mapping between extracted stats features with the 
 TS type.
 
-```@example tsclassifier
+```@repl tsclassifier
 fit!(tscl)
 ```
 
@@ -91,12 +91,16 @@ modelfname=tscl.args[:juliarfmodelname]
 
 trstatfname = joinpath(mdirname,modelfname*".csv")
 res = CSV.read(trstatfname) |> DataFrame
+nothing #hide
+```
+
+```@repl tsclassifier
 first(res,5)
 ```
 
 Let's check the accuracy of prediction with the test data using the `transform!` function.
 
-```@example tsclassifier
+```@repl tsclassifier
 dfresults = transform!(tscl)
 ```
 The table above shows the prediction corresponding to each filename which is the groundtruth. We can compute
@@ -111,6 +115,10 @@ groundtruth=map(fnames) do fname
   mymatch=match(myregex,fname)
   mymatch[:dtype]
 end
+nothing #hide
+```
+
+```@repl tsclassifier
 sum(groundtruth .== prediction) / length(groundtruth) * 100
 ```
 

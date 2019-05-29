@@ -26,6 +26,10 @@ upper = DateTime(2018,1,31)
 dat=lower:Dates.Day(1):upper |> collect
 vals = rand(length(dat))
 x = DataFrame(Date=dat,Value=vals)
+nothing #hide
+```
+
+```@repl dateifier
 first(x,5)
 ```
 
@@ -37,6 +41,10 @@ stride, and steps ahead to predict:
 mtr = Dateifier(Dict(:ahead=>24,:size=>24,:stride=>5))
 fit!(mtr,x)
 res = transform!(mtr,x)
+nothing #hide
+```
+
+```@repl dateifier
 first(res,5)
 ```
 
@@ -67,5 +75,9 @@ valuematrix = transform!(mtr,X)
 fit!(dtr,X)
 datematrix = transform!(dtr,X)
 mlfeatures = hcat(datematrix,valuematrix)
+nothing #hide
+```
+
+```@repl dateifier
 first(mlfeatures,5)
 ```
