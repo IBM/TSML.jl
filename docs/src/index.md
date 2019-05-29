@@ -83,7 +83,7 @@ Pages = [
   "tutorial/aggregators.md",
   "tutorial/pipeline.md",
   "tutorial/statistics.md",
-  "tutorial/monotonic.md",
+  "tutorial/monotonic_plotting.md",
   "tutorial/tsclassifier.md"
 ]
 Depth = 3
@@ -103,7 +103,10 @@ Depth = 3
 
 ## ML Library
 ```@contents
-Pages = ["lib/decisiontree.md"]
+Pages = [
+  "lib/decisiontree.md",
+  "lib/functions.md"
+]
 ```
 
 ```@index

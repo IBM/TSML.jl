@@ -10,7 +10,7 @@ Creates an API wrapper for DecisionTrees for pipeline workflow.
 Modules = [TSML.Outliernicers, TSML.Plotters]
 ```
 
-## AutoDocs
+## Descriptions
 ```@autodocs
 Modules = [TSML.Outliernicers, TSML.Plotters]
 ```

@@ -10,7 +10,7 @@ Creates an API wrapper for DecisionTrees for pipeline workflow.
 Modules = [TSML.DecisionTreeLearners]
 ```
 
-## AutoDocs
+## Types and Functions
 ```@autodocs
 Modules = [TSML.DecisionTreeLearners]
 ```
