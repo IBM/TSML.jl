@@ -10,6 +10,8 @@ alt="TSML Logo" width="250"></img> </div>
 
 The design/framework of this package is influenced heavily by Samuel Jenkins' [Orchestra.jl](https://github.com/svs14/Orchestra.jl) and Paulito Palmes [CombineML.jl](https://github.com/ppalmes/CombineML.jl) packages.
 
+Follow this link for a quick [TSML Demo](https://github.com/IBM/TSML.jl/blob/master/docs/StaticPlotting.jl.ipynb)
+
 ## Package Features
 
 - TS aggregation based on date-time interval
