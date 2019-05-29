@@ -56,16 +56,14 @@ function transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,Da
   if pltr.args[:interactive] == true
     interactiveplot(df)
   else
-    plt = Plots.plot(df[:Date],df[:Value])
-    #display(plt)
-    plt
+    Plots.plot(df[:Date],df[:Value];show=false);
   end
 end
 
 function interactiveplot(df::Union{Vector,Matrix,DataFrame})
   mlength = length(df[:Value])
   @manipulate for min in slider(1:mlength,label="min",value=1),max in slider(1:mlength,label="max",value=mlength)
-    Plots.plot(df[:Date][min:max],df[:Value][min:max])
+    Plots.plot(df[:Date][min:max],df[:Value][min:max];show=false);
   end
 end
 
