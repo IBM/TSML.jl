@@ -47,7 +47,7 @@ X,Y = generateXY()
 ```
 Let's use the same dataset we have used in the tutorial and print the first few rows.
 
-```@example impute
+```@repl impute
 first(X,10)
 ```
 
@@ -58,6 +58,10 @@ dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(2),
              :strict=>false))
 fit!(dnnr,X)
 forwardres=transform!(dnnr,X)
+nothing #hide
+```
+
+```@repl impute
 first(forwardres,5)
 ```
 
@@ -68,16 +72,25 @@ dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(2),
              :strict=>false))
 fit!(dnnr,X)
 reverseres=transform!(dnnr,X)
+nothing #hide
+```
+
+```@repl impute
 first(reverseres,5)
 ```
 
 Using `symmetric` imputation:
+
 ```@example impute
 dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(2),
              :nnsize=>10,:missdirection => :symmetric,
              :strict=>false))
 fit!(dnnr,X)
 symmetricres=transform!(dnnr,X)
+nothing #hide
+```
+
+```@repl impute
 first(symmetricres,5)
 ```
 
@@ -91,6 +104,7 @@ imputation shall be used.
 
 In the example above, the number of remaining missing data not imputed for
 `forward`, `reverse`, and `symmetric` is:
+
 ```@repl impute
 sum(ismissing.(forwardres[:Value]))
 sum(ismissing.(reverseres[:Value]))
@@ -110,6 +124,7 @@ on the `:dateinterval => Dates.Hour(1)`  argument with default value of hourly.
 Please refer to [Aggregators and Imputers](@ref aggregators_imputers) for more examples.
 
 Let's try hourly, daily, and monthly median as the basis of imputation:
+
 ```@repl impute
 hourlyzer = DateValizer(Dict(:dateinterval => Dates.Hour(1)))
 monthlyzer = DateValizer(Dict(:dateinterval => Dates.Month(1)))

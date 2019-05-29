@@ -29,8 +29,10 @@ function generateDataWithMissing()
    df[:Value][gndxmissing] .= missing
    return df
 end
-
-X = generateDataWithMissing()
+nothing #hide
+```
+```@repl 1
+X = generateDataWithMissing();
 first(X,15)
 ```
 ## DateValgator
@@ -48,6 +50,10 @@ using TSML: DateValgator
 dtvlgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
 fit!(dtvlgator,X)
 results = transform!(dtvlgator,X)
+nothing #hide
+```
+
+```@repl 1
 first(results,10)
 ```
 
@@ -55,7 +61,7 @@ The occurrence of missing values is now reduced because of the hourly aggregatio
 the default is hourly aggregation, you can easily change it by using a different interval
 in the argument during instance creation. Below indicates every 30 minutes interval.
 
-```
+```@repl 1
 dtvlgator = DateValgator(Dict(:dateinterval=>Dates.Minute(30)))
 ```
 
@@ -85,6 +91,10 @@ using TSML: DateValNNer
 datevalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
 fit!(datevalnner, X)
 results = transform!(datevalnner,X)
+nothing #hide
+```
+
+```@repl 1
 first(results,10)
 ```
 
@@ -108,5 +118,9 @@ using TSML: DateValizer
 datevalizer = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
 fit!(datevalizer, X)
 results = transform!(datevalizer,X)
+nothing #hide
+```
+
+```@repl 1
 first(results,10)
 ```

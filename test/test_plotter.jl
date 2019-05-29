@@ -41,14 +41,14 @@ function test_artificialdataplotter()
   myplot=transform!(pltr,df);
   fname=joinpath(tempdir(),"myplot.png")
   png(myplot,fname)
-  @test stat(fname).size > 40000
+  @test stat(fname).size > 10000
   rm(fname,force=true)
   df = generatedf()
   fit!(pltr,df)
   myplot1=transform!(pltr,df);
   fname1=joinpath(tempdir(),"myplot1.png")
   png(myplot1,fname1)
-  @test stat(fname1).size > 40000
+  @test stat(fname1).size > 10000
   rm(fname1,force=true)
 end
 @testset "Plotter: using artificial data" begin
@@ -68,7 +68,7 @@ function test_realdataplotter()
   myplot = transform!(mpipeline1);
   fname=joinpath(tempdir(),"myplot.png")
   png(myplot,fname)
-  @test stat(fname).size > 20000
+  @test stat(fname).size > 10000
   rm(fname,force=true)
 end
 @testset "Plotter: readcsv |> plotter" begin
