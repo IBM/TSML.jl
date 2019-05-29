@@ -13,7 +13,7 @@ makedocs(
        "tutorial/aggregators.md",
        "tutorial/pipeline.md",
        "tutorial/statistics.md",
-       "tutorial/monotonic.md",
+       "tutorial/monotonic_plotting.md",
        "tutorial/tsclassifier.md"
     ],
     "Manual" => Any[
@@ -24,8 +24,7 @@ makedocs(
     ],
     "ML Library" => Any[
       "Decision Tree" => "lib/decisiontree.md"
-      #"Scikit Learners" => "lib/sklearn.md",
-      #"Caret Learners" => "lib/caretlearn.md"
+      "Types and Functions" => "lib/functions.md"
     ]
   ],
   format = Documenter.HTML(

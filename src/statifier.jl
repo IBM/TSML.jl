@@ -1,6 +1,7 @@
 module Statifiers
 
-using StatsBase: std, skewness, kurtosis, variation, sem, mad,  entropy, summarystats, autocor, pacf, rle, quantile
+using StatsBase: std, skewness, kurtosis, variation, sem, mad
+using StatsBase: entropy, summarystats, autocor, pacf, rle, quantile
 using Dates
 using DataFrames
 using Random

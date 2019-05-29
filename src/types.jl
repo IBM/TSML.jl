@@ -19,8 +19,4 @@ function fit!(tr::Transformer, instances::T, labels::Vector) where {T<:Union{Vec
 	error(typeof(tr)," not implemented yet: fit!")
 end
 
-function typerun()
-	println("hello types")
-end
-
 end

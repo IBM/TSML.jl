@@ -71,6 +71,7 @@ TSML by adding `CSVReader` transformer and added in the pipeline to process CSV 
 
 ```@example pipeline
 using TSML.TSMLTypes
+using TSML.Utils
 import TSML.TSMLTypes.fit!
 import TSML.TSMLTypes.transform!
 
@@ -114,7 +115,7 @@ for processing.
 
 ```@example pipeline
 fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
-csvreader = CSVReader(Dict(:filename=>fname,:dateformat=>"d/m/y H:M"))
+csvreader = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"d/m/y H:M"))
 fit!(csvreader)
 csvdata = transform!(csvreader)
 first(csvdata,10)

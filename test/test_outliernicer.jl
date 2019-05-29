@@ -7,7 +7,6 @@ using TSML.TSMLTransformers
 
 using TSML.Outliernicers
 using TSML.Monotonicers
-using TSML.DataReaders
 using TSML.Statifiers
 
 using DataFrames
@@ -38,7 +37,7 @@ end
 function test_basicoutlier()
   Random.seed!(123)
   fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
-  csvfilter = DataReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
+  csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
   valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
   valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
   stfier = Statifier(Dict(:processmissing=>true))
@@ -77,9 +76,9 @@ function test_typesoutliernicer()
   regularfile = joinpath(dirname(pathof(TSML)),"../data/typedetection/regular.csv")
   monofile = joinpath(dirname(pathof(TSML)),"../data/typedetection/monotonic.csv")
   dailymonofile = joinpath(dirname(pathof(TSML)),"../data/typedetection/dailymonotonic.csv")
-  regularfilecsv = DataReader(Dict(:filename=>regularfile,:dateformat=>"dd/mm/yyyy HH:MM"))
-  monofilecsv = DataReader(Dict(:filename=>monofile,:dateformat=>"dd/mm/yyyy HH:MM"))
-  dailymonofilecsv = DataReader(Dict(:filename=>dailymonofile,:dateformat=>"dd/mm/yyyy HH:MM"))
+  regularfilecsv = CSVDateValReader(Dict(:filename=>regularfile,:dateformat=>"dd/mm/yyyy HH:MM"))
+  monofilecsv = CSVDateValReader(Dict(:filename=>monofile,:dateformat=>"dd/mm/yyyy HH:MM"))
+  dailymonofilecsv = CSVDateValReader(Dict(:filename=>dailymonofile,:dateformat=>"dd/mm/yyyy HH:MM"))
 
   valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
   valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))

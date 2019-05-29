@@ -5,8 +5,8 @@ using TSML.TSMLTypes
 using TSML.TSMLTransformers
 using TSML.Utils
 
-using TSML.DataReaders
-using TSML.DataWriters
+using TSML: CSVDateValReader
+using TSML: CSVDateValWriter
 using TSML.Statifiers
 using TSML.Monotonicers
 
@@ -33,7 +33,7 @@ end
 
 function rawstat(inputname::AbstractString,outputname::AbstractString="",datefmt::AbstractString="dd/mm/yyyy HH:MM")
     isfile(inputname) || error("input file name does not exist")
-    csvreader = DataReader(Dict(:filename=>inputname,:dateformat=>datefmt))
+    csvreader = CSVDateValReader(Dict(:filename=>inputname,:dateformat=>datefmt))
     stfier = Statifier()
     lpipe = Pipeline(Dict(
         :transformers => [csvreader,stfier]
@@ -49,7 +49,7 @@ end
 
 function aggregatedstat(inputname::AbstractString,outputname::AbstractString="",datefmt::AbstractString="dd/mm/yyyy HH:MM")
     isfile(inputname) || error("input file name does not exist")
-    csvreader = DataReader(Dict(:filename=>inputname,:dateformat=>datefmt))
+    csvreader = CSVDateValReader(Dict(:filename=>inputname,:dateformat=>datefmt))
     valgator = DateValgator(COMMONARG)
     stfier = Statifier()
     lpipe = Pipeline(Dict(
@@ -66,7 +66,7 @@ end
 
 function aggregatedoutput(inputname::AbstractString,outputname::AbstractString="",datefmt::AbstractString="dd/mm/yyyy HH:MM")
     isfile(inputname) || error("input file name does not exist")
-    csvreader = DataReader(Dict(:filename=>inputname,:dateformat=>datefmt))
+    csvreader = CSVDateValReader(Dict(:filename=>inputname,:dateformat=>datefmt))
     valgator = DateValgator(COMMONARG)
     lpipe = Pipeline(Dict(
         :transformers => [csvreader,valgator]
@@ -82,7 +82,7 @@ end
 
 function imputedstat(inputname::AbstractString,outputname::AbstractString="",datefmt::AbstractString="dd/mm/yyyy HH:MM")
     isfile(inputname) || error("input file name does not exist")
-    csvreader = DataReader(Dict(:filename=>inputname,:dateformat=>datefmt))
+    csvreader = CSVDateValReader(Dict(:filename=>inputname,:dateformat=>datefmt))
     valgator = DateValgator(COMMONARG)
     valnner = DateValNNer(COMMONARG)
     mononicer = Monotonicer()
@@ -101,7 +101,7 @@ end
 
 function imputedoutput(inputname::AbstractString,outputname::AbstractString="",datefmt::AbstractString="dd/mm/yyyy HH:MM")
     isfile(inputname) || error("input file name does not exist")
-    csvreader = DataReader(Dict(:filename=>inputname,:dateformat=>datefmt))
+    csvreader = CSVDateValReader(Dict(:filename=>inputname,:dateformat=>datefmt))
     valgator = DateValgator(COMMONARG)
     valnner = DateValNNer(COMMONARG)
     mononicer = Monotonicer()

@@ -6,7 +6,6 @@ using TSML.TSMLTypes
 using TSML.TSMLTransformers
 
 using TSML.Statifiers
-using TSML.DataReaders
 
 using DataFrames
 using Dates
@@ -32,7 +31,7 @@ function test_statifier()
   @test res[1,3:end]|>Vector|>sum |> x->round(x,digits=5) == 28.29114
 
   fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
-  csvfilter = DataReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
+  csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
   valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
   valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
 
@@ -44,7 +43,6 @@ function test_statifier()
   fit!(mpipeline0)
   respipe0 = transform!(mpipeline0)
   @test round(respipe0[1,:sfreq],digits=2) ==  0.18
-  #@test respipe1[1,3:end] |> Vector |> sum |> x->round(x,digits=5) == -106687.08093
   vals = respipe0[1,3:end]
   @test (vals[(!isnan).(vals)] |> sum |> x->round(x,sigdigits=2)) == -1.3e6
 

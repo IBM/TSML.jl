@@ -1,6 +1,5 @@
 module TSMLTransformers
 
-using MLDataUtils
 using Dates
 using DataFrames
 using Statistics
@@ -8,6 +7,8 @@ using Random
 using CSV
 
 export fit!,transform!
+
+using MLDataUtils: slidingwindow
 
 export Transformer,TSLearner
 export Imputer,Pipeline,SKLLearner,OneHotEncoder,Wrapper

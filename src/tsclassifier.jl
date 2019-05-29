@@ -22,7 +22,7 @@ using TSML.TSMLTransformers
 
 using TSML.DecisionTreeLearners: RandomForest
 using TSML.Statifiers
-using TSML.DataReaders
+using TSML: CSVDateValReader
 
 using CSV
 using DataFrames
@@ -88,7 +88,7 @@ function getfilestat(ldirname::AbstractString,lfname::AbstractString)
   dtype in string.(instances(TSType)) || error(dtype * ", filename does not indicate known data type.")
   # create a pipeline to get stat
   fname = joinpath(ldirname,lfname)
-  csvfilter = DataReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
+  csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
   valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
   valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
   stfier = Statifier(Dict(:processmissing=>false))

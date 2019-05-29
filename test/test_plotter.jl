@@ -7,7 +7,7 @@ using TSML.Utils
 using TSML.TSMLTypes
 using TSML.TSMLTransformers
 
-using TSML: DataReader,Plotter
+using TSML: CSVDateValReader,Plotter
 using TSML: fit!, transform!
 
 using DataFrames
@@ -58,7 +58,7 @@ end
 function test_realdataplotter()
   Random.seed!(123)
   fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
-  csvfilter = DataReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
+  csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
   pltr = Plotter(Dict(:interactive => false))
   mpipeline1 = Pipeline(Dict(
        :transformers => [csvfilter,pltr]

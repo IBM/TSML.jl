@@ -366,7 +366,7 @@ end
 function transform!(csvrdr::CSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
     fname = csvrdr.args[:filename]
     fmt = csvrdr.args[:dateformat]
-    df = CSV.read(fname)
+    df = CSV.read(fname) |> DataFrame
     ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
     rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
     df[:Date] = DateTime.(df[:Date],fmt)
@@ -395,7 +395,7 @@ end
 function transform!(csvwtr::CSVDateValWriter,x::T) where {T<:Union{DataFrame,Vector,Matrix}}
     fname = csvwtr.args[:filename]
     fmt = csvwtr.args[:dateformat]
-    df = deepcopy(x)
+    df = deepcopy(x) |> DataFrame
     ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
     rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
     eltype(df[:Date]) <: DateTime || error("Date format error")
