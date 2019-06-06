@@ -40,4 +40,7 @@ include("demo.jl")
 using .TSMLDemo
 export tsml_demo
 
+println("\n")
+@info "run tsml_demo() to show examples how to use TSML"
+
 end # module

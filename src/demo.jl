@@ -18,7 +18,7 @@ export tsml_demo
 
 function pauseme(msg)
   println(msg)
-  println("any key to continue...")
+  println(">>> enter key to continue <<<")
   read(stdin,Char);
   nothing
 end
@@ -37,16 +37,18 @@ end
 
 function tsml_demo()
   println("Welcome to TSML demo")
-  pauseme("Let's start by generating random Time Series data and output the first 20 rows")
+  println("Let's start by generating random Time Series")
+  pauseme("data and output the first 20 rows")
   data=generateX()
   println(first(data,20))
   println("...")
   println("...")
-  pauseme("Notice the presence of missing values")
+  pauseme("Notice the presence of missing values.")
 
   println("Let's create a pipeline for plotting")
   println(" ")
   pauseme("
+  julia code:
       pltr = Plotter()
       mpipeline = Pipeline(Dict(
             :transformers => [pltr]
@@ -55,6 +57,7 @@ function tsml_demo()
       fit!(mpipeline,data)
       transform!(mpipeline,data)
   ")
+  println("Please wait until the plot is shown before continuing.")
 
   pltr = Plotter()
   xpipeline = Pipeline(Dict(
@@ -64,11 +67,12 @@ function tsml_demo()
   fit!(xpipeline,data)
   res=transform!(xpipeline,data) 
   display(res)
-  println(" ")
-  println("Let's create a pipeline to aggregate and measure data quality")
-  println("including missing values")
+  println("Notice the breaks in the plot due to missing data.\n")
+  println("Let's create a pipeline to aggregate and")
+  println("measure data quality including missing values")
   println(" ")
   pauseme("
+  julia code:
       valgator = DateValgator(Dict(:dateinterval => Dates.Hour(1)))
       stfier = Statifier(Dict(:processmissing => true))
       mpipeline = Pipeline(Dict(
@@ -88,10 +92,11 @@ function tsml_demo()
   fit!(mpipeline,data)
   res = transform!(mpipeline,data)
   show(res,allcols=true)
-  println(" ")
+  println("Notice the stats of blocks of missing values denoted by fieldnames starting with b.")
   println(" ")
   println("Let's create a pipeline for aggregation with imputation and get data quality")
   pauseme("
+  julia code:
       valgator = DateValgator(Dict(:dateinterval => Dates.Hour(1)))
       valnner = DateValNNer(Dict(:dateinterval => Dates.Hour(1)))
       stfier = Statifier(Dict(:processmissing => true))
@@ -112,9 +117,18 @@ function tsml_demo()
   fit!(mpipeline,data)
   res = transform!(mpipeline,data)
   show(res,allcols=true)
+  println("Notice that the imputation causes the statistics of missing values return NaN.")
   println("")
-  println("")
-  pauseme("Let's plot the cleaned and imputed data")
+  pauseme("Let's create a pipeline to plot the cleaned and imputed data")
+  pauseme("
+  julia code:
+      mpipeline = Pipeline(Dict(
+              :transformers => [valgator,valnner,pltr]
+           )
+      )
+      fit!(mpipeline,data)
+      res=transform!(mpipeline,data)
+  ")
   mpipeline = Pipeline(Dict(
           :transformers => [valgator,valnner,pltr]
        )
