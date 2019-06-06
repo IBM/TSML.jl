@@ -1,5 +1,6 @@
 module TSML
 
+
 include("types.jl")
 using .TSMLTypes
 
@@ -8,6 +9,7 @@ using .Utils
 
 include("transformers.jl")
 using .TSMLTransformers
+
 
 include("baseline.jl")
 using .BaselineAlgos
@@ -33,5 +35,9 @@ using .Outliernicers
 
 include("plotter.jl")
 using .Plotters
+
+include("demo.jl")
+using .TSMLDemo
+export tsml_demo
 
 end # module
