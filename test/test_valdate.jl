@@ -5,6 +5,8 @@ using TSML.Utils
 using TSML.TSMLTypes
 using TSML.TSMLTransformers
 
+using TSML.Statifiers
+
 using CSV
 using Random
 using Statistics
@@ -268,7 +270,6 @@ end
 function test_csvreaderwriter()
   inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
   outputfile = joinpath(dirname(pathof(TSML)),"../data/testdata_output.csv")
-  rm(outputfile,force=true)
   csvreader = CSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
   csvwtr = CSVDateValWriter(Dict(:filename=>outputfile,:dateformat=>"d/m/y H:M"))
   filter1 = DateValgator()
@@ -289,18 +290,53 @@ function test_csvreaderwriter()
   res1=transform!(filter1,dat)
   fit!(filter2,res1,[])
   res2=transform!(filter2,res1)
+  @test nrow(res2) == 8761
+  @test ncol(res2) == 2
+  @test sum(ismissing.(res2[:Value])) == 0
+  @test floor(sum(res2[:Value])) == 97564.0
   @test mypipeline.args[:transformers][3].args[:missingcount] == filter2.args[:missingcount]
   mypipeline = Pipeline(Dict(
 	:transformers => [csvreader,filter1,filter2,csvwtr]
     )
   )
   fit!(mypipeline)
-  transform!(mypipeline)
+  res=transform!(mypipeline)
+  @test nrow(res2) == 8761
+  @test ncol(res2) == 2
+  @test sum(ismissing.(res2[:Value])) == 0
+  @test floor(sum(res2[:Value])) == 97564.0
+  @test mypipeline.args[:transformers][3].args[:missingcount] == filter2.args[:missingcount]
   @test filesize(csvwtr.args[:filename]) > 209220
+  rm(outputfile,force=true)
 end
 @testset "CSVDateValReaderWriter: reading csv with Date,Value columns" begin
   test_csvreaderwriter()
 end
+
+function test_statoutputwriter()
+  inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
+  statoutputfile = joinpath(dirname(pathof(TSML)),"../data/testdata_stat.csv")
+  csvreader = CSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
+  csvstatwtr = CSVDateValWriter(Dict(:filename=>statoutputfile))
+  statfier = statfier = Statifier(Dict(:processmissing=>true))
+  filter1 = DateValgator()
+  filter2 = DateValNNer(Dict(:nnsize=>1))
+
+  mypipeline = Pipeline(Dict(
+  	:transformers => [csvreader,filter1,filter2,statfier,csvstatwtr]
+    )
+  )
+  fit!(mypipeline)
+  res=transform!(mypipeline)
+  @test nrow(res) == 1
+  @test ncol(res) == 26
+  @test filesize(csvstatwtr.args[:filename]) > 400
+  rm(statoutputfile,force=true)
+end
+@testset "CSVDateValReaderWriter: writing stat output" begin
+  test_statoutputwriter()
+end
+
 
 
 end
