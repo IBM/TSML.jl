@@ -388,7 +388,7 @@ end
 function fit!(csvwtr::CSVDateValWriter,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
     fname = csvwtr.args[:filename]
     fmt = csvwtr.args[:dateformat]
-    (fname != "" && fmt != "") || error("missing filename or date format")
+    fname != ""  || error("missing filename")
     model = csvwtr.args
 end
 
@@ -396,8 +396,10 @@ function transform!(csvwtr::CSVDateValWriter,x::T) where {T<:Union{DataFrame,Vec
     fname = csvwtr.args[:filename]
     fmt = csvwtr.args[:dateformat]
     df = deepcopy(x) |> DataFrame
-    ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
-    rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
-    eltype(df[:Date]) <: DateTime || error("Date format error")
+    if ncol(df) == 2 
+      rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
+      eltype(df[:Date]) <: DateTime || error("Date format error")
+    end
     df |> CSV.write(fname)
+    return df
 end
