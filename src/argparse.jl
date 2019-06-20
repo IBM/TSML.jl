@@ -10,7 +10,6 @@ using TSML: CSVDateValWriter
 using TSML.Statifiers
 using TSML.Monotonicers
 using TSML.Outliernicers
-using TSML.Plotters
 
 using Dates
 using DataFrames
