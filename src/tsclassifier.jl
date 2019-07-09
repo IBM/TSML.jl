@@ -14,6 +14,11 @@ Loop over each file in a directory, get stat and record in a dictionary/datafram
 
 """
 
+include("filestats.jl") # common functions for ensembles and other mls
+using .FileStats
+
+export TSClassifier, fit!, transform!
+
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit!
 import TSML.TSMLTypes.transform!
@@ -29,7 +34,6 @@ using DataFrames
 using Dates
 using Serialization
 
-export TSClassifier, fit!, transform!
 
 # Default to using RandomForest for classification of data types
 mutable struct TSClassifier <: TSLearner
@@ -41,7 +45,7 @@ mutable struct TSClassifier <: TSLearner
       :trdirectory => "",
       :tstdirectory => "",
       :modeldirectory => "",
-      :feature_range => 6:20,
+      :feature_range => 7:20,
       :juliarfmodelname => "juliarfmodel.serialized",
       # Output to train against
       # (:class).
@@ -65,71 +69,13 @@ mutable struct TSClassifier <: TSLearner
   end
 end
 
-function ispathnotempty(margs::Dict)
-  return margs[:trdirectory] != "" && margs[:tstdirectory] != "" && margs[:modeldirectory] != ""
-end
-
-@enum TSType begin
-  temperature = 1
-  weather = 2
-  footfall = 3
-  AirOffTemp = 4
-  Energy = 5
-  Pressure = 6
-  RetTemp = 7
-end
-
-# return stat of a file
-function getfilestat(ldirname::AbstractString,lfname::AbstractString)
-  myregex = r"(?<dtype>[A-Z _ - a-z]+)(?<number>\d*).(?<ext>\w+)"
-  m=match(myregex,lfname)
-  ext = m[:ext]; dtype=m[:dtype];num = m[:number]
-  (dtype != "" && ext != "")  || error("wrong filename format: dtype[n].csv")
-  dtype in string.(instances(TSType)) || error(dtype * ", filename does not indicate known data type.")
-  # create a pipeline to get stat
-  fname = joinpath(ldirname,lfname)
-  csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
-  valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-  valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
-  stfier = Statifier(Dict(:processmissing=>false))
-  mpipeline = Pipeline(Dict(
-      :transformers => [csvfilter,valgator,valnner,stfier]
-     )
-  )
-  fit!(mpipeline)
-  df = transform!(mpipeline)
-  df[:dtype]=dtype
-  df[:fname]=lfname
-  return (df)
-end
-
-# loop over the directory and get stats of each file
-# return a dataframe containing stat features and ts type for target
-function getStats(ldirname::AbstractString)
-  ldirname != "" || error("directory name empty")
-  mfiles = readdir(ldirname) |> x->filter(y->match(r".csv",y) != nothing,x)
-  mfiles != [] || error("empty csv directory")
-  trdata = DataFrame()
-  for file in mfiles
-    try
-      df=getfilestat(ldirname,file)
-      trdata = vcat(trdata,df)
-      println("getting stats of "*file)
-    catch
-      println("skipping due to error "*file)
-      continue
-    end
-  end
-  return trdata
-end
-
 # get the stats of each file, collect as dataframe, train
 function fit!(tsc::TSClassifier, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   ispathnotempty(tsc.args) || error("empty training/testing/modeling directory")
   ldirname = tsc.args[:trdirectory]
   mdirname = tsc.args[:modeldirectory]
   modelfname=tsc.args[:juliarfmodelname]
-  trdata = getStats(ldirname)
+  trdata = getstats(ldirname)
   rfmodel = RandomForest(tsc.args)
   xfeatures = tsc.args[:feature_range]
   X=trdata[:,xfeatures]
@@ -150,7 +96,7 @@ function transform!(tsc::TSClassifier, features::T=[]) where {T<:Union{Vector,Ma
   ldirname = tsc.args[:tstdirectory]
   mdirname = tsc.args[:modeldirectory]
   modelfname=tsc.args[:juliarfmodelname]
-  trdata = getStats(ldirname)
+  trdata = getstats(ldirname)
   xfeatures = tsc.args[:feature_range]
   X=trdata[:,xfeatures]
   mfeatures=tsc.args[:features]
