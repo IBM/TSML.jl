@@ -1,0 +1,14 @@
+```@meta
+Author = "Paulito Palmes"
+```
+
+# [CaretLearners](@id lib_caretlearners)
+Creates an API wrapper for Caret Libs for pipeline workflow.
+
+```@index
+Modules = [CaretLearners]
+```
+
+```@autodocs
+Modules = [CaretLearners]
+```
