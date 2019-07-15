@@ -10,5 +10,6 @@ include("test_monotonicer.jl")
 include("test_cliwrapper.jl")
 include("test_outliernicer.jl")
 include("test_plotter.jl")
+include("test_ensemble.jl")
 
 end
