@@ -5,19 +5,19 @@ gval = rand(length(gdate))
 
 df = DataFrame(Date=gdate,Value=gval)</code></pre><pre><code class="language-julia-repl">julia&gt; first(df,10)
 10×2 DataFrames.DataFrame
-│ Row │ Date                │ Value    │
-│     │ Dates.DateTime      │ Float64  │
-├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.855378 │
-│ 2   │ 2014-01-01T00:05:00 │ 0.904765 │
-│ 3   │ 2014-01-01T00:10:00 │ 0.568712 │
-│ 4   │ 2014-01-01T00:15:00 │ 0.570362 │
-│ 5   │ 2014-01-01T00:20:00 │ 0.404122 │
-│ 6   │ 2014-01-01T00:25:00 │ 0.906382 │
-│ 7   │ 2014-01-01T00:30:00 │ 0.565445 │
-│ 8   │ 2014-01-01T00:35:00 │ 0.237272 │
-│ 9   │ 2014-01-01T00:40:00 │ 0.918741 │
-│ 10  │ 2014-01-01T00:45:00 │ 0.590004 │</code></pre><h2><a class="nav-anchor" id="DateValgator-1" href="#DateValgator-1">DateValgator</a></h2><p>Let&#39;s apply the aggregator and try diffent groupings: hourly vs half hourly vs daily aggregates of the data.</p><pre><code class="language-julia">using TSML, TSML.TSMLTransformers, TSML.Utils, TSML.TSMLTypes
+│ Row │ Date                │ Value     │
+│     │ Dates.DateTime      │ Float64   │
+├─────┼─────────────────────┼───────────┤
+│ 1   │ 2014-01-01T00:00:00 │ 0.184001  │
+│ 2   │ 2014-01-01T00:05:00 │ 0.514664  │
+│ 3   │ 2014-01-01T00:10:00 │ 0.906297  │
+│ 4   │ 2014-01-01T00:15:00 │ 0.0423632 │
+│ 5   │ 2014-01-01T00:20:00 │ 0.610845  │
+│ 6   │ 2014-01-01T00:25:00 │ 0.491414  │
+│ 7   │ 2014-01-01T00:30:00 │ 0.897988  │
+│ 8   │ 2014-01-01T00:35:00 │ 0.704705  │
+│ 9   │ 2014-01-01T00:40:00 │ 0.494157  │
+│ 10  │ 2014-01-01T00:45:00 │ 0.332067  │</code></pre><h2><a class="nav-anchor" id="DateValgator-1" href="#DateValgator-1">DateValgator</a></h2><p>Let&#39;s apply the aggregator and try diffent groupings: hourly vs half hourly vs daily aggregates of the data.</p><pre><code class="language-julia">using TSML, TSML.TSMLTransformers, TSML.Utils, TSML.TSMLTypes
 
 hourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Hour(1)))
 halfhourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Minute(30)))
@@ -32,33 +32,33 @@ hourlyres = transform!(hourlyagg,df)
 fit!(dailyagg,df)
 dailyres = transform!(dailyagg,df)</code></pre><p>The first 5 rows of half-hourly, hourly, and daily aggregates:</p><pre><code class="language-julia-repl">julia&gt; first(halfhourlyres,5)
 5×2 DataFrames.DataFrame
-│ Row │ Date                │ Value     │
-│     │ Dates.DateTime      │ Float64⍰  │
-├─────┼─────────────────────┼───────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.855378  │
-│ 2   │ 2014-01-01T00:30:00 │ 0.565445  │
-│ 3   │ 2014-01-01T01:00:00 │ 0.237979  │
-│ 4   │ 2014-01-01T01:30:00 │ 0.0276659 │
-│ 5   │ 2014-01-01T02:00:00 │ 0.401837  │
+│ Row │ Date                │ Value    │
+│     │ Dates.DateTime      │ Float64⍰ │
+├─────┼─────────────────────┼──────────┤
+│ 1   │ 2014-01-01T00:00:00 │ 0.184001 │
+│ 2   │ 2014-01-01T00:30:00 │ 0.897988 │
+│ 3   │ 2014-01-01T01:00:00 │ 0.860777 │
+│ 4   │ 2014-01-01T01:30:00 │ 0.865235 │
+│ 5   │ 2014-01-01T02:00:00 │ 0.643554 │
 
 julia&gt; first(hourlyres,5)
 5×2 DataFrames.DataFrame
 │ Row │ Date                │ Value    │
 │     │ Dates.DateTime      │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.71287  │
-│ 2   │ 2014-01-01T01:00:00 │ 0.545994 │
-│ 3   │ 2014-01-01T02:00:00 │ 0.51431  │
-│ 4   │ 2014-01-01T03:00:00 │ 0.511026 │
-│ 5   │ 2014-01-01T04:00:00 │ 0.361024 │
+│ 1   │ 2014-01-01T00:00:00 │ 0.503039 │
+│ 2   │ 2014-01-01T01:00:00 │ 0.551636 │
+│ 3   │ 2014-01-01T02:00:00 │ 0.587492 │
+│ 4   │ 2014-01-01T03:00:00 │ 0.405762 │
+│ 5   │ 2014-01-01T04:00:00 │ 0.657753 │
 
 julia&gt; first(dailyres,5)
 5×2 DataFrames.DataFrame
 │ Row │ Date                │ Value    │
 │     │ Dates.DateTime      │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.509528 │
-│ 2   │ 2014-01-02T00:00:00 │ 0.532569 │
-│ 3   │ 2014-01-03T00:00:00 │ 0.547213 │
-│ 4   │ 2014-01-04T00:00:00 │ 0.508159 │
-│ 5   │ 2014-01-05T00:00:00 │ 0.519881 │</code></pre><footer><hr/><a class="previous" href="../dateproc/"><span class="direction">Previous</span><span class="title">Date PreProcessing</span></a><a class="next" href="../imputation/"><span class="direction">Next</span><span class="title">Imputation</span></a></footer></article></body></html>
+│ 1   │ 2014-01-01T00:00:00 │ 0.473724 │
+│ 2   │ 2014-01-02T00:00:00 │ 0.54254  │
+│ 3   │ 2014-01-03T00:00:00 │ 0.461283 │
+│ 4   │ 2014-01-04T00:00:00 │ 0.507085 │
+│ 5   │ 2014-01-05T00:00:00 │ 0.540756 │</code></pre><footer><hr/><a class="previous" href="../dateproc/"><span class="direction">Previous</span><span class="title">Date PreProcessing</span></a><a class="next" href="../imputation/"><span class="direction">Next</span><span class="title">Imputation</span></a></footer></article></body></html>
