@@ -49,7 +49,7 @@ function transform!(st::Outliernicer, features::T) where {T<:Union{Vector,Matrix
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
   mfeatures=deepcopy(features)
-  rvals = mfeatures[:Value]
+  rvals = mfeatures.Value
   # compute the outlier range
   # setup to store both missing and numbers
   mvals = Array{Union{Missing,eltype(rvals)},1}(missing,length(rvals))
@@ -60,12 +60,12 @@ function transform!(st::Outliernicer, features::T) where {T<:Union{Vector,Matrix
   lower=q25-miqr; upper=q75+miqr
   missindx = findall(x -> !ismissing(x) && (x > upper || x < lower),rvals) 
   mvals[missindx] .= missing
-  mfeatures[:Value] = mvals
+  mfeatures.Value = mvals
   # use ValNNer to replace missings
   valnner = DateValNNer(st.args)
   fit!(valnner,mfeatures)
   resdf = transform!(valnner,mfeatures)
-  resdf[:Value] = collect(skipmissing(resdf[:Value])) 
+  resdf.Value = collect(skipmissing(resdf.Value)) 
   resdf
 end
 

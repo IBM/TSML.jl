@@ -19,7 +19,7 @@ function test_timescaledb()
   )
   fit!(mpipeline)
   respipe = transform!(mpipeline)
-  @test sum(respipe[:Value]) ≈ 560997.0
+  @test sum(respipe.Value) ≈ 560997.0
   @test nrow(respipe) == 48349
   @test ncol(respipe) == 2
 end

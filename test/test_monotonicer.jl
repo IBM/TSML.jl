@@ -28,7 +28,7 @@ function test_basicmonotonicer()
   mono = Monotonicer(Dict())
   fit!(mono,df)
   res=transform!(mono,df)
-  @test ismonotonic(res[:Value]) == false 
+  @test ismonotonic(res.Value) == false 
 
   fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
   csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
@@ -50,7 +50,7 @@ function test_basicmonotonicer()
   )
   fit!(mpipeline2)
   respipe2 = transform!(mpipeline2)
-  @test sum(respipe1[1,:] .== respipe2[1,:]) == ncol(respipe1)
+  @test (respipe1[1:1,:] .== respipe2[1:1,:]) |> Matrix |> sum  == ncol(respipe1)
 
   mpipeline3 = Pipeline(Dict(
       :transformers => [csvfilter,valgator,valnner,mono,stfier]
@@ -110,7 +110,7 @@ function test_typesmonotonicer()
   dailymonodf=transform!(dailymonopipeline)
 
   @test round(dailyflips(regulardf),digits=2) == 11.98
-  @test round(dailyflips(monodf),digits=2) == 10.09
+  @test round(dailyflips(monodf),digits=2) == 10.28
   @test round(dailyflips(dailymonodf),digits=2) == 9.11
 end
 @testset "Monotonicer: check type format detection" begin

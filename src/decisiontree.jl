@@ -108,7 +108,7 @@ function ptreerun()
   Random.seed!(125)
   data = getiris()
   features = data[:,1:4]
-  sp = data[:Species] |> Vector
+  sp = data.Species |> Vector
   pt = PrunedTree()
   fit!(pt,features,sp)
   res=transform!(pt,features)
@@ -211,7 +211,7 @@ function rfrun()
   Random.seed!(123)
   data = getiris()
   features = data[:,1:4]
-  sp = data[:Species] |> Vector
+  sp = data.Species |> Vector
   rf = RandomForest()
   fit!(rf,features,sp)
   res=transform!(rf,features)
@@ -299,7 +299,7 @@ function adarun()
   Random.seed!(123)
   data = getiris()
   features = data[:,1:4]
-  sp = data[:Species] |> Vector
+  sp = data.Species |> Vector
   ada = Adaboost()
   fit!(ada,features,sp)
   res=transform!(ada,features)

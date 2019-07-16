@@ -27,7 +27,7 @@ function test_artificialdata()
   outnicer = Outliernicer(Dict(:dateinterval => Dates.Hour(1)))
   fit!(outnicer,df)
   resdf = transform!(outnicer,df)
-  @test round(mean(resdf[:Value]),digits=2) == 510.32
+  @test round(mean(resdf.Value),digits=2) == 510.32
 end
 @testset "Outliernicer: using artificial data" begin
   test_artificialdata()

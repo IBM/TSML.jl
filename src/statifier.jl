@@ -43,7 +43,7 @@ function transform!(st::Statifier, features::T=[]) where {T<:Union{Vector,Matrix
   typeof(features) <: DataFrame || error("Statifier.fit!: data should be a dataframe: Date,Val ")
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
-  fstat = fullstat(features[:Value])
+  fstat = fullstat(features.Value)
   timestat = timevalstat(features)
   if st.args[:processmissing] == true
     # full namedtuple: stat1,stat2,bstat
@@ -54,11 +54,11 @@ function transform!(st::Statifier, features::T=[]) where {T<:Union{Vector,Matrix
 end
 
 function timevalstat(features::DataFrame)
-  ldates=features[:Date] |> skipmissing |> collect
+  ldates=features.Date |> skipmissing |> collect
   totalhours = sum(diff(ldates)).value/1000/3600 # to hours
   lcount = length(ldates)
-  timestart=first(features[:Date])
-  timeend=last(features[:Date])
+  timestart=first(features.Date)
+  timeend=last(features.Date)
   sfreq = totalhours/lcount
   dftime = DataFrame(tstart=timestart,tend=timeend,sfreq=sfreq)
 end

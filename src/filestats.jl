@@ -40,8 +40,8 @@ function getfilestat(ldirname::AbstractString,lfname::AbstractString)
   )
   fit!(mpipeline)
   df = transform!(mpipeline)
-  df[:dtype]=dtype
-  df[:fname]=lfname
+  df[!,:dtype] .= dtype
+  df[!,:fname] .= lfname
   return (df)
 end
 
@@ -57,8 +57,8 @@ function getstats(ldirname::AbstractString)
       df=getfilestat(ldirname,file)
       trdata = vcat(trdata,df)
       println("getting stats of "*file)
-    catch
-      println("skipping due to error "*file)
+    catch errormsg
+      println("skipping "*file*": "*string(errormsg))
       continue
     end
   end

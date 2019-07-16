@@ -61,25 +61,25 @@ function transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,Da
   sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
   # covert missing to NaN
   df = deepcopy(features)
-  df[:Value] = Array{Union{Missing, Float64,eltype(features[:Value])},1}(missing,nrow(df))
-  df[:Value] .= features[:Value]
-  ndxmissing = findall(x->ismissing(x),df[:Value])
-  df[:Value][ndxmissing] .= NaN
+  df.Value = Array{Union{Missing, Float64,eltype(features.Value)},1}(missing,nrow(df))
+  df.Value .= features.Value
+  ndxmissing = findall(x->ismissing(x),df.Value)
+  df.Value[ndxmissing] .= NaN
 
   setupplot(pltr.args[:pdfoutput])
   Plots.gr()
   if pltr.args[:interactive] == true && pltr.args[:pdfoutput] == false
     interactiveplot(df)
   else
-    pl=Plots.plot(df[:Date],df[:Value],xlabel="Date",ylabel="Value",legend=false,show=false);
+    pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
     return pl
   end
 end
 
 function interactiveplot(df::Union{Vector,Matrix,DataFrame})
-  mlength = length(df[:Value])
+  mlength = length(df.Value)
   @manipulate for min in slider(1:mlength,label="min",value=1),max in slider(1:mlength,label="max",value=mlength)
-     Plots.plot(df[:Date][min:max],df[:Value][min:max],xlabel="Date",ylabel="Value",legend=false,show=false);
+     Plots.plot(df.Date[min:max],df.Value[min:max],xlabel="Date",ylabel="Value",legend=false,show=false);
   end
 end
 

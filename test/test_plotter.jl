@@ -23,7 +23,7 @@ function generatedf()
     gmissing = floor(0.30*length(gdate)) |> Integer
     gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
     df = DataFrame(Date=gdate,Value=gval)
-    df[:Value][gndxmissing] .= missing
+    df.Value[gndxmissing] .= missing
     return df
 end;
 
