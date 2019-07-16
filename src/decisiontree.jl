@@ -263,7 +263,7 @@ end
 Function to optimize the hyperparameters of `Adaboost` instance.
 """
 function fit!(adaboost::Adaboost, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
-  instance = features
+  instances = features
   if typeof(features) <: DataFrame
     instances = convert(Matrix,features)
   end
@@ -286,7 +286,7 @@ end
 Function to predict using the optimized hyperparameters of the trained `Adaboost` instance.
 """
 function transform!(adaboost::Adaboost, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
-  instance = features
+  instances = features
   if typeof(features) <: DataFrame
     instances = convert(Matrix,features)
   end
