@@ -10,6 +10,9 @@ function generateDataWithMissing()
    df[:Value][gndxmissing] .= missing
    return df
 end</code></pre><pre><code class="language-julia-repl">julia&gt; X = generateDataWithMissing();
+┌ Warning: `getindex(df::DataFrame, col_ind::ColumnIndex)` is deprecated, use `df[!, col_ind]` instead.
+│   caller = generateDataWithMissing() at none:8
+└ @ Main.ex-1 ./none:8
 
 julia&gt; first(X,15)
 15×2 DataFrames.DataFrame

@@ -6,7 +6,7 @@ Random.seed!(12345)
 
 trdirname = joinpath(dirname(pathof(TSML)),&quot;../data/realdatatsclassification/training&quot;)
 tstdirname = joinpath(dirname(pathof(TSML)),&quot;../data/realdatatsclassification/testing&quot;)
-modeldirname = joinpath(dirname(pathof(TSML)),&quot;../data/realdatatsclassification/model&quot;)</code></pre><pre><code class="language-none">&quot;/Users/travis/build/IBM/TSML.jl/src/../data/realdatatsclassification/model&quot;</code></pre><p>Here&#39;s the list of files for training:</p><pre><code class="language-julia">show(readdir(trdirname) |&gt; x-&gt;filter(y-&gt;match(r&quot;.csv&quot;,y) != nothing,x))</code></pre><pre><code class="language-none">[&quot;AirOffTemp1.csv&quot;, &quot;AirOffTemp2.csv&quot;, &quot;AirOffTemp3.csv&quot;, &quot;Energy1.csv&quot;, &quot;Energy2.csv&quot;, &quot;Energy3.csv&quot;, &quot;Energy4.csv&quot;, &quot;Energy6.csv&quot;, &quot;Energy7.csv&quot;, &quot;Energy8.csv&quot;, &quot;Energy9.csv&quot;, &quot;Pressure1.csv&quot;, &quot;Pressure2.csv&quot;, &quot;Pressure3.csv&quot;, &quot;Pressure4.csv&quot;, &quot;Pressure6.csv&quot;, &quot;RetTemp11.csv&quot;, &quot;RetTemp21.csv&quot;, &quot;RetTemp41.csv&quot;, &quot;RetTemp51.csv&quot;]</code></pre><p>and here are the files in testing directory:</p><pre><code class="language-julia">show(readdir(tstdirname) |&gt; x-&gt;filter(y-&gt;match(r&quot;.csv&quot;,y) != nothing,x))</code></pre><pre><code class="language-none">[&quot;AirOffTemp4.csv&quot;, &quot;AirOffTemp5.csv&quot;, &quot;Energy10.csv&quot;, &quot;Energy5.csv&quot;, &quot;Pressure2.csv&quot;, &quot;Pressure5.csv&quot;, &quot;RetTemp31.csv&quot;]</code></pre><p>The files in testing directory doesn&#39;t need to be labeled but we use the labeling as a way to validate the effectiveness of the classifier. The labels will be used as the groundtruth during prediction/classification.</p><h2><a class="nav-anchor" id="TSClassifier-1" href="#TSClassifier-1">TSClassifier</a></h2><p>Let us now setup an instance of the <code>TSClassifier</code> and pass the arguments containing the directory locations of files for training, testing, and modeling.</p><pre><code class="language-julia">using TSML: TSClassifier
+modeldirname = joinpath(dirname(pathof(TSML)),&quot;../data/realdatatsclassification/model&quot;)</code></pre><pre><code class="language-none">&quot;/Users/travis/build/IBM/TSML.jl/src/../data/realdatatsclassification/model&quot;</code></pre><p>Here&#39;s the list of files for training:</p><pre><code class="language-julia">show(readdir(trdirname) |&gt; x-&gt;filter(y-&gt;match(r&quot;.csv&quot;,y) != nothing,x))</code></pre><pre><code class="language-none">[&quot;AirOffTemp1.csv&quot;, &quot;AirOffTemp2.csv&quot;, &quot;AirOffTemp3.csv&quot;, &quot;Energy1.csv&quot;, &quot;Energy2.csv&quot;, &quot;Energy3.csv&quot;, &quot;Energy4.csv&quot;, &quot;Energy6.csv&quot;, &quot;Energy7.csv&quot;, &quot;Energy8.csv&quot;, &quot;Energy9.csv&quot;, &quot;Pressure1.csv&quot;, &quot;Pressure3.csv&quot;, &quot;Pressure4.csv&quot;, &quot;Pressure6.csv&quot;, &quot;RetTemp11.csv&quot;, &quot;RetTemp21.csv&quot;, &quot;RetTemp41.csv&quot;, &quot;RetTemp51.csv&quot;]</code></pre><p>and here are the files in testing directory:</p><pre><code class="language-julia">show(readdir(tstdirname) |&gt; x-&gt;filter(y-&gt;match(r&quot;.csv&quot;,y) != nothing,x))</code></pre><pre><code class="language-none">[&quot;AirOffTemp4.csv&quot;, &quot;AirOffTemp5.csv&quot;, &quot;Energy10.csv&quot;, &quot;Energy5.csv&quot;, &quot;Pressure5.csv&quot;, &quot;RetTemp31.csv&quot;]</code></pre><p>The files in testing directory doesn&#39;t need to be labeled but we use the labeling as a way to validate the effectiveness of the classifier. The labels will be used as the groundtruth during prediction/classification.</p><h2><a class="nav-anchor" id="TSClassifier-1" href="#TSClassifier-1">TSClassifier</a></h2><p>Let us now setup an instance of the <code>TSClassifier</code> and pass the arguments containing the directory locations of files for training, testing, and modeling.</p><pre><code class="language-julia">using TSML: TSClassifier
 using TSML: fit!, transform!
 
 tscl = TSClassifier(Dict(:trdirectory=&gt;trdirname,
@@ -27,7 +27,6 @@ getting stats of Energy7.csv
 getting stats of Energy8.csv
 getting stats of Energy9.csv
 getting stats of Pressure1.csv
-skipping due to error Pressure2.csv
 getting stats of Pressure3.csv
 getting stats of Pressure4.csv
 getting stats of Pressure6.csv
@@ -58,7 +57,6 @@ getting stats of AirOffTemp4.csv
 getting stats of AirOffTemp5.csv
 getting stats of Energy10.csv
 getting stats of Energy5.csv
-skipping due to error Pressure2.csv
 getting stats of Pressure5.csv
 getting stats of RetTemp31.csv
 loading model from file: /Users/travis/build/IBM/TSML.jl/src/../data/realdatatsclassification/model/juliarfmodel.serialized
@@ -77,5 +75,10 @@ myregex = r&quot;(?&lt;dtype&gt;[A-Z _ - a-z]+)(?&lt;number&gt;\d*).(?&lt;ext&gt
 groundtruth=map(fnames) do fname
   mymatch=match(myregex,fname)
   mymatch[:dtype]
-end</code></pre><pre><code class="language-julia-repl">julia&gt; sum(groundtruth .== prediction) / length(groundtruth) * 100
+end</code></pre><pre><code class="language-none">┌ Warning: `getindex(df::DataFrame, col_ind::ColumnIndex)` is deprecated, use `df[!, col_ind]` instead.
+│   caller = top-level scope at none:0
+└ @ Core none:0
+┌ Warning: `getindex(df::DataFrame, col_ind::ColumnIndex)` is deprecated, use `df[!, col_ind]` instead.
+│   caller = top-level scope at none:0
+└ @ Core none:0</code></pre><pre><code class="language-julia-repl">julia&gt; sum(groundtruth .== prediction) / length(groundtruth) * 100
 66.66666666666666</code></pre><p>Of course we need more data to split between training and testing to improve accuracy and get a more stable measurement of performance.</p><footer><hr/><a class="previous" href="../monotonic_plotting/"><span class="direction">Previous</span><span class="title">Monotonic Detection and Plotting</span></a><a class="next" href="../../man/valueproc/"><span class="direction">Next</span><span class="title">Value PreProcessing</span></a></footer></article></body></html>

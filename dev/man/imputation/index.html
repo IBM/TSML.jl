@@ -53,12 +53,21 @@ symmetricres=transform!(dnnr,X)</code></pre><pre><code class="language-julia-rep
 │ 3   │ 2014-01-01T04:00:00 │ 0.361194 │
 │ 4   │ 2014-01-01T06:00:00 │ 0.918165 │
 │ 5   │ 2014-01-01T08:00:00 │ 0.690462 │</code></pre><p>Unlike <code>symmetric</code> imputation that guarantees 100% imputation of missing data as long as the input has non-missing elements, <code>forward</code> and <code>reverse</code> cannot guarantee that the imputation replaces all missing data because of the boundary issues. If the top or bottom of the input is missing, the assymetric imputation will not be able to replace the endpoints that are missing. It is advised that to have successful imputation, <code>symmetric</code> imputation shall be used.</p><p>In the example above, the number of remaining missing data not imputed for <code>forward</code>, <code>reverse</code>, and <code>symmetric</code> is:</p><pre><code class="language-julia-repl">julia&gt; sum(ismissing.(forwardres[:Value]))
+┌ Warning: `getindex(df::DataFrame, col_ind::ColumnIndex)` is deprecated, use `df[!, col_ind]` instead.
+│   caller = top-level scope at none:0
+└ @ Core none:0
 3
 
 julia&gt; sum(ismissing.(reverseres[:Value]))
+┌ Warning: `getindex(df::DataFrame, col_ind::ColumnIndex)` is deprecated, use `df[!, col_ind]` instead.
+│   caller = top-level scope at none:0
+└ @ Core none:0
 3
 
 julia&gt; sum(ismissing.(symmetricres[:Value]))
+┌ Warning: `getindex(df::DataFrame, col_ind::ColumnIndex)` is deprecated, use `df[!, col_ind]` instead.
+│   caller = top-level scope at none:0
+└ @ Core none:0
 0</code></pre><h2><a class="nav-anchor" id="DateValizer-1" href="#DateValizer-1">DateValizer</a></h2><p><code>DateValizer</code> operates on the principle that there is a reqularity of patterns in a specific time period such that replacing values is just a matter of  extracting which time period it belongs and used the pooled median in that time period to replace the missing data. The default time period for <code>DateValizer</code> is hourly. In a more advanced implementation, we can add daily, hourly, and weekly  periods but it will require much larger hash table. Additional grouping criteria  can result into smaller subgroups which may contain 100% missing in some of these subgroups resulting to imputation failure. <code>DateValizer</code> only depends on the <code>:dateinterval =&gt; Dates.Hour(1)</code>  argument with default value of hourly. Please refer to <a href="../../tutorial/aggregators/#aggregators_imputers-1">Aggregators and Imputers</a> for more examples.</p><p>Let&#39;s try hourly, daily, and monthly median as the basis of imputation:</p><pre><code class="language-julia-repl">julia&gt; hourlyzer = DateValizer(Dict(:dateinterval =&gt; Dates.Hour(1)))
 TSML.TSMLTransformers.DateValizer(nothing, Dict{Symbol,Any}(:medians=&gt;0×0 DataFrames.DataFrame
 ,:dateinterval=&gt;1 hour))
