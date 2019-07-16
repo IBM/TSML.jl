@@ -111,7 +111,7 @@ function transform!(tsc::TSClassifier, features::T=[]) where {T<:Union{Vector,Ma
     model= tsc.model
   end
   mpred = transform!(model,X)
-  return DataFrame(fname=trdata[:fname],predtype=mpred)
+  return DataFrame(fname=trdata.fname,predtype=mpred)
 end
 
 end # module

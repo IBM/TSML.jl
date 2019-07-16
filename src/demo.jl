@@ -30,7 +30,7 @@ function generateX()
     gmissing = 0.30 * length(gdate) |> floor |> Integer
     gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
     X = DataFrame(Date=gdate,Value=gval)
-    X[:Value][gndxmissing] .= missing
+    X.Value[gndxmissing] .= missing
     return X
 end
 

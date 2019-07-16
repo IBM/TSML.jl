@@ -25,8 +25,8 @@ function test_realdatatsclassifier()
   
   dfresults = transform!(tscl)
 
-  apredict = dfresults[:predtype]
-  fnames = dfresults[:fname]
+  apredict = dfresults.predtype
+  fnames = dfresults.fname
   myregex = r"(?<dtype>[A-Z _ - a-z]+)(?<number>\d*).(?<ext>\w+)"
   mtypes=map(fnames) do fname
     mymatch=match(myregex,fname)
@@ -38,7 +38,5 @@ end
 @testset "TSClassifier" begin
   test_realdatatsclassifier()
 end
-
-
 
 end

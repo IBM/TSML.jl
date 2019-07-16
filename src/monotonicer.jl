@@ -43,7 +43,7 @@ function transform!(st::Monotonicer, features::T) where {T<:Union{Vector,Matrix,
   mfeatures=features
   # double check monotonic 
   # based on flips and daily flips
-  if ismonotonic(features[:Value])
+  if ismonotonic(features.Value)
     mfeatures = antimonotonize(features)
   end
   # daily mono reset everynight at most 2x
@@ -62,18 +62,18 @@ function antimonotonizedaily(dat::DataFrame)
   # get diffs, negative values represent reset
   # replace negative values by succeeding neighbor
   df = deepcopy(dat)
-  df[:Value] = [ -1.0; diff(dat[:Value]) ]
-  valuelength = length(df[:Value])
+  df.Value .= [ -1.0; diff(dat.Value) ]
+  valuelength = length(df.Value)
   # find locations of negatives
-  negatives = findall(x->x<0,df[:Value])
+  negatives = findall(x->x<0,df.Value)
   # if last element is negative, zero it
   if negatives[end] == valuelength
-    df[:Value][negative[end]] = 0.0
+    df.Value[negative[end]] = 0.0
     pop!(negatives)
   end
   # replace negatives with immediate neighbor
   for val in reverse(negatives)
-    df[:Value][val] = df[:Value][val+1]
+    df.Value[val] = df.Value[val+1]
   end
   return df
 end
@@ -83,16 +83,16 @@ function antimonotonize(data::Union{Vector,DataFrame,Matrix})
   typeof(dat) <: DataFrame || error("input must be a dataframe")
   ncol(dat) == 2 || error("input must have two columns")
   sum(names(dat) .== (:Date,:Value))  == 2 || error("wrong column names")
-  vals = dat[:Value]
+  vals = dat.Value
   fvals = diff(vals)
   dvals = [fvals[1];fvals]
-  dat[:Value] = dvals
+  dat.Value = dvals
   return dat
 end
 
 function dailyflips(dat::DataFrame)
-  dates = dat[:Date]
-  values = dat[:Value]
+  dates = dat.Date
+  values = dat.Value
   datemin = minimum(dates)
   datemax = maximum(dates)
   ndays = round(datemax-datemin,Dates.Day(1))

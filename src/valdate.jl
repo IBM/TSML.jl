@@ -24,14 +24,14 @@ end
 
 function fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input is not a dataframe")
-  x = deepcopy(xx[:Value])
+  x = deepcopy(xx.Value)
   x isa Vector || error("data should be a vector")
   mtr.model = mtr.args
 end
 
 function transform!(mtr::Matrifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input is not a dataframe")
-  x = deepcopy(xx[:Value])
+  x = deepcopy(xx.Value)
   x isa Vector || error("data should be a vector")
   mtype = eltype(x)
   res=toMatrix(mtr,x)
@@ -77,7 +77,7 @@ end
 
 function fit!(dtr::Dateifier,xx::T,y::Vector=[]) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input not a dataframe")
-  x = deepcopy(xx[:Date])
+  x = deepcopy(xx.Date)
   (eltype(x) <: DateTime || eltype(x) <: Date) || error("array element types are not dates")
   dtr.args[:lower] = minimum(x)
   dtr.args[:upper] = maximum(x)
@@ -87,20 +87,20 @@ end
 # transform to day of the month, day of the week, etc
 function transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input not a dataframe")
-  x = deepcopy(xx[:Date])
+  x = deepcopy(xx.Date)
   x isa Vector || error("data should be a vector")
   @assert eltype(x) <: DateTime || eltype(x) <: Date
   res=toMatrix(dtr,x)
   endpoints = convert(Array{DateTime},res)[:,end-1]
   dt = DataFrame()
-  dt[:year]=Dates.year.(endpoints)
-  dt[:month]=Dates.month.(endpoints)
-  dt[:day]=Dates.day.(endpoints)
-  dt[:hour]=Dates.hour.(endpoints)
-  dt[:week]=Dates.week.(endpoints)
-  dt[:dow]=Dates.dayofweek.(endpoints)
-  dt[:doq]=Dates.dayofquarter.(endpoints)
-  dt[:qoy]=Dates.quarterofyear.(endpoints)
+  dt.year=Dates.year.(endpoints)
+  dt.month=Dates.month.(endpoints)
+  dt.day=Dates.day.(endpoints)
+  dt.hour=Dates.hour.(endpoints)
+  dt.week=Dates.week.(endpoints)
+  dt.dow=Dates.dayofweek.(endpoints)
+  dt.doq=Dates.dayofquarter.(endpoints)
+  dt.qoy=Dates.quarterofyear.(endpoints)
   dtr.args[:header] = names(dt)
   #convert(Matrix{Int64},dt)
   return dt
@@ -151,11 +151,11 @@ function transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
   fn = aggregatorclskipmissing(aggfn)
   grpby = typeof(dvmr.args[:dateinterval])
   sym = Symbol(grpby)
-  x[sym] = round.(x[:Date],grpby)
+  x[!,sym] = round.(x.Date,grpby)
   aggr=by(x,sym,MeanValue = :Value=>fn)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
-  lower = round(minimum(x[:Date]),grpby)
-  upper = round(maximum(x[:Date]),grpby)
+  lower = round(minimum(x.Date),grpby)
+  upper = round(maximum(x.Date),grpby)
   #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dvmr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
@@ -188,7 +188,7 @@ function getMedian(t::Type{T},xx::DataFrame) where {T<:Union{TimePeriod,DatePeri
             Dates.Day=>Dates.day,
             Dates.Month=>Dates.month)
   try
-    x[sgp]=fn[t].(x[:Date])
+    x[!,sgp]=fn[t].(x.Date)
   catch
     error("unknown dateinterval")
   end
@@ -200,11 +200,11 @@ function fullaggregate!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   x = deepcopy(xx)
   grpby = typeof(dvzr.args[:dateinterval])
   sym = Symbol(grpby)
-  x[sym] = round.(x[:Date],grpby)
+  x[!,sym] = round.(x.Date,grpby)
   aggr = by(x,sym,MeanValue = :Value=>skipmedian)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
-  lower = minimum(x[:Date])
-  upper = maximum(x[:Date])
+  lower = minimum(x.Date)
+  upper = maximum(x.Date)
   #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dvzr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
@@ -238,16 +238,16 @@ function transform!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
             Dates.Day => Dates.day,
             Dates.Month=>Dates.month)
   try
-    joined[sym]=fn[grpby].(joined[:Date])
+    joined[!,sym]=fn[grpby].(joined.Date)
   catch
     error("unknown dateinterval")
   end
   # find indices of missing
-  missingndx = findall(ismissing.(joined[:Value]))
+  missingndx = findall(ismissing.(joined.Value))
   jmndx=joined[missingndx,sym] .+ 1 # get time period index of missing, convert 0 index time to 1 index
   missingvals::SubArray = @view joined[missingndx,:Value]
   missingvals .= medians[jmndx,:Value] # replace missing with median value
-  sum(ismissing.(joined[:,:Value])) == 0 || error("Aggregation by time period failed to replace missings")
+  sum(ismissing.(joined.Value)) == 0 || error("Aggregation by time period failed to replace missings")
   joined[:,[:Date,:Value]]
 end
 
@@ -291,20 +291,20 @@ function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   grpby = typeof(dnnr.args[:dateinterval])
   sym = Symbol(grpby)
   # aggregate by time period
-  x[sym] = round.(x[:Date],grpby)
+  x[!,sym] = round.(x.Date,grpby)
   aggr = by(x,sym,MeanValue = :Value=>fn)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
-  lower = round(minimum(x[:Date]),grpby)
-  upper = round(maximum(x[:Date]),grpby)
+  lower = round(minimum(x.Date),grpby)
+  upper = round(maximum(x.Date),grpby)
   #create list of complete dates and join with aggregated data
   cdate = DataFrame(Date = collect(lower:dnnr.args[:dateinterval]:upper))
   joined = join(cdate,aggr,on=:Date,kind=:left)
-  missingcount = sum(ismissing.(joined[:Value]))
+  missingcount = sum(ismissing.(joined.Value))
   dnnr.args[:missingcount] = missingcount
   res = transform_worker!(dnnr,joined)
   count=1
   if dnnr.args[:missdirection] == :symmetric
-    while sum(ismissing.(res[:Value])) > 0
+    while sum(ismissing.(res.Value)) > 0
       res = transform_worker!(dnnr,res)
       count += 1
     end
@@ -319,14 +319,14 @@ function transform_worker!(dnnr::DateValNNer,joinc::T) where {T<:DataFrame}
 
   # to fill-in with nearest neighbors
   nnsize::Int64 = dnnr.args[:nnsize]
-  themissing = findall(ismissing.(joined[:Value]))
+  themissing = findall(ismissing.(joined.Value))
   # ==== symmetric nearest neighbor
   missingndx = DataFrame()
   if dnnr.args[:missdirection] == :symmetric
     missed = themissing |> reverse
-    missingndx[:Missed] = missed
+    missingndx.Missed = missed
     # get lower:upper range
-    missingndx[:neighbors] = map(missingndx[:Missed]) do m
+    missingndx.neighbors = map(missingndx.Missed) do m
       lower = (m-nnsize >= 1) ? (m-nnsize) : 1
       upper = (m+nnsize <= maxrow) ? m+nnsize : maxrow
       lower:upper
@@ -334,14 +334,14 @@ function transform_worker!(dnnr::DateValNNer,joinc::T) where {T<:DataFrame}
   else
     # ===== reverse and forward
     missed = (dnnr.args[:missdirection] == :reverse) ? (themissing |> reverse) : themissing
-    missingndx[:Missed] = missed
+    missingndx.Missed = missed
     # dealing with boundary exceptions, default to range until the maxrow
-    missingndx[:neighbors] = (m->((m+1>=maxrow) || (m+nnsize>=maxrow)) ? (m+1:maxrow) : (m+1:m+nnsize)).(missingndx[:Missed]) # NN ranges
+    missingndx.neighbors = (m->((m+1>=maxrow) || (m+nnsize>=maxrow)) ? (m+1:maxrow) : (m+1:m+nnsize)).(missingndx.Missed) # NN ranges
   end
   #joined[missingndx[:Missed],:Value] = (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # iterate to each range
-  missingvals::SubArray = @view joined[missingndx[:Missed],:Value] # get view of only missings
-  missingvals .=  (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # replace with nn medians
-  dnnr.args[:strict] && (sum(ismissing.(joined[:,:Value])) == 0 || error("Nearest Neigbour algo failed to replace missings"))
+  missingvals::SubArray = @view joined[missingndx.Missed,:Value] # get view of only missings
+  missingvals .=  (r -> skipmedian(joined[r,:Value])).(missingndx.neighbors) # replace with nn medians
+  dnnr.args[:strict] && (sum(ismissing.(joined.Value)) == 0 || error("Nearest Neigbour algo failed to replace missings"))
   joined
 end
 
@@ -369,7 +369,7 @@ function transform!(csvrdr::CSVDateValReader,x::T=[]) where {T<:Union{DataFrame,
     df = CSV.read(fname) |> DataFrame
     ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
     rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
-    df[:Date] = DateTime.(df[:Date],fmt)
+    df.Date = DateTime.(df.Date,fmt)
     df
 end
 
@@ -398,7 +398,7 @@ function transform!(csvwtr::CSVDateValWriter,x::T) where {T<:Union{DataFrame,Vec
     df = deepcopy(x) |> DataFrame
     if ncol(df) == 2 
       rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
-      eltype(df[:Date]) <: DateTime || error("Date format error")
+      eltype(df.Date) <: DateTime || error("Date format error")
     end
     df |> CSV.write(fname)
     return df

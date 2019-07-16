@@ -51,8 +51,8 @@ function transform!(tdb::TimescaleDB, features::T=[]) where {T<:Union{Vector,Mat
   ncol(df) == 2 || error("data should have 2 columns")
   nrow(df) > 0 || return DataFrame()
   rename!(df,names(df)[1] => :Date, names(df)[2] => :Value)
-  df[:Date] = DateTime.(df[:Date])
-  eltype(df[:Value]) <: Number || error("values in second column are not numeric")
+  df.Date = DateTime.(df.Date)
+  eltype(df.Value) <: Number || error("values in second column are not numeric")
   return df
 end
 
