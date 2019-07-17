@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Aggregation · TSML Documentation</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link href="../../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>TSML Documentation</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../../">HOME</a></li><li><span class="toctext">Tutorial</span><ul><li><a class="toctext" href="../../tutorial/aggregators/">Aggregators and Imputers</a></li><li><a class="toctext" href="../../tutorial/pipeline/">Pipeline</a></li><li><a class="toctext" href="../../tutorial/statistics/">Statistical Metrics</a></li><li><a class="toctext" href="../../tutorial/monotonic_plotting/">Monotonic Detection and Plotting</a></li><li><a class="toctext" href="../../tutorial/tsclassifier/">TS Data Discovery</a></li></ul></li><li><span class="toctext">Manual</span><ul><li><a class="toctext" href="../valueproc/">Value PreProcessing</a></li><li><a class="toctext" href="../dateproc/">Date PreProcessing</a></li><li class="current"><a class="toctext" href>Aggregation</a><ul class="internal"><li><a class="toctext" href="#DateValgator-1">DateValgator</a></li></ul></li><li><a class="toctext" href="../imputation/">Imputation</a></li></ul></li><li><span class="toctext">ML Library</span><ul><li><a class="toctext" href="../../lib/decisiontree/">Decision Tree</a></li><li><a class="toctext" href="../../lib/functions/">Types and Functions</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Manual</li><li><a href>Aggregation</a></li></ul><a class="edit-page" href="https://github.com/IBM/TSML.jl/blob/master/docs/src/man/aggregation.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Aggregation</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Aggregation-1" href="#Aggregation-1">Aggregation</a></h1><p><code>DateValgator</code> is a data type that supports operation  for aggregation to minimize noise and  lessen the occurrence of missing data. It expects to receive one argument which is the date-time interval for grouping values by taking  their median. For example, hourly median as the basis of aggregation can be carried out by passing this argument: <code>:dateinterval =&gt; Dates.Hour(1)</code></p><p>To illustrate <code>DateValgator</code> usage, let&#39;s start by  generating an artificial data with sample frequencey every 5 minutes and print the first 10 rows.</p><pre><code class="language-julia">using Dates, DataFrames
+gdate = DateTime(2014,1,1):Dates.Minute(5):DateTime(2014,5,1)
+gval = rand(length(gdate))
+
+df = DataFrame(Date=gdate,Value=gval)</code></pre><pre><code class="language-julia-repl">julia&gt; first(df,10)
+10×2 DataFrames.DataFrame
+│ Row │ Date                │ Value     │
+│     │ Dates.DateTime      │ Float64   │
+├─────┼─────────────────────┼───────────┤
+│ 1   │ 2014-01-01T00:00:00 │ 0.399431  │
+│ 2   │ 2014-01-01T00:05:00 │ 0.788559  │
+│ 3   │ 2014-01-01T00:10:00 │ 0.545367  │
+│ 4   │ 2014-01-01T00:15:00 │ 0.839216  │
+│ 5   │ 2014-01-01T00:20:00 │ 0.470629  │
+│ 6   │ 2014-01-01T00:25:00 │ 0.0656326 │
+│ 7   │ 2014-01-01T00:30:00 │ 0.752692  │
+│ 8   │ 2014-01-01T00:35:00 │ 0.374048  │
+│ 9   │ 2014-01-01T00:40:00 │ 0.373181  │
+│ 10  │ 2014-01-01T00:45:00 │ 0.955266  │</code></pre><h2><a class="nav-anchor" id="DateValgator-1" href="#DateValgator-1">DateValgator</a></h2><p>Let&#39;s apply the aggregator and try diffent groupings: hourly vs half hourly vs daily aggregates of the data.</p><pre><code class="language-julia">using TSML, TSML.TSMLTransformers, TSML.Utils, TSML.TSMLTypes
+
+hourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Hour(1)))
+halfhourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Minute(30)))
+dailyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Day(1)))
+
+fit!(halfhourlyagg,df)
+halfhourlyres = transform!(halfhourlyagg,df)
+
+fit!(hourlyagg,df)
+hourlyres = transform!(hourlyagg,df)
+
+fit!(dailyagg,df)
+dailyres = transform!(dailyagg,df)</code></pre><p>The first 5 rows of half-hourly, hourly, and daily aggregates:</p><pre><code class="language-julia-repl">julia&gt; first(halfhourlyres,5)
+5×2 DataFrames.DataFrame
+│ Row │ Date                │ Value     │
+│     │ Dates.DateTime      │ Float64⍰  │
+├─────┼─────────────────────┼───────────┤
+│ 1   │ 2014-01-01T00:00:00 │ 0.399431  │
+│ 2   │ 2014-01-01T00:30:00 │ 0.752692  │
+│ 3   │ 2014-01-01T01:00:00 │ 0.0625833 │
+│ 4   │ 2014-01-01T01:30:00 │ 0.933601  │
+│ 5   │ 2014-01-01T02:00:00 │ 0.936948  │
+
+julia&gt; first(hourlyres,5)
+5×2 DataFrames.DataFrame
+│ Row │ Date                │ Value    │
+│     │ Dates.DateTime      │ Float64⍰ │
+├─────┼─────────────────────┼──────────┤
+│ 1   │ 2014-01-01T00:00:00 │ 0.507998 │
+│ 2   │ 2014-01-01T01:00:00 │ 0.485866 │
+│ 3   │ 2014-01-01T02:00:00 │ 0.621437 │
+│ 4   │ 2014-01-01T03:00:00 │ 0.27688  │
+│ 5   │ 2014-01-01T04:00:00 │ 0.342715 │
+
+julia&gt; first(dailyres,5)
+5×2 DataFrames.DataFrame
+│ Row │ Date                │ Value    │
+│     │ Dates.DateTime      │ Float64⍰ │
+├─────┼─────────────────────┼──────────┤
+│ 1   │ 2014-01-01T00:00:00 │ 0.533073 │
+│ 2   │ 2014-01-02T00:00:00 │ 0.497969 │
+│ 3   │ 2014-01-03T00:00:00 │ 0.482068 │
+│ 4   │ 2014-01-04T00:00:00 │ 0.458082 │
+│ 5   │ 2014-01-05T00:00:00 │ 0.545561 │</code></pre><footer><hr/><a class="previous" href="../dateproc/"><span class="direction">Previous</span><span class="title">Date PreProcessing</span></a><a class="next" href="../imputation/"><span class="direction">Next</span><span class="title">Imputation</span></a></footer></article></body></html>
