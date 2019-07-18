@@ -13,6 +13,9 @@ using .TSMLTransformers
 include("baseline.jl")
 using .BaselineAlgos
 
+include("mlbase.jl")
+using .MLBaseWrapper
+
 include("decisiontree.jl")
 using .DecisionTreeLearners
 
