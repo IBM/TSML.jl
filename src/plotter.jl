@@ -41,7 +41,9 @@ mutable struct Plotter <: Transformer
         :interactive => false,
         :pdfoutput => false
     )
-    new(nothing, mergedict(default_args, args))
+    margs=mergedict(default_args, args)
+    setupplot(margs[:pdfoutput])
+    new(nothing,margs)
   end
 end
 
