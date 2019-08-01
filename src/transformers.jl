@@ -5,6 +5,7 @@ using DataFrames
 using Statistics
 using Random
 using CSV
+using CodecBzip2
 
 export fit!,transform!
 
@@ -16,6 +17,7 @@ export Imputer,Pipeline,SKLLearner,OneHotEncoder,Wrapper
 export Matrifier,Dateifier
 export DateValizer,DateValgator,DateValNNer
 export CSVDateValReader, CSVDateValWriter
+export BzCSVDateValReader
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload

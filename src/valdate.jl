@@ -345,6 +345,8 @@ function transform_worker!(dnnr::DateValNNer,joinc::T) where {T<:DataFrame}
   joined
 end
 
+# =========
+
 mutable struct CSVDateValReader <: Transformer
     model
     args
@@ -360,7 +362,7 @@ function fit!(csvrdr::CSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{Dat
     fname = csvrdr.args[:filename]
     fmt = csvrdr.args[:dateformat]
     (fname != "" && fmt != "") || error("missing filename or date format")
-    model = csvrdr.args
+    csvrdr.model = csvrdr.args
 end
 
 function transform!(csvrdr::CSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
@@ -372,6 +374,8 @@ function transform!(csvrdr::CSVDateValReader,x::T=[]) where {T<:Union{DataFrame,
     df.Date = DateTime.(df.Date,fmt)
     df
 end
+
+# ========
 
 mutable struct CSVDateValWriter <: Transformer
     model
@@ -389,7 +393,7 @@ function fit!(csvwtr::CSVDateValWriter,x::T=[],y::Vector=[]) where {T<:Union{Dat
     fname = csvwtr.args[:filename]
     fmt = csvwtr.args[:dateformat]
     fname != ""  || error("missing filename")
-    model = csvwtr.args
+    csvwtr.model = csvwtr.args
 end
 
 function transform!(csvwtr::CSVDateValWriter,x::T) where {T<:Union{DataFrame,Vector,Matrix}}
@@ -403,3 +407,36 @@ function transform!(csvwtr::CSVDateValWriter,x::T) where {T<:Union{DataFrame,Vec
     df |> CSV.write(fname)
     return df
 end
+
+# =========
+
+mutable struct BzCSVDateValReader <: Transformer
+    model
+    args
+    function BzCSVDateValReader(args=Dict())
+        default_args = Dict(
+            :filename => "",
+            :dateformat => ""
+        )
+        new(nothing,mergedict(default_args,args))
+    end
+end
+function fit!(bzcsvrdr::BzCSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+    fname = bzcsvrdr.args[:filename]
+    fmt = bzcsvrdr.args[:dateformat]
+    (fname != "" && fmt != "") || error("missing filename or date format")
+    bzcsvrdr.model = bzcsvrdr.args
+end
+
+function transform!(bzcsvrdr::BzCSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+    fname = bzcsvrdr.args[:filename]
+    fmt = bzcsvrdr.args[:dateformat]
+    stream = Bzip2DecompressorStream(open(fname))
+    df = CSV.read(stream) |> DataFrame
+    ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
+    rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
+    df.Date = DateTime.(df.Date,fmt)
+    df
+end
+
+
