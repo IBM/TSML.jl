@@ -1,53 +1,61 @@
 module TSML
+using Reexport
+
+# reexport common functions to Main
+@reexport using CSV
+@reexport using Dates
+@reexport using DataFrames
+@reexport using Random
 
 
 include("types.jl")
-using .TSMLTypes
+@reexport using .TSMLTypes
 
 include("utils.jl")
-using .Utils
+@reexport using .Utils
 
 include("transformers.jl")
-using .TSMLTransformers
+@reexport using .TSMLTransformers
 
 include("baseline.jl")
-using .BaselineAlgos
+@reexport using .BaselineAlgos
 
 include("mlbase.jl")
-using .MLBaseWrapper
+@reexport using .MLBaseWrapper
 
 include("decisiontree.jl")
-using .DecisionTreeLearners
+@reexport using .DecisionTreeLearners
 
 include("statifier.jl")
-using .Statifiers
+@reexport using .Statifiers
 
 include("monotonicer.jl")
-using .Monotonicers
+@reexport using .Monotonicers
 
 include("cliwrapper.jl")
-using .CLIWrappers
+@reexport using .CLIWrappers
 export tsmlrun
 
 include("tsclassifier.jl")
-using .TSClassifiers
+@reexport using .TSClassifiers
 
 include("outliernicer.jl")
-using .Outliernicers
+@reexport using .Outliernicers
 
 include("plotter.jl")
-using .Plotters
+@reexport using .Plotters
 
 include("timescaledb.jl")
-using .TimescaleDBs
+@reexport using .TimescaleDBs
 
 include("demo.jl")
-using .TSMLDemo
+@reexport using .TSMLDemo
 export tsml_demo
 
 include("argparse.jl")
-using .ArgumentParsers
+@reexport using .ArgumentParsers
 
 include("ensemble.jl")
-using .EnsembleMethods
+@reexport using .EnsembleMethods
+
 end # module
