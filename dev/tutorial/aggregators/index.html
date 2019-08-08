@@ -15,9 +15,9 @@ end</code></pre><pre><code class="language-julia-repl">julia&gt; X = generateDat
 └ @ Main.ex-1 ./none:8
 
 julia&gt; first(X,15)
-15×2 DataFrames.DataFrame
+15×2 DataFrame
 │ Row │ Date                │ Value     │
-│     │ Dates.DateTime      │ Float64⍰  │
+│     │ DateTime            │ Float64⍰  │
 ├─────┼─────────────────────┼───────────┤
 │ 1   │ 2014-01-01T00:00:00 │ missing   │
 │ 2   │ 2014-01-01T00:15:00 │ missing   │
@@ -42,9 +42,9 @@ using TSML: DateValgator
 dtvlgator = DateValgator(Dict(:dateinterval=&gt;Dates.Hour(1)))
 fit!(dtvlgator,X)
 results = transform!(dtvlgator,X)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
-10×2 DataFrames.DataFrame
+10×2 DataFrame
 │ Row │ Date                │ Value    │
-│     │ Dates.DateTime      │ Float64⍰ │
+│     │ DateTime            │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
 │ 1   │ 2014-01-01T00:00:00 │ missing  │
 │ 2   │ 2014-01-01T01:00:00 │ missing  │
@@ -56,14 +56,14 @@ results = transform!(dtvlgator,X)</code></pre><pre><code class="language-julia-r
 │ 8   │ 2014-01-01T07:00:00 │ 0.614255 │
 │ 9   │ 2014-01-01T08:00:00 │ 0.690462 │
 │ 10  │ 2014-01-01T09:00:00 │ 0.92049  │</code></pre><p>The occurrence of missing values is now reduced because of the hourly aggregation. While the default is hourly aggregation, you can easily change it by using a different interval in the argument during instance creation. Below indicates every 30 minutes interval.</p><pre><code class="language-julia-repl">julia&gt; dtvlgator = DateValgator(Dict(:dateinterval=&gt;Dates.Minute(30)))
-TSML.TSMLTransformers.DateValgator(nothing, Dict{Symbol,Any}(:dateinterval=&gt;30 minutes,:aggregator=&gt;:median))</code></pre><p><code>DateValgator</code> is one of the several TSML transformers to preprocess and clean the  time series data. In order to create additional transformers to extend TSML,  each transformer must overload the two <code>Transformer</code> functions:<code>fit!</code> and <code>transform!</code>.  <code>DateValgator</code> <code>fit!</code> performs initial setups of necessary parameters and validation of arguments while its <code>transform!</code> function contains the algorithm  for aggregation. </p><p>For machine learning prediction and classification transformer,  <code>fit!</code> function is equivalent to ML training or parameter optimization,  while the <code>transform!</code> function is for doing the actual prediction. The later part of the tutorial will provide an example how to add a <code>Transformer</code> to extend the functionality of TSML.</p><h2><a class="nav-anchor" id="DateValNNer-1" href="#DateValNNer-1">DateValNNer</a></h2><p>Let&#39;s perform further processing to replace the remaining missing values with their nearest neighbors.  We will use <code>DateValNNer</code> which is a TSML transformer to process the output of <code>DateValgator</code>. <code>DateValNNer</code> can also process non-aggregated data by first running similar workflow of <code>DateValgator</code> before performing its imputation routine.</p><pre><code class="language-julia">using TSML: DateValNNer
+DateValgator(nothing, Dict{Symbol,Any}(:dateinterval=&gt;30 minutes,:aggregator=&gt;:median))</code></pre><p><code>DateValgator</code> is one of the several TSML transformers to preprocess and clean the  time series data. In order to create additional transformers to extend TSML,  each transformer must overload the two <code>Transformer</code> functions:<code>fit!</code> and <code>transform!</code>.  <code>DateValgator</code> <code>fit!</code> performs initial setups of necessary parameters and validation of arguments while its <code>transform!</code> function contains the algorithm  for aggregation. </p><p>For machine learning prediction and classification transformer,  <code>fit!</code> function is equivalent to ML training or parameter optimization,  while the <code>transform!</code> function is for doing the actual prediction. The later part of the tutorial will provide an example how to add a <code>Transformer</code> to extend the functionality of TSML.</p><h2><a class="nav-anchor" id="DateValNNer-1" href="#DateValNNer-1">DateValNNer</a></h2><p>Let&#39;s perform further processing to replace the remaining missing values with their nearest neighbors.  We will use <code>DateValNNer</code> which is a TSML transformer to process the output of <code>DateValgator</code>. <code>DateValNNer</code> can also process non-aggregated data by first running similar workflow of <code>DateValgator</code> before performing its imputation routine.</p><pre><code class="language-julia">using TSML: DateValNNer
 
 datevalnner = DateValNNer(Dict(:dateinterval=&gt;Dates.Hour(1)))
 fit!(datevalnner, X)
 results = transform!(datevalnner,X)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
-10×2 DataFrames.DataFrame
+10×2 DataFrame
 │ Row │ Date                │ Value    │
-│     │ Dates.DateTime      │ Float64⍰ │
+│     │ DateTime            │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
 │ 1   │ 2014-01-01T00:00:00 │ 0.108871 │
 │ 2   │ 2014-01-01T01:00:00 │ 0.108871 │
@@ -79,9 +79,9 @@ results = transform!(datevalnner,X)</code></pre><pre><code class="language-julia
 datevalizer = DateValizer(Dict(:dateinterval=&gt;Dates.Hour(1)))
 fit!(datevalizer, X)
 results = transform!(datevalizer,X)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
-10×2 DataFrames.DataFrame
+10×2 DataFrame
 │ Row │ Date                │ Value    │
-│     │ Dates.DateTime      │ Float64⍰ │
+│     │ DateTime            │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
 │ 1   │ 2014-01-01T00:00:00 │ 0.498827 │
 │ 2   │ 2014-01-01T01:00:00 │ 0.500748 │

@@ -5,9 +5,9 @@
 └ @ Main.ex-pipeline ./string:9
 
 julia&gt; first(X,15)
-15×2 DataFrames.DataFrame
+15×2 DataFrame
 │ Row │ Date                │ Value     │
-│     │ Dates.DateTime      │ Float64⍰  │
+│     │ DateTime            │ Float64⍰  │
 ├─────┼─────────────────────┼───────────┤
 │ 1   │ 2014-01-01T00:00:00 │ missing   │
 │ 2   │ 2014-01-01T00:15:00 │ missing   │
@@ -44,9 +44,9 @@ mypipeline = Pipeline(
 
 fit!(mypipeline,X)
 results = transform!(mypipeline,X)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
-10×2 DataFrames.DataFrame
+10×2 DataFrame
 │ Row │ Date                │ Value    │
-│     │ Dates.DateTime      │ Float64⍰ │
+│     │ DateTime            │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
 │ 1   │ 2014-01-01T00:00:00 │ 0.108871 │
 │ 2   │ 2014-01-01T01:00:00 │ 0.108871 │
@@ -95,9 +95,9 @@ end</code></pre><p>Instead of passing table X that contains the time series, we 
 csvreader = CSVDateValReader(Dict(:filename=&gt;fname,:dateformat=&gt;&quot;d/m/y H:M&quot;))
 fit!(csvreader)
 csvdata = transform!(csvreader)</code></pre><pre><code class="language-julia-repl">julia&gt; first(csvdata,10)
-10×2 DataFrames.DataFrame
+10×2 DataFrame
 │ Row │ Date                │ Value   │
-│     │ Dates.DateTime      │ Float64 │
+│     │ DateTime            │ Float64 │
 ├─────┼─────────────────────┼─────────┤
 │ 1   │ 2014-01-01T00:06:00 │ 10.0    │
 │ 2   │ 2014-01-01T00:18:00 │ 10.0    │
@@ -119,9 +119,9 @@ csvdata = transform!(csvreader)</code></pre><pre><code class="language-julia-rep
 
 fit!(mypipeline)
 results = transform!(mypipeline)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
-10×2 DataFrames.DataFrame
+10×2 DataFrame
 │ Row │ Date                │ Value    │
-│     │ Dates.DateTime      │ Float64⍰ │
+│     │ DateTime            │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
 │ 1   │ 2014-01-01T00:00:00 │ 10.0     │
 │ 2   │ 2014-01-01T01:00:00 │ 9.9      │

@@ -9,9 +9,9 @@ upper = DateTime(2017,1,5)
 dat=lower:Dates.Hour(1):upper |&gt; collect
 vals = 1:length(dat)
 x = DataFrame(Date=dat,Value=vals)</code></pre><pre><code class="language-julia-repl">julia&gt; last(x,5)
-5×2 DataFrames.DataFrame
+5×2 DataFrame
 │ Row │ Date                │ Value │
-│     │ Dates.DateTime      │ Int64 │
+│     │ DateTime            │ Int64 │
 ├─────┼─────────────────────┼───────┤
 │ 1   │ 2017-01-04T20:00:00 │ 93    │
 │ 2   │ 2017-01-04T21:00:00 │ 94    │
@@ -20,7 +20,7 @@ x = DataFrame(Date=dat,Value=vals)</code></pre><pre><code class="language-julia-
 │ 5   │ 2017-01-05T00:00:00 │ 97    │</code></pre><h2><a class="nav-anchor" id="Matrifier-1" href="#Matrifier-1">Matrifier</a></h2><p>Let us create an instance of Matrifier passing the size of row, stride, and steps ahead to predict:</p><pre><code class="language-julia">mtr = Matrifier(Dict(:ahead=&gt;6,:size=&gt;6,:stride=&gt;3))
 fit!(mtr,x)
 res = transform!(mtr,x)</code></pre><pre><code class="language-julia-repl">julia&gt; first(res,5)
-5×7 DataFrames.DataFrame
+5×7 DataFrame
 │ Row │ x1    │ x2    │ x3    │ x4    │ x5    │ x6    │ output │
 │     │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64  │
 ├─────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤
@@ -31,7 +31,7 @@ res = transform!(mtr,x)</code></pre><pre><code class="language-julia-repl">julia
 │ 5   │ 74    │ 75    │ 76    │ 77    │ 78    │ 79    │ 85     │</code></pre><p>In this example, we have hourly values. We indicated in the  <code>Matrifier</code> to generate a matrix where the size of each row is 6 hours, steps ahead for prediction is 6 hours and the stride of 3 hours. There are 7 columns because the last column indicates the value indicated by the steps <code>ahead</code> argument.</p><p>Let us try to make a matrix with the size of 6 hours, steps ahead of 2 hours, and a stride of 3 hours:</p><pre><code class="language-julia">mtr = Matrifier(Dict(:ahead=&gt;2,:size=&gt;6,:stride=&gt;3))
 fit!(mtr,x)
 res = transform!(mtr,x)</code></pre><pre><code class="language-julia-repl">julia&gt; first(res,5)
-5×7 DataFrames.DataFrame
+5×7 DataFrame
 │ Row │ x1    │ x2    │ x3    │ x4    │ x5    │ x6    │ output │
 │     │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64  │
 ├─────┼───────┼───────┼───────┼───────┼───────┼───────┼────────┤

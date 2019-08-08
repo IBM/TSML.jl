@@ -34,7 +34,7 @@ getting stats of RetTemp11.csv
 getting stats of RetTemp21.csv
 getting stats of RetTemp41.csv
 getting stats of RetTemp51.csv
-TSML.DecisionTreeLearners.RandomForest(Ensemble of Decision Trees
+RandomForest(Ensemble of Decision Trees
 Trees:      10
 Avg Leaves: 4.0
 Avg Depth:  2.5, Dict{Symbol,Any}(:tstdirectory=&gt;&quot;/Users/travis/build/IBM/TSML.jl/src/../data/realdatatsclassification/testing&quot;,:output=&gt;:class,:modeldirectory=&gt;&quot;/Users/travis/build/IBM/TSML.jl/src/../data/realdatatsclassification/model&quot;,:juliarfmodelname=&gt;&quot;juliarfmodel.serialized&quot;,:feature_range=&gt;6:20,:impl_args=&gt;Dict{Symbol,Real}(:max_depth=&gt;-1,:purity_threshold=&gt;1.0,:num_subfeatures=&gt;0,:min_samples_split=&gt;2,:min_samples_leaf=&gt;1,:num_trees=&gt;10,:min_purity_increase=&gt;0.0,:partial_sampling=&gt;0.7),:trdirectory=&gt;&quot;/Users/travis/build/IBM/TSML.jl/src/../data/realdatatsclassification/training&quot;,:num_trees=&gt;20))</code></pre><p>We can examine the extracted features saved by the model that is used for its training.</p><pre><code class="language-julia">using CSV, DataFrames
@@ -44,9 +44,9 @@ modelfname=tscl.args[:juliarfmodelname]
 
 trstatfname = joinpath(mdirname,modelfname*&quot;.csv&quot;)
 res = CSV.read(trstatfname) |&gt; DataFrame</code></pre><pre><code class="language-julia-repl">julia&gt; first(res,5)
-5×22 DataFrames.DataFrame. Omitted printing of 18 columns
+5×22 DataFrame. Omitted printing of 18 columns
 │ Row │ tstart              │ tend                │ sfreq    │ count │
-│     │ Dates.DateTime      │ Dates.DateTime      │ Float64  │ Int64 │
+│     │ DateTime            │ DateTime            │ Float64  │ Int64 │
 ├─────┼─────────────────────┼─────────────────────┼──────────┼───────┤
 │ 1   │ 2012-12-01T00:00:00 │ 2013-01-01T00:00:00 │ 0.998658 │ 745   │
 │ 2   │ 2012-12-01T00:00:00 │ 2013-01-01T00:00:00 │ 0.998658 │ 745   │
@@ -60,7 +60,7 @@ getting stats of Energy5.csv
 getting stats of Pressure5.csv
 getting stats of RetTemp31.csv
 loading model from file: /Users/travis/build/IBM/TSML.jl/src/../data/realdatatsclassification/model/juliarfmodel.serialized
-6×2 DataFrames.DataFrame
+6×2 DataFrame
 │ Row │ fname           │ predtype   │
 │     │ String          │ SubStrin…  │
 ├─────┼─────────────────┼────────────┤
