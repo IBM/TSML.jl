@@ -104,18 +104,6 @@ function transform!(tree::PrunedTree, features::T) where {T<:Union{Vector,Matrix
   return DT.apply_tree(tree.model, instances)
 end
 
-function ptreerun()
-  Random.seed!(125)
-  data = getiris()
-  features = data[:,1:4]
-  sp = data.Species |> Vector
-  pt = PrunedTree()
-  fit!(pt,features,sp)
-  res=transform!(pt,features)
-  sum(sp .== res)/length(sp)
-end
-ptreerun()
-
 
 # Random forest (CART).
 
@@ -207,18 +195,6 @@ function transform!(forest::RandomForest, features::T) where {T<:Union{Vector,Ma
   return DT.apply_forest(forest.model, instances)
 end
 
-function rfrun()
-  Random.seed!(123)
-  data = getiris()
-  features = data[:,1:4]
-  sp = data.Species |> Vector
-  rf = RandomForest()
-  fit!(rf,features,sp)
-  res=transform!(rf,features)
-  sum(sp .== res)/length(sp)
-end
-rfrun()
-
 
 # Adaboosted decision stumps.
 
@@ -294,18 +270,6 @@ function transform!(adaboost::Adaboost, features::T) where {T<:Union{Vector,Matr
     adaboost.model[:ensemble], adaboost.model[:coefficients], instances
   )
 end
-
-function adarun()
-  Random.seed!(123)
-  data = getiris()
-  features = data[:,1:4]
-  sp = data.Species |> Vector
-  ada = Adaboost()
-  fit!(ada,features,sp)
-  res=transform!(ada,features)
-  sum(sp .== res)/length(sp)
-end
-adarun()
 
 
 end # module
