@@ -1,0 +1,197 @@
+
+% JuliaCon proceedings template
+\documentclass{juliacon}
+\setcounter{page}{1}
+
+\begin{document}
+
+\input{header}
+
+\maketitle
+
+\begin{abstract}
+
+  Over the past years, the industrial sector has seen many innovations brought about by automation. 
+  Inherent in this automation is the installation of sensor networks for status monitoring and data collection. 
+  One of the major challenges in these data-rich environments is how to extract and exploit information from 
+  these large volume of data to detect anomalies, discover patterns to reduce downtimes and manufacturing 
+  errors, reduce energy usage, predict faults/failures, effective maintenance schedules, etc. 
+  To address these issues, we developed TSML. Its technology is based 
+  on using the pipeline of lightweight filters as building blocks to process huge amount of industrial time series data in parallel.  
+
+\end{abstract}
+
+\section{Introduction}
+
+\textbf{TSML} is a package for time series data processing, classification, and prediction. 
+It provides common API for ML libraries from Python's ScikitLearn, 
+R's caret, and native Julia MLs for seamless integration of heterogenous 
+libraries to create complex ensembles for robust time-series prediction, clustering, and classification.
+TSML has the following features:
+\begin{itemize}
+\item data type clustering/classification for automatic data discovery
+\item aggregation based on date/time interval
+\item imputation based on symmetric Nearest Neighbors
+\item statistical metrics for data quality assessment
+\item ML wrapper with more than 100+ libraries from caret, scikitlearn, and julia
+\item date/value matrix conversion of 1-D time series using sliding windows for ML input
+\item pipeline API for high-level description of the processing workflow
+\item specific cleaning/normalization workflow based on data type
+\item automatic selection of optimised ML model
+\item automatic segmentation of time-series data into matrix form for ML training and prediction 
+\item extensible architecture using just two main interfaces: fit and transform
+\item meta-ensembles for automatic feature and model selection
+\item support for distributed computation for scalability and speed
+\end{itemize}
+
+The \textbf{TSML} package assumes a two-column input composed of \emph{dates} and \emph{values}. 
+The first part of the workflow aggregates values based on the specified date/time 
+interval which minimizes occurrence of missing values and noise. The aggregated 
+data is then left-joined to the complete sequence of dates in a specified date/time interval. 
+Remaining missing values are replaced by \textit{k} nearest neighbors where \textit{k} is the symmetric 
+distance from the location of missing value. This approach can be called several 
+times until there are no more missing values.
+
+The next part of the workflow extracts the date features and 
+convert the value column into matrix form parameterized by 
+the size and stride of the sliding window. The final part joins
+ the date features and the value matrix to serve as input to the 
+ ML with the output representing the values of the time periods 
+ to be predicted ahead of time.
+ 
+\textbf{TSML} uses a pipeline which iteratively calls the \emph{fit} and \emph{transform}
+families of functions relying on `multiple dispatch` to select the correct 
+algorithm from the steps outlined above. Machine learning functions in 
+\textbf{TSML} are wrappers to the corresponding Scikit-learn, Caret, and native Julia ML libraries. 
+There are more than hundred classifiers and regression functions available using a common API.
+
+\section{TSML Workflow}
+\label{sec:tsmlworkflow}
+%
+
+\textbf{TSML} workflow borrows the idea of Unix pipeline.
+The main elements in a pipeline are series of filters
+each performing one specific task and does it well. 
+
+\vskip 6pt
+To illustrate, below describes the main steps in using \textbf{TSML}.
+First, we create filters for csv reading, aggregation, imputation, data quality
+assessment.
+
+\begin{lstlisting}[language = Julia]
+fname = joinpath(dirname(pathof(TSML)),
+   "../data/testdata.csv")
+csvfilter = DataReader(Dict(
+   :filename=>fname,
+   :dateformat=>"dd/mm/yyyy HH:MM"))
+valgator = DateValgator(Dict(
+   :dateinterval=>Dates.Hour(1)))
+valnner = DateValNNer(Dict(
+   :dateinterval=>Dates.Hour(1)))
+stfier = Statifier(Dict(:processmissing=>true))
+\end{lstlisting}
+
+We can then setup a pipeline containing these filters to process the csv data
+by aggregating the time series hourly and check the data quality using the
+\emph{Statifier} filter.
+
+\begin{lstlisting}[language = Julia]
+apipeline = Pipeline(Dict(
+   :transformers => [csvfilter, valgator, stfier]))
+fit!(apipeline)
+mystats = transform!(apipeline)
+@show mystats
+\end{lstlisting}
+
+Calling the \emph{fit} and \emph{transform} in the pipeline
+iteratively calls the corresponding \emph{fit} and \emph{transform} within each filter. 
+This common API relying on Julia's multi-dispatch mechanism greatly simplifies the implementations, operations, 
+and understanding of the entire workflow. In addition, extending TSML functionality is just a 
+matter of creating a new data type filter and define its own  \emph{fit} and \emph{transform} 
+functions.
+
+In the \emph{Statifier} filter result, blocks of missing data is indicated by column names starting
+with \emph{b}. Running the code above indicates that there are plenty of missing data blocks.
+We can add the \emph{ValNNer} filter to perform \emph{k} nearest neighbour imputation and check
+the statistics:
+
+\begin{lstlisting}[language = Julia]
+bpipeline = Pipeline(Dict(
+  :transformers => [csvfilter, valgator, 
+                    valnner,stfier]))
+fit!(bpipeline)
+imputed = transform!(bpipeline)
+@show imputed
+\end{lstlisting}
+
+The result now indicates \emph{NaN} for all missing data statistics column because the set 
+of missing blocks count is now empty.
+
+\section{Time Series Classification}
+
+We can now use the knowledge we learned in setting up 
+\emph{pipeline} and \emph{filters} to build higher level
+operations to solve a specific industrial problem. One major problem
+which we consider relevant because it is a common issue in IOT (Internet of Things) 
+ is the time series classification. This problem is prevalent nowadays 
+due to the increasing need to use many sensors to monitor status in different aspects of industrial
+operations and maintenance of cars, buildings, hospitals, supermarkets, homes, cities, etc.
+
+Rapid deployment of these sensors result to many of them not properly labeled or classified.
+Time series classification is a significant first step for optimal prediction and anomaly detection.
+To successfully perform the latter operations, it is necessary to identify first the time series
+type so that appropriate model and cleaning routines can be selected for optimal model performance . 
+The  \emph{TSClassifier} filter aims to address this problem and its usage is described below.
+
+\vskip 6pt
+First, we setup the locations of files for training, testing, and saving the model.
+Next, we start the training phase by calling \emph{fit} which loads
+file in the training directory and learn the mapping between their
+statistic features extracted by \emph{Statifier} with their types indicated
+by their filenames. Once the training is done, the final model
+is saved in the \emph{model} directory which will be used for 
+testing accuracy and classifying new time series datasets. 
+
+\begin{lstlisting}[language = Julia]
+trdirname = "training"
+tstdirname = "testing"
+modeldirname = "model"
+tscl = TSClassifier(Dict(
+   :trdirectory=>trdirname,
+   :tstdirectory=>tstdirname,
+   :modeldirectory=>modeldirname,
+   :num_trees=>50)
+)
+fit!(tscl)
+predictions = transform!(tscl)
+@show testingAccuracy(predictions)
+\end{lstlisting}
+
+\section{Extending TSML with Scikitlearn and Caret}
+In the latest \textbf{TSML} version (2.3.4), we refactored the base TSML
+to only include pure Julia code implementations and moved
+external libs and binary dependencies into the TSMLextra package. 
+One major reason is to have a smaller code base so that it can be easily
+maintained and rapidly deployed. Moreover, smaller codes make
+static compilation fast for smaller docker image  
+in \emph{Kubernetes} deployment. 
+
+There are cases however where the main task of time series classification 
+requires more complex ensemble model using hierarchy or trees where 
+members are from heterogenous ML libraries. For illustration purposes, we
+will show how to ensemble ML libraries from ScikitLearn and Caret from Julia
+meta-ensembles that support common \emph{fit} and \emph{transform} APIs.
+
+%\begin{verbatim}
+%\bibliographystyle{juliacon}
+%\bibliography{ref}
+%\end{verbatim}
+%When submitting the document source (.tex) file to external
+%parties, the ref.bib file should be sent with it.
+%\cite{bezanson2017julia}
+
+%\input{bib.tex}
+
+\end{document}
+
+% Inspired by the International Journal of Computer Applications template
