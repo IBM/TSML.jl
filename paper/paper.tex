@@ -183,6 +183,8 @@ different languages. For illustration purposes, we will show how to
 ensemble ML libraries from ScikitLearn and Caret using \textbf{TSML} 
 meta-ensembles that support the \emph{fit} and \emph{transform} APIs.
 
+\vskip 6pt
+
 Load necessary modules:
 \begin{lstlisting}[language = Julia]
 @everywhere using TSML, TSMLextra, Plots
@@ -255,6 +257,47 @@ Setup Julia learners and meta-ensembles:
                jbest_ens,sk_rf,sk_gb]))
 \end{lstlisting}
 
+Setup pipeline for training and prediction:
+\begin{lstlisting}[language = Julia]
+@everywhere function predict(learner,
+            data,train_ind,test_ind)
+            
+  features = convert(Matrix,data[:, 1:(end-1)])
+  labels = convert(Array,data[:, end])
+  # Create pipeline
+  pipeline = Pipeline(
+    Dict(
+      :transformers => [
+        OneHotEncoder(), # nominal to bits
+        Imputer(), # Imputes NA values
+        StandardScaler(), # normalize
+        learner # Predicts labels on instances
+      ]
+    )
+  )
+  
+  # Train
+  fit!(pipeline, features[train_ind, :],
+       labels[train_ind])
+       
+  # Predict
+  predictions = transform!(pipeline, 
+      features[test_ind, :])
+  
+  # Assess predictions
+  result = score(:accuracy, 
+      labels[test_ind], predictions)
+  return result
+end
+\end{lstlisting}
+
+
+TODO: 
+\begin{itemize}
+\item add plots
+\item add stats output
+\item add more examples from docs
+\end{itemize}
 %\begin{verbatim}
 %\bibliographystyle{juliacon}
 %\bibliography{ref}
