@@ -25,7 +25,7 @@
 
 \textbf{TSML} is a package for time series data processing, classification, and prediction. 
 It provides common API for ML libraries from Python's ScikitLearn, 
-R's caret, and native Julia MLs for seamless integration of heterogenous 
+R's caret, and native Julia MLs for seamless integration of heterogeneous 
 libraries to create complex ensembles for robust time-series prediction, clustering, and classification.
 TSML has the following features:
 \begin{itemize}
@@ -177,10 +177,83 @@ static compilation fast for smaller docker image
 in \emph{Kubernetes} deployment. 
 
 There are cases however where the main task of time series classification 
-requires more complex ensemble model using hierarchy or trees where 
-members are from heterogenous ML libraries. For illustration purposes, we
-will show how to ensemble ML libraries from ScikitLearn and Caret from Julia
-meta-ensembles that support common \emph{fit} and \emph{transform} APIs.
+requires more complex ensemble model using hierarchy or tree where 
+members are composed of heterogeneous ML learners from binaries in 
+different languages. For illustration purposes, we will show how to 
+ensemble ML libraries from ScikitLearn and Caret using \textbf{TSML} 
+meta-ensembles that support the \emph{fit} and \emph{transform} APIs.
+
+Load necessary modules:
+\begin{lstlisting}[language = Julia]
+@everywhere using TSML, TSMLextra, Plots
+@everywhere using TSML.TSMLTypes
+@everywhere using TSML: TSClassifier
+@everywhere using TSML.TSClassifiers.FileStats
+@everywhere using TSML.TSMLTransformers
+@everywhere using TSML.EnsembleMethods
+@everywhere using TSML.DecisionTreeLearners
+@everywhere using TSML.Utils
+@everywhere using TSMLextra.CaretLearners
+@everywhere using TSMLextra.SKLearners
+@everywhere using TSML.MLBaseWrapper
+
+@everywhere using DataFrames
+@everywhere using Random
+@everywhere using Statistics
+@everywhere using StatsBase: iqr
+@everywhere using RDatasets
+\end{lstlisting}
+
+Setup external learners:
+\begin{lstlisting}[language = Julia]
+# Caret ML
+@everywhere caret_svmlinear = 
+   CaretLearner(Dict(:learner=>"svmLinear"))
+@everywhere caret_treebag = 
+   CaretLearner(Dict(:learner=>"treebag"))
+@everywhere caret_rpart = 
+   CaretLearner(Dict(:learner=>"rpart"))
+@everywhere caret_rf = 
+   CaretLearner(Dict(:learner=>"rf"))
+
+# ScikitLearn ML
+@everywhere sk_ridge = 
+   SKLearner(Dict(:learner=>"RidgeClassifier"))
+@everywhere sk_sgd = 
+   SKLearner(Dict(:learner=>"SGDClassifier"))
+@everywhere sk_knn = 
+   SKLearner(Dict(:learner=>"KNeighborsClassifier"))
+@everywhere sk_gb = 
+   SKLearner(Dict(:learner=>
+   "GradientBoostingClassifier",
+   :impl_args=>Dict(:n_estimators=>10)))
+@everywhere sk_extratree = 
+   SKLearner(Dict(:learner=>"ExtraTreesClassifier",
+   :impl_args=>Dict(:n_estimators=>10)))
+@everywhere sk_rf = 
+   SKLearner(Dict(:learner=>
+   "RandomForestClassifier",
+   :impl_args=>Dict(:n_estimators=>10)))
+\end{lstlisting}
+
+Setup Julia learners and meta-ensembles:
+\begin{lstlisting}[language = Julia]
+# Julia ML
+@everywhere jrf = RandomForest()
+@everywhere jpt = PrunedTree()
+@everywhere jada = Adaboost()
+
+# Julia Ensembles
+@everywhere jvote_ens=VoteEnsemble(Dict(
+   :learners=>[jrf,jpt,sk_gb,sk_extratree,sk_rf]))
+@everywhere jstack_ens=StackEnsemble(Dict(
+   :learners=>[jrf,jpt,sk_gb,sk_extratree,sk_rf]))
+@everywhere jbest_ens=BestLearner(Dict(
+   :learners=>[jrf,sk_gb,sk_rf]))
+@everywhere jsuper_ens=VoteEnsemble(Dict(
+   :learners=>[jvote_ens,jstack_ens,
+               jbest_ens,sk_rf,sk_gb]))
+\end{lstlisting}
 
 %\begin{verbatim}
 %\bibliographystyle{juliacon}
