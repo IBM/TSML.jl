@@ -139,11 +139,11 @@ respipe2 = transform!(mpipeline2)
 @show respipe2
 ```
 
-- #### Load csv data, aggregate, impute, and normalize outliers
+- #### Load csv data, aggregate, impute, normalize outliers, and plot
 ```julia
 # Add imputation in the pipeline and rerun
 mpipeline2 = Pipeline(Dict(
-  :transformers => [csvreader,valgator,valnner,outnicer]
+  :transformers => [csvreader,valgator,valnner,outnicer,plotter]
  )
 )
 fit!(mpipeline2)
@@ -157,7 +157,7 @@ respipe2 = transform!(mpipeline2)
 ```julia
 # Add imputation in the pipeline, and plot 
 mpipeline2 = Pipeline(Dict(
-  :transformers => [csvreader,valgator,valnner,mono]
+  :transformers => [csvreader,valgator,valnner,mono,plotter]
  )
 )
 fit!(mpipeline2)
