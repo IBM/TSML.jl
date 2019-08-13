@@ -1,7 +1,7 @@
 module TestMLBaseWrapper
 
 using Test
-using TSML.MLBaseWrapper
+using TSML
 
 @testset "MLBase transformers" begin
 

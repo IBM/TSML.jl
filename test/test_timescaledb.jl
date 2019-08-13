@@ -1,15 +1,7 @@
 module TestTimescaleDB
 
-using TSML
-using TSML.Utils
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-
-using TSML.TimescaleDBs
-
-using DataFrames
-using Dates
 using Test
+using TSML
 
 function test_timescaledb()
   tsdb = TimescaleDB()

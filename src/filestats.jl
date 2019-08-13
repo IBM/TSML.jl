@@ -1,11 +1,10 @@
-module FileStats
+@reexport module FileStats
 
-export ispathnotempty, getstats, TSType
+export ispathnotempty, getstats, getfilestat, TSType
 
 using DataFrames
 using Dates
 using TSML
-using TSML:CSVDateValReader, DateValgator, DateValNNer, Statifier, Pipeline, fit!, transform!
 
 @enum TSType begin
   temperature = 1

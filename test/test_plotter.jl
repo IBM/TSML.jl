@@ -1,20 +1,9 @@
 module TestPlotter
 
-using Plots
-
-using TSML
-using TSML.Utils
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-
-using TSML: CSVDateValReader,Plotter
-using TSML: fit!, transform!
-
-using DataFrames
-using Dates
-using Random
-using StatsBase: sample 
 using Test
+using Plots
+using StatsBase: sample 
+using TSML
 
 function generatedf()
     Random.seed!(123)

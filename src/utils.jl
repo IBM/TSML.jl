@@ -1,5 +1,6 @@
-module Utils
+@reexport module Utils
 
+using Random: randperm
 export mergedict, getiris 
 export skipmean,skipmedian,skipstd
 export aggregatorclskipmissing
@@ -16,7 +17,6 @@ export holdout,
 
 using TSML: Transformer
 using Statistics
-using Random
 using DataFrames
 using CSV
 

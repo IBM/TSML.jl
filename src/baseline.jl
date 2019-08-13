@@ -1,4 +1,4 @@
-module BaselineAlgos
+@reexport module BaselineAlgos
 
 using TSML.TSMLTypes
 using TSML.Utils

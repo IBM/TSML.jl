@@ -1,4 +1,4 @@
-module Plotters
+@reexport module Plotters
 
 using Plots
 using GR

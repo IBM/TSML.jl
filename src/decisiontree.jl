@@ -1,5 +1,5 @@
 # Decision trees as found in DecisionTree Julia package.
-module DecisionTreeLearners
+@reexport module DecisionTreeLearners
 
 using DataFrames
 using TSML.TSMLTypes

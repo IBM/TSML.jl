@@ -1,4 +1,4 @@
-module Outliernicers
+@reexport module Outliernicers
 
 using Dates
 using DataFrames

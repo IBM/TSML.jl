@@ -1,9 +1,9 @@
 # Ensemble learning methods.
-module EnsembleMethods
+@reexport module EnsembleMethods
 
 using DataFrames
 using Statistics
-using Random
+using Random: randperm
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit!
@@ -14,10 +14,7 @@ import StatsBase
 import IterTools: product
 import MLBase
 
-import TSML.DecisionTreeLearners: fit!, transform!
-import TSML.DecisionTreeLearners: PrunedTree
-import TSML.DecisionTreeLearners: RandomForest
-import TSML.DecisionTreeLearners: Adaboost
+using TSML.DecisionTreeLearners
 
 export VoteEnsemble, 
        StackEnsemble,

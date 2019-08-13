@@ -1,14 +1,14 @@
 # MLBase transformers.
-module MLBaseWrapper
-
+@reexport module MLBaseWrapper
+using Reexport
 using DataFrames
+
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit!
 import TSML.TSMLTypes.transform!
 using TSML.Utils
 
 include("standardize.jl")
-
 using .MStandardize # standardize,estimate,transform
 
 export StandardScaler,

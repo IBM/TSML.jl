@@ -1,4 +1,4 @@
-module Statifiers
+@reexport module Statifiers
 
 using StatsBase: std, skewness, kurtosis, variation, sem, mad
 using StatsBase: entropy, summarystats, autocor, pacf, rle, quantile
@@ -10,7 +10,7 @@ using Statistics
 export fit!,transform!
 export Statifier
 
-export fullstat,statifierrun
+export tsmlfullstat
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload
@@ -43,7 +43,7 @@ function transform!(st::Statifier, features::T=[]) where {T<:Union{Vector,Matrix
   typeof(features) <: DataFrame || error("Statifier.fit!: data should be a dataframe: Date,Val ")
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
-  fstat = fullstat(features.Value)
+  fstat = tsmlfullstat(features.Value)
   timestat = timevalstat(features)
   if st.args[:processmissing] == true
     # full namedtuple: stat1,stat2,bstat
@@ -63,7 +63,7 @@ function timevalstat(features::DataFrame)
   dftime = DataFrame(tstart=timestart,tend=timeend,sfreq=sfreq)
 end
 
-function fullstat(dat::Vector)
+function tsmlfullstat(dat::Vector)
   data = skipmissing(dat) |> collect
   lcount = length(data)
   lmax = maximum(data)

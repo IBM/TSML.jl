@@ -1,19 +1,8 @@
 module TestEnsembleMethods
 
-#include(joinpath("..", "fixture_learners.jl"))
-#using .FixtureLearners
-#nfcp = NumericFeatureClassification()
-
 using Test
 using Random
-
 using TSML
-using TSML.EnsembleMethods
-using TSML.DecisionTreeLearners
-using TSML.TSMLTypes
-
-include(joinpath(dirname(pathof(TSML)),"filestats.jl"))
-using .FileStats
 
 function getprediction(model::TSLearner,data::Dict)
   Random.seed!(126)

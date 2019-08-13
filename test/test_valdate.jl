@@ -1,19 +1,7 @@
 module TestDateVal
 
-using TSML
-using TSML.Utils
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-
-using TSML.Statifiers
-
-using CSV
-using Random
-using Statistics
-using DataFrames
-using Dates
-#using MLDataUtils
 using Test
+using TSML
 
 function generateXY()
     Random.seed!(123)

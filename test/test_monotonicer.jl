@@ -1,18 +1,7 @@
 module TestMonotonicer
 
-using TSML
-using TSML.Utils
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-
-using TSML.Monotonicers
-using TSML.Monotonicers: ismonotonic
-using TSML.Statifiers
-
-using DataFrames
-using Dates
-using Random
 using Test
+using TSML
 
 function test_basicmonotonicer()
   Random.seed!(123)
