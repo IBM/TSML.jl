@@ -92,13 +92,10 @@ Below are examples of the `Pipeline` workflow.
 
 Generally, you will need the different transformers and utils in TSML for time-series processing. To use them, it is standard in TSML code to have the following declared at the topmost part of your application:
 
-- #### Load TSML filters/transformers
+- #### Load TSML and setup filters/transformers
 ```julia
 using TSML 
-```
 
-- #### Setup different transformers
-```julia
 # Setup source data and filters to aggregate and impute hourly
 fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
 
