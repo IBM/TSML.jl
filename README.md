@@ -107,7 +107,7 @@ outnicer = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize outlie
 plotter = Plotter() # visualize output
 ```
 
-- #### Load csv data, aggregate, and get statistics
+- #### Setup pipeline to load csv data, aggregate, and get statistics
 ```julia
 # Setup pipeline without imputation and run
 mpipeline1 = Pipeline(Dict(
