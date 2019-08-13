@@ -80,11 +80,11 @@ described below.
 
 The package assumes a two-column input composed of Dates and Values. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurrence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by `k` nearest neighbors where `k` is the `symmetric` distance from the location of missing value. This approach can be called several times until there are no more missing values.
 
-The next part extracts the date features and convert the values into matrix form parameterized by the _size_ and _stride_ of the sliding window representing the dimension of the input for ML training and prediction.
-
-The final part combines the date features and the matrix of values as input to the ML with the output representing the values of the time periods to be predicted ahead of time.
-
 TSML uses a pipeline which iteratively calls the __fit__ and __transform__ families of functions relying on multiple dispatch to select the correct algorithm from the steps outlined above.
+
+TSML supports transforming time series data into matrix form for ML training and prediction. `Dateifier` filter extracts the date features and convert the values into matrix form parameterized by the _size_ and _stride_ of the sliding window representing the dimension of the input for ML training and prediction. Similar workflow is done by the `Matrifier` filter to convert the time series values into matrix form.
+
+The final part combines the dates matrix with the values matrix to become input of the ML with the output representing the values of the time periods to be predicted ahead of time.
 
 Machine learning functions in TSML are wrappers to the corresponding Scikit-learn, Caret, and native Julia ML libraries. There are more than hundred classifiers and regression functions available using a common API. 
 
