@@ -115,10 +115,10 @@ mpipeline1 = Pipeline(Dict(
  )
 )
 fit!(mpipeline1)
-respipe1 = transform!(mpipeline1)
+stats1 = transform!(mpipeline1)
 
 # Show statistics including blocks of missing data stats
-@show respipe1
+show(stats1, allcols=true)
 ```
 
  - #### Load csv data, aggregate, impute, and get statistics
@@ -129,10 +129,10 @@ mpipeline2 = Pipeline(Dict(
  )
 )
 fit!(mpipeline2)
-respipe2 = transform!(mpipeline2)
+stats2 = transform!(mpipeline2)
 
 # Show statistics including blocks of missing data stats
-@show respipe2
+show(stats2, allcols=true)
 ```
 
 - #### Load csv data, aggregate, impute, normalize monotonic data, and plot
