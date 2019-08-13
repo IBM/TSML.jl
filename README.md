@@ -94,11 +94,10 @@ Generally, you will need the different transformers and utils in TSML for time-s
 
 - #### Load TSML and setup filters/transformers
 ```julia
+# Setup source data and filters to aggregate and impute hourly
 using TSML 
 
-# Setup source data and filters to aggregate and impute hourly
 fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
-
 csvreader = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
 valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1))) # aggregator
 valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))   # imputer
