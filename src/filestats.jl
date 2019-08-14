@@ -69,7 +69,7 @@ function threadloop(ldirname,mfiles)
       df=getfilestat(ldirname,file)
       lock(mutex)
       trdata = vcat(trdata,df)
-      println("getting stats of "*file*" thread:"*string(Base.Threads.threadid()))
+      println("getting stats of "*file*" on thread:"*string(Base.Threads.threadid()))
       unlock(mutex)
     catch errormsg
       println("skipping "*file*": "*string(errormsg))
