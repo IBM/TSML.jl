@@ -25,18 +25,21 @@ after_success:
 
 jobs:
   include:
-    - stage: "Documentation"
-      julia: 1.0
+    - stage: "HTML Documentation"
+      julia: 1.1
       os: osx
       script:
         - julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
         - julia --project=docs/ docs/make.jl
       name: "HTML"
       after_success: skip
-    - script:
+      services: docker
+    - stage: "PDF Documentation"
+      julia: 1.1
+      os: osx
+      script:
         - julia --project=docs/pdf/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
         - julia --project=docs/pdf/ docs/pdf/make.jl
       name: "PDF"
       after_success: skip
       services: docker
-   
