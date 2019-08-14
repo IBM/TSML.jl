@@ -10,9 +10,10 @@ julia:
 env:
   - JULIA_NUM_THREADS=8
 matrix:
+  fast_finish: true
   allow_failures:
     - julia: nightly
-    - fast_finish: true
+
 notifications:
   email: false
 
