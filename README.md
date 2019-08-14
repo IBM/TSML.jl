@@ -27,7 +27,7 @@ Follow this link for a quick [Jupyter Notebook TSML Demo](https://github.com/IBM
 - Automatic segmentation of time-series data into matrix form for ML training and  prediction
 - Easily extensible architecture by using just two main interfaces: fit and transform
 - Meta-ensembles for robust prediction
-- Support for distributed computation, for scalability, and speed
+- Support for threads and distributed computation for scalability, and speed
 
 ## Installation
 TSML is in the Julia Official package registry. The latest release can be installed at the Julia prompt using Julia's package management which is triggered by pressing `]` at the julia prompt:
@@ -175,8 +175,8 @@ Usage questions can be posted in:
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-dev-url]: https://ibm.github.io/TSML.jl/latest/
 
-[travis-img]: https://travis-ci.org/ppalmes/TSML.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/ppalmes/TSML.jl
+[travis-img]: https://travis-ci.org/IBM/TSML.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/IBM/TSML.jl
 
 [codecov-img]: https://codecov.io/gh/IBM/TSML.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/IBM/TSML.jl
