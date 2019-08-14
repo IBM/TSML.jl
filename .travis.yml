@@ -12,6 +12,7 @@ env:
 matrix:
   allow_failures:
     - julia: nightly
+    - fast_finish: true
 notifications:
   email: false
 
