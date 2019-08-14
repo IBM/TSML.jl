@@ -1,5 +1,6 @@
 # Decision trees as found in DecisionTree Julia package.
-module TSClassifiers
+@reexport module TSClassifiers
+using Reexport
 
 """
 Given a bunch of time-series with specific types. Get the statistical features of each,

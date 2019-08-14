@@ -1,16 +1,7 @@
 module TestDecisionTree
 
-using TSML
-using TSML.Utils
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-using TSML.DecisionTreeLearners
-
-using DataFrames
-using Random
-using Statistics
 using Test
-using Dates
+using TSML
 
 
 function generateXY()

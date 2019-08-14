@@ -1,16 +1,7 @@
 module TestStatifier
 
-using TSML
-using TSML.Utils
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-
-using TSML.Statifiers
-
-using DataFrames
-using Dates
-using Random
 using Test
+using TSML
 
 function test_statifier()
 

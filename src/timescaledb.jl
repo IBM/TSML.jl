@@ -1,4 +1,4 @@
-module TimescaleDBs
+@reexport module TimescaleDBs
 
 using HTTP, JSON2
 

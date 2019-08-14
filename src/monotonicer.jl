@@ -1,4 +1,4 @@
-module Monotonicers
+@reexport module Monotonicers
 
 using Dates
 using DataFrames
@@ -7,8 +7,6 @@ using Statistics
 
 export fit!,transform!,ismonotonic,dailyflips
 export Monotonicer
-
-export monotonicerrun
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload

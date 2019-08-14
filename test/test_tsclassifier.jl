@@ -1,13 +1,7 @@
 module TestTSClassifier
 
-using TSML
-using TSML.Utils
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-using TSML.TSClassifiers
-
-using DataFrames
 using Test
+using TSML
 
 function test_realdatatsclassifier()
   tscl=TSClassifier(Dict()) 

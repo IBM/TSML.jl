@@ -1,8 +1,7 @@
 module TestCLIWrapper
 
-using TSML
-using Statistics
 using Test
+using TSML
 
 using TSML.CLIWrappers:tsmlrun,rawstat,aggregatedstat,aggregatedoutput,imputedstat,imputedoutput
 

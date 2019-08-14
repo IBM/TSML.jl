@@ -1,11 +1,10 @@
-module FileStats
+@reexport module FileStats
 
-export ispathnotempty, getstats, TSType
+export ispathnotempty, getstats, getfilestat, TSType
 
 using DataFrames
 using Dates
 using TSML
-using TSML:CSVDateValReader, DateValgator, DateValNNer, Statifier, Pipeline, fit!, transform!
 
 @enum TSType begin
   temperature = 1
@@ -45,12 +44,7 @@ function getfilestat(ldirname::AbstractString,lfname::AbstractString)
   return (df)
 end
 
-# loop over the directory and get stats of each file
-# return a dataframe containing stat features and ts type for target
-function getstats(ldirname::AbstractString)
-  ldirname != "" || error("directory name empty")
-  mfiles = readdir(ldirname) |> x->filter(y->match(r".csv",y) != nothing,x)
-  mfiles != [] || error("empty csv directory")
+function serialloop(ldirname,mfiles)
   trdata = DataFrame()
   for file in mfiles
     try
@@ -63,6 +57,42 @@ function getstats(ldirname::AbstractString)
     end
   end
   return trdata
+end
+
+
+function threadloop(ldirname,mfiles)
+  @eval using Base.Threads
+  trdata = DataFrame()
+  mutex = SpinLock()
+  Base.Threads.@threads for file in mfiles
+    try
+      df=getfilestat(ldirname,file)
+      lock(mutex)
+      trdata = vcat(trdata,df)
+      println("getting stats of "*file*" on thread:"*string(Base.Threads.threadid()))
+      unlock(mutex)
+    catch errormsg
+      println("skipping "*file*": "*string(errormsg))
+    end
+  end
+  return trdata
+end
+
+# loop over the directory and get stats of each file
+# return a dataframe containing stat features and ts type for target
+function getstats(ldirname::AbstractString)
+  ldirname != "" || error("directory name empty")
+  mfiles = readdir(ldirname) |> x->filter(y->match(r".csv",y) != nothing,x)
+  mfiles != [] || error("empty csv directory")
+  # get julia version and run threads if julia 1.3
+  jversion = string(Base.VERSION)
+  df = DataFrame()
+  if match(r"^1.3",jversion) === nothing
+    df = serialloop(ldirname,mfiles)
+  else
+    df = threadloop(ldirname,mfiles)
+  end
+  return df
 end
 
 end

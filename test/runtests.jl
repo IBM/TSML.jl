@@ -12,7 +12,6 @@ include("test_cliwrapper.jl")
 include("test_outliernicer.jl")
 include("test_plotter.jl")
 
-
 #include("test_timescaledb.jl")
 
 end

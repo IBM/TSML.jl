@@ -1,4 +1,4 @@
-module ArgumentParsers
+@reexport module ArgumentParsers
 
 using TSML
 using TSML.TSMLTypes

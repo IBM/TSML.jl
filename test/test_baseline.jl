@@ -1,13 +1,7 @@
 module TestBaseline
 
-using TSML
-using TSML.Utils
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-using TSML.BaselineAlgos
-using Random
 using Test
-using DataFrames
+using TSML
 
 function test_baseline()
     Random.seed!(123)

@@ -1,19 +1,8 @@
 module TestOutliernicer
 
-using TSML
-using TSML.Utils
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-
-using TSML.Outliernicers
-using TSML.Monotonicers
-using TSML.Statifiers
-
-using DataFrames
-using Dates
-using Random
 using StatsBase: sample, mean
 using Test
+using TSML
 
 function test_artificialdata()
   Random.seed!(123)

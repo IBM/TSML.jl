@@ -1,4 +1,4 @@
-module CLIWrappers
+@reexport module CLIWrappers
 
 using TSML
 using TSML.TSMLTypes

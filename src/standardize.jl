@@ -1,4 +1,4 @@
-module MStandardize
+@reexport module MStandardize
 
 using LinearAlgebra
 

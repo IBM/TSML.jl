@@ -1,8 +1,7 @@
-module TSMLTypes
+@reexport module TSMLTypes
 
 using DataFrames
 
-export typerun
 export 	Transformer,
 		TSLearner,
 		fit!,
