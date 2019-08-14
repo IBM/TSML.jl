@@ -19,7 +19,7 @@ Let us again start generating an artificial data with missing values
 using the `generateDataWithMissing()` described in the beginning of tutorial.
 
 ```@setup stat
-using Random, Dates, DataFrames
+using TSML
 function generateDataWithMissing()
    Random.seed!(123)
    gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
@@ -27,7 +27,7 @@ function generateDataWithMissing()
    gmissing = 50000
    gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
    df = DataFrame(Date=gdate,Value=gval)
-   df[:Value][gndxmissing] .= missing
+   df[!,:Value][gndxmissing] .= missing
    return df
 end
 ```
@@ -45,14 +45,7 @@ missing blocks of data. To disable this feature, one can pass
 illustrates this workflow.
 
 ```@example stat
-using Dates
 using TSML
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-using TSML: Pipeline
-using TSML: DateValgator
-using TSML: DateValNNer
-using TSML: Statifier
 
 dtvalgator = DateValgator(Dict(:dateinterval => Dates.Hour(1)))
 dtvalnner = DateValNNer(Dict(:dateinterval => Dates.Hour(1)))

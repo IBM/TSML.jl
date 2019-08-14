@@ -16,10 +16,7 @@ to the other dates.
 Let us start by creating a Date,Value dataframe similar to the previous section.
 
 ```@example dateifier
-using Dates
-using TSML, TSML.Utils, TSML.TSMLTypes
-using TSML.TSMLTransformers
-using DataFrames
+using TSML
 
 lower = DateTime(2017,1,1)
 upper = DateTime(2018,1,31)

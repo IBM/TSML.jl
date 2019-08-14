@@ -14,12 +14,10 @@ Let's create an artificial monotonic data and apply our monotonic transformer to
 We can use the `Plotter` filter to visualize the generated data.
 
 ```@example mono
-using Dates, DataFrames, Random
-using TSML, TSML.Utils, TSML.TSMLTypes
-using TSML: Plotter
+using TSML
 
 Random.seed!(123)
-pltr = Plotter(Dict(:interactive => false))
+pltr = Plotter(Dict(:interactive => false,:pdfoutput => false))
 mdates = DateTime(2017,12,1,1):Dates.Hour(1):DateTime(2017,12,31,10) |> collect
 mvals = rand(length(mdates)) |> cumsum
 df =  DataFrame(Date=mdates ,Value = mvals)
@@ -30,12 +28,9 @@ transform!(pltr,df)
 Now that we have a monotonic data, let's use the `Monotonicer` to normalize and plot the result:
 
 ```@example mono
-using TSML, TSML.Utils, TSML.TSMLTypes
-using TSML.TSMLTransformers
-using TSML: Monotonicer
+using TSML
 
 mono = Monotonicer(Dict())
-
 pipeline = Pipeline(Dict(
    :transformers => [mono,pltr]
    )
@@ -60,7 +55,8 @@ automatically detects these three different types and apply the corresponding
 normalization accordingly.
 
 ```@example mono
-using TSML: DateValgator, DateValNNer, Statifier, Monotonicer
+using TSML
+
 regularfile = joinpath(dirname(pathof(TSML)),"../data/typedetection/regular.csv")
 monofile = joinpath(dirname(pathof(TSML)),"../data/typedetection/monotonic.csv")
 dailymonofile = joinpath(dirname(pathof(TSML)),"../data/typedetection/dailymonotonic.csv")

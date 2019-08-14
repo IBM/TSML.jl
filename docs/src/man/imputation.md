@@ -24,13 +24,7 @@ imputing from the top while the `:reverse` starts from the bottom. Please refer 
 [Aggregators and Imputers](@ref aggregators_imputers) for other examples.
 
 ```@setup impute
-using Random
 using TSML
-using TSML.Utils
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-
-using Dates, DataFrames
 
 function generateXY()
     Random.seed!(123)
@@ -39,7 +33,7 @@ function generateXY()
     gmissing = 50000
     gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
     X = DataFrame(Date=gdate,Value=gval)
-    X[:Value][gndxmissing] .= missing
+    X[!,:Value][gndxmissing] .= missing
     Y = rand(length(gdate))
     (X,Y)
 end
@@ -106,9 +100,9 @@ In the example above, the number of remaining missing data not imputed for
 `forward`, `reverse`, and `symmetric` is:
 
 ```@repl impute
-sum(ismissing.(forwardres[:Value]))
-sum(ismissing.(reverseres[:Value]))
-sum(ismissing.(symmetricres[:Value]))
+sum(ismissing.(forwardres.Value))
+sum(ismissing.(reverseres.Value))
+sum(ismissing.(symmetricres.Value))
 ```
 
 ## DateValizer
@@ -126,9 +120,9 @@ Please refer to [Aggregators and Imputers](@ref aggregators_imputers) for more e
 Let's try hourly, daily, and monthly median as the basis of imputation:
 
 ```@repl impute
-hourlyzer = DateValizer(Dict(:dateinterval => Dates.Hour(1)))
-monthlyzer = DateValizer(Dict(:dateinterval => Dates.Month(1)))
-dailyzer = DateValizer(Dict(:dateinterval => Dates.Day(1)))
+hourlyzer = DateValizer(Dict(:dateinterval => Dates.Hour(1)));
+monthlyzer = DateValizer(Dict(:dateinterval => Dates.Month(1)));
+dailyzer = DateValizer(Dict(:dateinterval => Dates.Day(1)));
 
 fit!(hourlyzer,X)
 hourlyres = transform!(hourlyzer,X)
@@ -139,4 +133,3 @@ dailyres = transform!(dailyzer,X)
 fit!(monthlyzer,X)
 monthlyres = transform!(monthlyzer,X)
 ```
-

@@ -89,14 +89,13 @@ or
 julia> import TSML
 ```
 Generally, you will need the different transformers and utils in TSML for
-time-series processing. To use them, it is standard in TSML code to have the
-following declared at the topmost part of your application:
+time-series processing. To use them, TSML relies on the Reexport.jl package
+to exposes all the necessary filters and transformers into the Julia Main module
+including exported functions in DataFrames, CSV, Dates, and Random. By just a single
+line below, all these related modules become available in Julia Main module:
 
 ```julia
 using TSML 
-using TSML.TSMLTransformers
-using TSML.TSMLTypes
-using TSML.Utils
 ```
 
 ## Tutorial Outline

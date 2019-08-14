@@ -14,9 +14,7 @@ Let's create an artificial monotonic data and apply our monotonic transformer to
 We can use the `Plotter` filter to visualize the generated data.
 
 ```@example mono
-using Dates, DataFrames, Random
-using TSML, TSML.Utils, TSML.TSMLTypes
-using TSML: Plotter
+using TSML
 
 Random.seed!(123)
 pltr = Plotter(Dict(:interactive => false, :pdfoutput => true))
@@ -24,26 +22,22 @@ mdates = DateTime(2017,12,1,1):Dates.Hour(1):DateTime(2017,12,31,10) |> collect
 mvals = rand(length(mdates)) |> cumsum
 df =  DataFrame(Date=mdates ,Value = mvals)
 fit!(pltr,df)
-transform!(pltr,df)
+transform!(pltr,df);
 ```
 
 Now that we have a monotonic data, let's use the `Monotonicer` to normalize and plot the result:
 
 ```@example mono
-using TSML, TSML.Utils, TSML.TSMLTypes
-using TSML.TSMLTransformers
-using TSML: Monotonicer
+using TSML
 
 mono = Monotonicer(Dict())
-
 pipeline = Pipeline(Dict(
    :transformers => [mono,pltr]
    )
 )
 
 fit!(pipeline,df)
-res=transform!(pipeline,df)
-
+res=transform!(pipeline,df);
 ```
 
 ## Real Data Example
@@ -60,7 +54,8 @@ automatically detects these three different types and apply the corresponding
 normalization accordingly.
 
 ```@example mono
-using TSML: DateValgator, DateValNNer, Statifier, Monotonicer
+using TSML
+
 regularfile = joinpath(dirname(pathof(TSML)),"../data/typedetection/regular.csv")
 monofile = joinpath(dirname(pathof(TSML)),"../data/typedetection/monotonic.csv")
 dailymonofile = joinpath(dirname(pathof(TSML)),"../data/typedetection/dailymonotonic.csv")
@@ -88,7 +83,7 @@ pipeline = Pipeline(Dict(
    )
 )
 fit!(pipeline)
-transform!(pipeline)
+transform!(pipeline);
 ```
 
 - Pipeline without `Monotonicer`: regular time series
@@ -99,6 +94,7 @@ pipeline = Pipeline(Dict(
 )
 fit!(pipeline)
 transform!(pipeline)
+nothing #hide
 ```
 
 Notice that the plots are the same with or without the `Monotonicer` instance.
@@ -114,6 +110,7 @@ pipeline = Pipeline(Dict(
 )
 fit!(pipeline)
 transform!(pipeline)
+nothing #hide
 ```
 
 - Pipeline with `Monotonicer`: monotonic time series
@@ -123,7 +120,7 @@ pipeline = Pipeline(Dict(
    )
 )
 fit!(pipeline)
-transform!(pipeline)
+transform!(pipeline);
 ```
 
 Notice that without the `Monotonicer` instance, the data is monotonic. Applying
@@ -144,6 +141,7 @@ pipeline = Pipeline(Dict(
 )
 fit!(pipeline)
 transform!(pipeline)
+nothing #hide
 ```
 
 ## Daily Monotonic TS Processing
@@ -157,6 +155,7 @@ pipeline = Pipeline(Dict(
 )
 fit!(pipeline)
 transform!(pipeline)
+nothing #hide
 ```
 
 This plot is characterized by monotonically increasing trend but resets to certain baseline value 
@@ -172,6 +171,7 @@ pipeline = Pipeline(Dict(
 )
 fit!(pipeline)
 transform!(pipeline)
+nothing #hide
 ```
 
 While the `Monotonicer` filter is able to transform the data into a regular time series,
@@ -187,6 +187,7 @@ pipeline = Pipeline(Dict(
 )
 fit!(pipeline)
 transform!(pipeline)
+nothing #hide
 ```
 
 The `Outliernicer` filter effectively removed the outliers as shown in the plot.

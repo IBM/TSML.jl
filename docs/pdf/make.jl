@@ -1,7 +1,5 @@
 using Documenter, DocumenterTools, DocumenterLaTeX
 using TSML
-using TSML.DecisionTreeLearners
-using Test
 
 const ROOT = joinpath(@__DIR__, "..")
 
@@ -10,7 +8,7 @@ doc = makedocs(
    debug = true,
    root = ROOT,
    build = "pdf/build",
-   modules = [TSML, DecisionTreeLearners],
+   modules = [TSML],
    clean = false,
    format = LaTeX(platform = "docker"),
    sitename = "TSML: Time Series Machine Learning Toolbox",
@@ -31,7 +29,6 @@ doc = makedocs(
          "Imputation" => "man/imputation.md",
       ],
       "ML Library" => Any[
-      	 "Decision Tree" => "lib/decisiontree.md",
       	 "Types and Functions" => "lib/functions.md"
       ]
    ]  

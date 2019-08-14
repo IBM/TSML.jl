@@ -11,7 +11,7 @@ and calling `fit!` and `transform!` repeatedly for each transformer in its argum
 Let's start again by using a function to generate a time series dataframe with some missing data.
 
 ```@setup pipeline
-using Random, Dates, DataFrames
+using TSML
 function generateDataWithMissing()
    Random.seed!(123)
    gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
@@ -19,7 +19,7 @@ function generateDataWithMissing()
    gmissing = 50000
    gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
    df = DataFrame(Date=gdate,Value=gval)
-   df[:Value][gndxmissing] .= missing
+   df[!,:Value][gndxmissing] .= missing
    return df
 end
 ```
@@ -34,13 +34,7 @@ first(X,15)
 Let's use the pipeline transformer to aggregate and impute:
 
 ```@example pipeline
-using Dates
 using TSML
-using TSML.TSMLTypes
-using TSML.TSMLTransformers
-using TSML: Pipeline
-using TSML: DateValgator
-using TSML: DateValNNer
 
 dtvalgator = DateValgator(Dict(:dateinterval => Dates.Hour(1)))
 dtvalnner = DateValNNer(Dict(:dateinterval => Dates.Hour(1)))
@@ -74,12 +68,9 @@ To illustrate how simple it is to add a new transformer, below extends
 TSML by adding `CSVReader` transformer and added in the pipeline to process CSV data:
 
 ```@example pipeline
-using TSML.TSMLTypes
-using TSML.Utils
+using TSML
 import TSML.TSMLTypes.fit!
 import TSML.TSMLTypes.transform!
-
-using CSV
 
 mutable struct CSVReader <: Transformer
     model
@@ -113,7 +104,7 @@ nothing #hide
 ```
 
 Instead of passing table X that contains the time series, we will add 
-an instance of the`CSVReader` at the start of the array of transformers in the pipeline 
+an instance of the `CSVReader` at the start of the array of transformers in the pipeline 
 to read the csv data. CSVReader `transform!` function converts the csv time series table
 into a dataframe, which will be consumed by the next transformer in the pipeline 
 for processing.

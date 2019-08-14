@@ -19,10 +19,7 @@ is generated.
 
 
 ```@example matrify
-using Dates
-using TSML, TSML.Utils, TSML.TSMLTypes
-using TSML.TSMLTransformers
-using DataFrames
+using TSML
 
 lower = DateTime(2017,1,1)
 upper = DateTime(2017,1,5)

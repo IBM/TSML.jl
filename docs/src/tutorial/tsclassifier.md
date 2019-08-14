@@ -32,14 +32,13 @@ unlabeled data exploits the idea of the pipeline workflow discussed in the previ
 Let's illustrate the process by loading some sample data:
 
 ```@example tsclassifier
-using Random
 using TSML
 
 Random.seed!(12345)
-
 trdirname = joinpath(dirname(pathof(TSML)),"../data/realdatatsclassification/training")
 tstdirname = joinpath(dirname(pathof(TSML)),"../data/realdatatsclassification/testing")
 modeldirname = joinpath(dirname(pathof(TSML)),"../data/realdatatsclassification/model")
+nothing #hide
 ```
 
 Here's the list of files for training:
@@ -62,8 +61,7 @@ Let us now setup an instance of the `TSClassifier` and pass the arguments contai
 the directory locations of files for training, testing, and modeling.
 
 ```@example tsclassifier
-using TSML: TSClassifier
-using TSML: fit!, transform!
+using TSML
 
 tscl = TSClassifier(Dict(:trdirectory=>trdirname,
           :tstdirectory=>tstdirname,
@@ -78,14 +76,13 @@ Time to train our `TSClassifier` to learn the mapping between extracted stats fe
 TS type.
 
 ```@repl tsclassifier
-fit!(tscl)
+fit!(tscl);
+nothing #hide
 ```
 
 We can examine the extracted features saved by the model that is used for its training.
 
 ```@example tsclassifier
-using CSV, DataFrames
-
 mdirname = tscl.args[:modeldirectory]
 modelfname=tscl.args[:juliarfmodelname]
 
@@ -101,15 +98,16 @@ first(res,5)
 Let's check the accuracy of prediction with the test data using the `transform!` function.
 
 ```@repl tsclassifier
-dfresults = transform!(tscl)
+dfresults = transform!(tscl);
+first(dfresults,5)
 ```
 The table above shows the prediction corresponding to each filename which is the groundtruth. We can compute
 the accuracy by extracting from the filename the TS type and compare it with the corresponding prediction.
 Below computes the prediction accuracy:
 
 ```@example tsclassifier
-prediction = dfresults[:predtype]
-fnames = dfresults[:fname]
+prediction = dfresults.predtype
+fnames = dfresults.fname
 myregex = r"(?<dtype>[A-Z _ - a-z]+)(?<number>\d*).(?<ext>\w+)"
 groundtruth=map(fnames) do fname
   mymatch=match(myregex,fname)

@@ -23,7 +23,6 @@ makedocs(
       "Imputation" => "man/imputation.md",
     ],
     "ML Library" => Any[
-      "Decision Tree" => "lib/decisiontree.md"
       "Types and Functions" => "lib/functions.md"
     ]
   ],

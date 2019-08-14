@@ -15,10 +15,10 @@ generating an artificial data with sample
 frequencey every 5 minutes and print the first 10 rows.
 
 ```@example datevalgator
-using Dates, DataFrames
+using TSML
+
 gdate = DateTime(2014,1,1):Dates.Minute(5):DateTime(2014,5,1)
 gval = rand(length(gdate))
-
 df = DataFrame(Date=gdate,Value=gval)
 nothing #hide
 ```
@@ -34,7 +34,7 @@ Let's apply the aggregator and try diffent groupings: hourly vs half hourly
 vs daily aggregates of the data.
 
 ```@example datevalgator
-using TSML, TSML.TSMLTransformers, TSML.Utils, TSML.TSMLTypes
+using TSML
 
 hourlyagg = DateValgator(Dict(:dateinterval => Dates.Hour(1)))
 halfhourlyagg = DateValgator(Dict(:dateinterval => Dates.Minute(30)))

@@ -26,6 +26,7 @@ function setupplot(pdfoutput::Bool)
   else
     Plots.default(size=(500,300)); #Plot canvas size
   end
+  return nothing
 end
 
 """

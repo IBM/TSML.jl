@@ -18,7 +18,7 @@ Let us create a Date, Value table with some missing values and output the first
 Below is the code of the `generateDataWithMissing()` function:
 
 ```@example 1
-using Random, Dates, DataFrames
+using TSML
 function generateDataWithMissing()
    Random.seed!(123)
    gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
@@ -26,7 +26,7 @@ function generateDataWithMissing()
    gmissing = 50000
    gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
    df = DataFrame(Date=gdate,Value=gval)
-   df[:Value][gndxmissing] .= missing
+   df[!,:Value][gndxmissing] .= missing
    return df
 end
 nothing #hide
@@ -42,10 +42,6 @@ let's aggregate our dataset by taking the hourly median using the `DateValgator`
 
 ```@example 1
 using TSML
-using TSML.TSMLTypes
-using TSML.Utils
-using TSML.TSMLTransformers
-using TSML: DateValgator
 
 dtvlgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
 fit!(dtvlgator,X)
@@ -86,7 +82,7 @@ We will use `DateValNNer` which is a TSML transformer to process the output of `
 of `DateValgator` before performing its imputation routine.
 
 ```@example 1
-using TSML: DateValNNer
+using TSML
 
 datevalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
 fit!(datevalnner, X)
@@ -113,7 +109,7 @@ a particular hour have all missing data.
 Below is a sample workflow to replace missing data in X with the hourly medians.
 
 ```@example 1
-using TSML: DateValizer
+using TSML
 
 datevalizer = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
 fit!(datevalizer, X)
