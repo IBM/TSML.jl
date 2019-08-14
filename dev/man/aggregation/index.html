@@ -8,16 +8,16 @@ df = DataFrame(Date=gdate,Value=gval)</code></pre><pre><code class="language-jul
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64  │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.230639 │
-│ 2   │ 2014-01-01T00:05:00 │ 0.140225 │
-│ 3   │ 2014-01-01T00:10:00 │ 0.187896 │
-│ 4   │ 2014-01-01T00:15:00 │ 0.585324 │
-│ 5   │ 2014-01-01T00:20:00 │ 0.699505 │
-│ 6   │ 2014-01-01T00:25:00 │ 0.891221 │
-│ 7   │ 2014-01-01T00:30:00 │ 0.54795  │
-│ 8   │ 2014-01-01T00:35:00 │ 0.399666 │
-│ 9   │ 2014-01-01T00:40:00 │ 0.334754 │
-│ 10  │ 2014-01-01T00:45:00 │ 0.994814 │</code></pre><h2><a class="nav-anchor" id="DateValgator-1" href="#DateValgator-1">DateValgator</a></h2><p>Let&#39;s apply the aggregator and try diffent groupings: hourly vs half hourly vs daily aggregates of the data.</p><pre><code class="language-julia">using TSML
+│ 1   │ 2014-01-01T00:00:00 │ 0.899883 │
+│ 2   │ 2014-01-01T00:05:00 │ 0.908264 │
+│ 3   │ 2014-01-01T00:10:00 │ 0.010671 │
+│ 4   │ 2014-01-01T00:15:00 │ 0.538414 │
+│ 5   │ 2014-01-01T00:20:00 │ 0.785792 │
+│ 6   │ 2014-01-01T00:25:00 │ 0.674814 │
+│ 7   │ 2014-01-01T00:30:00 │ 0.325746 │
+│ 8   │ 2014-01-01T00:35:00 │ 0.403577 │
+│ 9   │ 2014-01-01T00:40:00 │ 0.143098 │
+│ 10  │ 2014-01-01T00:45:00 │ 0.581872 │</code></pre><h2><a class="nav-anchor" id="DateValgator-1" href="#DateValgator-1">DateValgator</a></h2><p>Let&#39;s apply the aggregator and try diffent groupings: hourly vs half hourly vs daily aggregates of the data.</p><pre><code class="language-julia">using TSML
 
 hourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Hour(1)))
 halfhourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Minute(30)))
@@ -35,30 +35,30 @@ dailyres = transform!(dailyagg,df)</code></pre><p>The first 5 rows of half-hourl
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.230639 │
-│ 2   │ 2014-01-01T00:30:00 │ 0.54795  │
-│ 3   │ 2014-01-01T01:00:00 │ 0.509678 │
-│ 4   │ 2014-01-01T01:30:00 │ 0.22417  │
-│ 5   │ 2014-01-01T02:00:00 │ 0.100861 │
+│ 1   │ 2014-01-01T00:00:00 │ 0.899883 │
+│ 2   │ 2014-01-01T00:30:00 │ 0.325746 │
+│ 3   │ 2014-01-01T01:00:00 │ 0.637426 │
+│ 4   │ 2014-01-01T01:30:00 │ 0.892327 │
+│ 5   │ 2014-01-01T02:00:00 │ 0.501161 │
 
 julia&gt; first(hourlyres,5)
 5×2 DataFrame
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.407982 │
-│ 2   │ 2014-01-01T01:00:00 │ 0.490897 │
-│ 3   │ 2014-01-01T02:00:00 │ 0.233705 │
-│ 4   │ 2014-01-01T03:00:00 │ 0.491308 │
-│ 5   │ 2014-01-01T04:00:00 │ 0.302316 │
+│ 1   │ 2014-01-01T00:00:00 │ 0.730303 │
+│ 2   │ 2014-01-01T01:00:00 │ 0.464519 │
+│ 3   │ 2014-01-01T02:00:00 │ 0.497896 │
+│ 4   │ 2014-01-01T03:00:00 │ 0.469517 │
+│ 5   │ 2014-01-01T04:00:00 │ 0.779348 │
 
 julia&gt; first(dailyres,5)
 5×2 DataFrame
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.457719 │
-│ 2   │ 2014-01-02T00:00:00 │ 0.489225 │
-│ 3   │ 2014-01-03T00:00:00 │ 0.549512 │
-│ 4   │ 2014-01-04T00:00:00 │ 0.510762 │
-│ 5   │ 2014-01-05T00:00:00 │ 0.554217 │</code></pre><footer><hr/><a class="previous" href="../dateproc/"><span class="direction">Previous</span><span class="title">Date PreProcessing</span></a><a class="next" href="../imputation/"><span class="direction">Next</span><span class="title">Imputation</span></a></footer></article></body></html>
+│ 1   │ 2014-01-01T00:00:00 │ 0.53341  │
+│ 2   │ 2014-01-02T00:00:00 │ 0.523556 │
+│ 3   │ 2014-01-03T00:00:00 │ 0.496558 │
+│ 4   │ 2014-01-04T00:00:00 │ 0.490904 │
+│ 5   │ 2014-01-05T00:00:00 │ 0.470239 │</code></pre><footer><hr/><a class="previous" href="../dateproc/"><span class="direction">Previous</span><span class="title">Date PreProcessing</span></a><a class="next" href="../imputation/"><span class="direction">Next</span><span class="title">Imputation</span></a></footer></article></body></html>
