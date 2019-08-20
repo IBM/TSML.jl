@@ -4,7 +4,6 @@ using StatsBase: std, skewness, kurtosis, variation, sem, mad
 using StatsBase: entropy, summarystats, autocor, pacf, rle, quantile
 using Dates
 using DataFrames
-using Random
 using Statistics
 
 export fit!,transform!
