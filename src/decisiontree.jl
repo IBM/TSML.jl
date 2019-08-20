@@ -7,7 +7,6 @@ import TSML.TSMLTypes.fit!
 import TSML.TSMLTypes.transform!
 using TSML.Utils
 
-using Random
 import DecisionTree
 DT = DecisionTree
 

@@ -2,7 +2,6 @@
 
 using Dates
 using DataFrames
-using Random
 using Statistics
 
 export fit!,transform!,ismonotonic,dailyflips
