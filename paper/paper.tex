@@ -81,7 +81,7 @@ assessment.
 \begin{lstlisting}[language = Julia]
 fname = joinpath(dirname(pathof(TSML)),
    "../data/testdata.csv")
-csvfilter = DataReader(Dict(
+csvfilter = CSVDateValReader(Dict(
    :filename=>fname,
    :dateformat=>"dd/mm/yyyy HH:MM"))
 valgator = DateValgator(Dict(
@@ -102,6 +102,15 @@ fit!(apipeline)
 mystats = transform!(apipeline)
 @show mystats
 \end{lstlisting}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=\columnwidth]{stat1.png} % requires the graphicx package
+   \vskip 2pt
+      \includegraphics[width=\columnwidth]{stat2.png} % requires the graphicx package
+   \caption{Data Quality Statistics. Column names starting with `b` refer to statistics of contiguous blocks of missing data.}
+   \label{fig:dataquality}
+\end{figure}
 
 Calling the \emph{fit} and \emph{transform} in the pipeline
 iteratively calls the corresponding \emph{fit} and \emph{transform} within each filter. 
@@ -124,8 +133,36 @@ imputed = transform!(bpipeline)
 @show imputed
 \end{lstlisting}
 
-The result now indicates \emph{NaN} for all missing data statistics column because the set 
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=\columnwidth]{imputed1.png} % requires the graphicx package
+   \vskip 2pt
+      \includegraphics[width=\columnwidth]{imputed2.png} % requires the graphicx package
+   \caption{Statistics after Imputation. All statistics for blocks of missing data indicate NaN to indicate the stats of empty set. This implies that all missing blocks are imputed.}
+   \label{fig:imputation}
+\end{figure}
+
+The result in Fig.~\ref{fig:imputation} now indicates \emph{NaN} for all missing data statistics column because the set 
 of missing blocks count is now empty.
+
+\vskip 3pt
+
+We can also visualise our time series data using the \emph{plotter} filter instead of the \emph{statifier} as show below:
+
+\begin{lstlisting}
+pltr=Plotter(Dict(:interactive => true))
+plpipeline = Pipeline(Dict(
+   :transformers => [csvfilter, valgator, pltr]))
+fit!(plpipeline)
+myplot = transform!(plpipeline)
+\end{lstlisting}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=\columnwidth]{mplot.png} % requires the graphicx package
+   \caption{example caption}
+   \label{fig:example}
+\end{figure}
 
 \section{Time Series Classification}
 
