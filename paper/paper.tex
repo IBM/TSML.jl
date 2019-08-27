@@ -52,7 +52,7 @@ Remaining missing values are replaced by \textit{k} nearest neighbors where \tex
 distance from the location of missing value. This approach can be called several 
 times until there are no more missing values.
 
-The next part of the workflow extracts the date features and 
+For prediction tasks, TSML extracts the date features and 
 convert the value column into matrix form parameterized by 
 the size and stride of the sliding window. The final part joins
  the date features and the value matrix to serve as input to the 
@@ -291,6 +291,68 @@ Setup pipeline for training and prediction:
 end
 \end{lstlisting}
 
+Setup function to run learners in parallel using distributed computing.
+\begin{lstlisting}
+function parallelmodel(learners::Dict,
+            data::DataFrame;trials=5)
+  models=collect(keys(learners))
+  ctable=@distributed (vcat) for i=1:trials
+    # Split into training and test sets
+    Random.seed!(3i)
+    (train_ind, test_ind) = 
+           holdout(size(data, 1), 0.20)
+    acc=@distributed (vcat) for model in models
+      res=predict(learners[model],
+             data,train_ind,test_ind)
+      println("trial ",i,", ",model," => ",
+              round(res))
+      [model res i]
+    end
+    acc
+  end
+  df = ctable |> DataFrame
+  rename!(df,:x1=>:model,:x2=>:acc,:x3=>:trial)
+  gp=by(df,:model) do x
+    DataFrame(mean=mean(x.acc),std=std(x.acc),
+              n=length(x.acc)) 
+  end
+  sort!(gp,:mean,rev=true)
+  return gp
+end
+\end{lstlisting}
+
+We can now benchmark the performance of the different machine learners using a sensor dataset by creating a dictionary of workers from Caret, ScikitLearn, and Julia libraries and call the `parallelmode` function:
+
+\begin{lstlisting}
+learners=Dict(
+  :jvote_ens=>jvote_ens,:jstack_ens=>jstack_ens,
+  :jbest_ens=>jbest_ens,:jrf => jrf,:jada=>jada,
+  :jsuper_ens=>jsuper_ens,#:crt_rpart=>caret_rpart,
+  :crt_svmlinear=>caret_svmlinear,
+  :crt_treebag=>caret_treebag,#:crt_rf=>caret_rf, 
+  :skl_knn=>sk_knn,:skl_gb=>sk_gb,
+  :skl_extratree=>sk_extratree,
+  :sk_rf => sk_rf
+);
+
+df = parallelmodel(learners,tsdata;trials=3)
+\end{lstlisting}
+
+Figure~\ref{fig:sim}  shows a snapshot of running workers exploiting the distributed library of Julia. There are 8 workers running in parallel over 12 different machine learning classifiers.
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=0.8\columnwidth]{sim.png} % requires the graphicx package
+   \caption{Sample output running several workers}
+   \label{fig:sim}
+\end{figure}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=0.6\columnwidth]{results.png} % requires the graphicx package
+   \caption{Sample Output in 3 Trials}
+   \label{fig:performance}
+\end{figure}
 
 TODO: 
 \begin{itemize}
