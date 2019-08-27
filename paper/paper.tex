@@ -147,22 +147,111 @@ of missing blocks count is now empty.
 
 \vskip 3pt
 
-We can also visualise our time series data using the \emph{plotter} filter instead of the \emph{statifier} as show below:
+We can also visualise our time series data using the \emph{plotter} filter instead of the \emph{statifier} as show in Fig~\ref{fig:mplot}. Looking closely, you will see discontinuities in the plot due to blocks of missing data.
 
 \begin{lstlisting}
 pltr=Plotter(Dict(:interactive => true))
 plpipeline = Pipeline(Dict(
    :transformers => [csvfilter, valgator, pltr]))
-fit!(plpipeline)
-myplot = transform!(plpipeline)
+fit!(plpipeline); transform!(plpipeline)
 \end{lstlisting}
 
 \begin{figure}[htbp]
    \centering
    \includegraphics[width=\columnwidth]{mplot.png} % requires the graphicx package
-   \caption{example caption}
-   \label{fig:example}
+   \caption{Plot with Missing Data}
+   \label{fig:mplot}
 \end{figure}
+
+Using the imputation pipeline described before, we can visualise the result of imputation by replacing the Statifier with the Plotter filter. Figure~\ref{fig:amplot} shows the plot after imputation which gets rid of missing data.
+
+\begin{lstlisting}[language = Julia]
+bplpipeline = Pipeline(Dict(
+  :transformers => [csvfilter, valgator, 
+                    valnner,pltr]))
+fit!(bplpipeline); transform!(bplpipeline)
+\end{lstlisting}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=\columnwidth]{amplot.png} % requires the graphicx package
+   \caption{Plot after Data Imputation}
+   \label{fig:amplot}
+\end{figure}
+
+\section{Processing Monotonic Time Series}
+In this section, we will show additional filters we use to handle monotonic data which are commonly used in energy/water meter sensors as well as in footfall sensors. In the former case, the time series type is strictly monotonically increasing while in the latter case, the monotonicity happens daily by resetting the sensor to certain baseline. We use the filter called \emph{Monotonicer} which automatically detects the two types of monotonic sensors and apply the normalisation accordingly. 
+
+\begin{lstlisting}[language = Julia]
+mono = joinpath(dirname(pathof(TSML)),
+     "../data/typedetection/monotonic.csv")
+dailymono = joinpath(dirname(pathof(TSML)),
+     "../data/typedetection/dailymonotonic.csv")
+ 
+monocsv = CSVDateValReader(Dict(
+     :filename=>mono,
+     :dateformat=>"dd/mm/yyyy HH:MM"))
+dailymonocsv = CSVDateValReader(Dict(
+     :filename=>dailymono,
+     :dateformat=>"dd/mm/yyyy HH:MM"))
+\end{lstlisting}
+
+Let us plot the monotonic data with the usual workflow of aggregating and imputing the data first.
+
+\begin{lstlisting}[language = Julia]
+monopipeline = Pipeline(Dict(
+  :transformers => [monofilecsv,valgator,
+                    valputer,pltr]))
+fit!(monopipeline); transform!(monopipeline)
+\end{lstlisting}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=0.9\columnwidth]{mono.png} % requires the graphicx package
+   \caption{Monotonic Time Series}
+   \label{fig:mono}
+\end{figure}
+
+Let us now normalise the data by adding the \emph{Monotonicer} filter in the pipeline and plot.
+
+\begin{lstlisting}[language = Julia]
+mononicer = Monotonicer(Dict())
+
+monopipeline = Pipeline(Dict(
+  :transformers => [monofilecsv,valgator,valputer,
+                    mononicer, pltr]))
+fit!(monopipeline); transform!(monopipeline)
+\end{lstlisting}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=\columnwidth]{mononicer.png} % requires the graphicx package
+   \caption{Normalized Monotonic Time Series}
+   \label{fig:nmono}
+\end{figure}
+
+The presence of outlierdue to some random errors during meter reading  becomes obvious after the normalisation. To remedy this issue, we can add the \emph{Outliernicer} filter which detects outliers and replace them using similar KNN imputation technique used by the \emph{DateValNNer} filter.
+
+\begin{lstlisting}[language = Julia]
+outliernicer = Outliernicer(
+       Dict(:dateinterval=>Dates.Hour(1)))
+
+monopipeline = Pipeline(Dict(
+  :transformers => [monofilecsv,valgator,valputer,
+                    mononicer,outliernicer,pltr]))
+fit!(monopipeline); transform!(monopipeline)
+\end{lstlisting}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=\columnwidth]{outnicer.png} % requires the graphicx package
+   \caption{Normalized Monotonic Time Series With Outlier Removal Filter}
+   \label{fig:outnicer}
+\end{figure}
+
+We follow similar workflow of normalizing daily monotonic time series. We visualise first the original data, apply the monotonic and outlier, and plot the cleaned data.
+
+
 
 \section{Time Series Classification}
 
@@ -189,29 +278,46 @@ by their filenames. Once the training is done, the final model
 is saved in the \emph{model} directory which will be used for 
 testing accuracy and classifying new time series datasets. 
 
+The code below initialises the \emph{TSClassifier} with the locations of the training, testing, and modelling repository. Training is carried out by the \emph{fit} function which extracts the stat features of the training data and save them as a DataFrame input to the \emph{RandomForest} classifier. The trained model is saved and used during testing.
+
 \begin{lstlisting}[language = Julia]
-trdirname = "training"
-tstdirname = "testing"
-modeldirname = "model"
+trdirname = joinpath(dirname(pathof(TSML)),
+     "../data/realdatatsclassification/training")
+tstdirname = joinpath(dirname(pathof(TSML)),
+     "../data/realdatatsclassification/testing")
+modeldirname = joinpath(dirname(pathof(TSML)),
+     "../data/realdatatsclassification/model")
 tscl = TSClassifier(Dict(
-   :trdirectory=>trdirname,
-   :tstdirectory=>tstdirname,
-   :modeldirectory=>modeldirname,
-   :num_trees=>50)
+  :trdirectory=>trdirname,
+  :tstdirectory=>tstdirname,
+  :modeldirectory=>modeldirname,
+  :num_trees=>75)
 )
 fit!(tscl)
 predictions = transform!(tscl)
 @show testingAccuracy(predictions)
 \end{lstlisting}
 
+Figure~\ref{fig:tcl} shows: a) a snapshot of the output during training and testing which extracts the statistical features of the time series; and b) the testing performance of the classifier. The training and testing data are labeled based on their sensor type for easier validation. The labels are not used as input during training. The classification workflow is purely driven by the statistical features. The prediction indicates 80\% accuracy.
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=0.5\columnwidth]{tscl1.png} % requires the graphicx package
+   \vskip 2pt
+   \includegraphics[width=0.4\columnwidth]{tscl2.png} % requires the graphicx package
+   \caption{Extraction of Statistical Features for Training and Prediction. By convention, the TSClassifier validates the ground truth based on the filename which represents the sensor type disregarding the numerical component.}
+   \label{fig:tcl}
+\end{figure}
+
 \section{Extending TSML with Scikitlearn and Caret}
-In the latest \textbf{TSML} version (2.3.4), we refactored the base TSML
+In the latest \textbf{TSML} version (2.3.4 and above), 
+we refactored the base TSML
 to only include pure Julia code implementations and moved
 external libs and binary dependencies into the TSMLextra package. 
 One major reason is to have a smaller code base so that it can be easily
-maintained and rapidly deployed. Moreover, smaller codes make
+maintained and rapidly deployed in a dockerized solution or Kubernetes deployment. Moreover, smaller codes make
 static compilation fast for smaller docker image  
-in \emph{Kubernetes} deployment. 
+in cloud deployment. 
 
 There are cases however where the main task of time series classification 
 requires more complex ensemble model using hierarchy or tree where 
@@ -222,7 +328,15 @@ meta-ensembles that support the \emph{fit} and \emph{transform} APIs.
 
 \vskip 6pt
 
-Load necessary modules:
+We will use Julia's built-in support for parallelism by using the \emph{Distributed} library. We also let Julia detect the number of processors available and activate them.
+
+\begin{lstlisting}[language = Julia]
+using Distributed 
+nprocs() == 1 && addprocs()
+\end{lstlisting}
+
+With several workers active, we can use the \emph{@everywhere} macro to load the necessary filters and transformers to all workers.
+
 \begin{lstlisting}[language = Julia]
 @everywhere using TSML, TSMLextra, Plots
 @everywhere using TSML.TSMLTypes
@@ -235,7 +349,6 @@ Load necessary modules:
 @everywhere using TSMLextra.CaretLearners
 @everywhere using TSMLextra.SKLearners
 @everywhere using TSML.MLBaseWrapper
-
 @everywhere using DataFrames
 @everywhere using Random
 @everywhere using Statistics
@@ -243,7 +356,8 @@ Load necessary modules:
 @everywhere using RDatasets
 \end{lstlisting}
 
-Setup external learners:
+With all the necessary TSML functions loaded, we can now setup the different MLs starting with some learners from Caret and ScikitLearn. The list is not exhaustive for demonstration purposes.
+
 \begin{lstlisting}[language = Julia]
 # Caret ML
 @everywhere caret_svmlinear = 
@@ -295,6 +409,7 @@ Setup Julia learners and meta-ensembles:
 \end{lstlisting}
 
 Setup pipeline for training and prediction:
+
 \begin{lstlisting}[language = Julia]
 @everywhere function predict(learner,
             data,train_ind,test_ind)
@@ -331,16 +446,15 @@ end
 Setup function to run learners in parallel using distributed computing.
 \begin{lstlisting}
 function parallelmodel(learners::Dict,
-            data::DataFrame;trials=5)
+         data::DataFrame;trials=5)
   models=collect(keys(learners))
   ctable=@distributed (vcat) for i=1:trials
     # Split into training and test sets
     Random.seed!(3i)
-    (train_ind, test_ind) = 
-           holdout(size(data, 1), 0.20)
+    (trndx, tstndx) = holdout(size(data, 1), 0.20)
     acc=@distributed (vcat) for model in models
       res=predict(learners[model],
-             data,train_ind,test_ind)
+             data,trndx,tstndx)
       println("trial ",i,", ",model," => ",
               round(res))
       [model res i]
@@ -358,18 +472,17 @@ function parallelmodel(learners::Dict,
 end
 \end{lstlisting}
 
-We can now benchmark the performance of the different machine learners using a sensor dataset by creating a dictionary of workers from Caret, ScikitLearn, and Julia libraries and call the `parallelmode` function:
+We can now benchmark the performance of the different machine learners using a sensor dataset by creating a dictionary of workers from Caret, ScikitLearn, and Julia libraries and call the \texttt{parallelmodel} function:
 
 \begin{lstlisting}
 learners=Dict(
   :jvote_ens=>jvote_ens,:jstack_ens=>jstack_ens,
-  :jbest_ens=>jbest_ens,:jrf => jrf,:jada=>jada,
-  :jsuper_ens=>jsuper_ens,#:crt_rpart=>caret_rpart,
+  :jbest_ens=>jbest_ens,:jrf=>jrf,:jada=>jada,
+  :jsuper_ens=>jsuper_ens, 
   :crt_svmlinear=>caret_svmlinear,
-  :crt_treebag=>caret_treebag,#:crt_rf=>caret_rf, 
+  :crt_treebag=>caret_treebag,
   :skl_knn=>sk_knn,:skl_gb=>sk_gb,
-  :skl_extratree=>sk_extratree,
-  :sk_rf => sk_rf
+  :skl_extratree=>sk_extratree, :sk_rf=>sk_rf
 );
 
 df = parallelmodel(learners,tsdata;trials=3)
@@ -380,14 +493,14 @@ Figure~\ref{fig:sim}  shows a snapshot of running workers exploiting the distrib
 \begin{figure}[htbp]
    \centering
    \includegraphics[width=0.8\columnwidth]{sim.png} % requires the graphicx package
-   \caption{Sample output running several workers}
+   \caption{Output During Training with Several Workers}
    \label{fig:sim}
 \end{figure}
 
 \begin{figure}[htbp]
    \centering
    \includegraphics[width=0.6\columnwidth]{results.png} % requires the graphicx package
-   \caption{Sample Output in 3 Trials}
+   \caption{Classification Performance in 3 Trials}
    \label{fig:performance}
 \end{figure}
 
