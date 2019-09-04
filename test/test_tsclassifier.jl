@@ -14,8 +14,8 @@ function test_realdatatsclassifier()
 			   :tstdirectory=>tstdirname,
 			   :modeldirectory=>modeldirname,
 			   :feature_range => 5:20,
-			   :num_trees=>10))
-  fit!(tscl)
+			   :num_trees=>100))
+ fit!(tscl)
   
   dfresults = transform!(tscl)
 
