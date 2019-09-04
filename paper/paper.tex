@@ -23,18 +23,18 @@
 
 \section{Introduction}
 
-\textbf{TSML} is a package for time series data processing, classification, and prediction. 
+\textbf{TSML} is a Julia\cite{bezanson2017julia} package for time series data processing, classification, and prediction. 
 It provides common API for ML libraries from Python's ScikitLearn, 
 R's caret, and native Julia MLs for seamless integration of heterogeneous 
 libraries to create complex ensembles for robust time-series prediction, clustering, and classification.
 TSML has the following features:
-\begin{itemize}
+\begin{enumerate}
 \item data type clustering/classification for automatic data discovery
 \item aggregation based on date/time interval
 \item imputation based on symmetric Nearest Neighbors
-\item statistical metrics for data quality assessment
+\item statistical metrics for data quality assessment and classification input features
 \item ML wrapper with more than 100+ libraries from caret, scikitlearn, and julia
-\item date/value matrix conversion of 1-D time series using sliding windows for ML input
+\item date/value matrix conversion of 1-D time series using sliding windows to generate features for ML prediction
 \item pipeline API for high-level description of the processing workflow
 \item specific cleaning/normalization workflow based on data type
 \item automatic selection of optimised ML model
@@ -42,7 +42,7 @@ TSML has the following features:
 \item extensible architecture using just two main interfaces: fit and transform
 \item meta-ensembles for automatic feature and model selection
 \item support for distributed computation for scalability and speed
-\end{itemize}
+\end{enumerate}
 
 The \textbf{TSML} package assumes a two-column input composed of \emph{dates} and \emph{values}. 
 The first part of the workflow aggregates values based on the specified date/time 
@@ -80,14 +80,14 @@ assessment.
 
 \begin{lstlisting}[language = Julia]
 fname = joinpath(dirname(pathof(TSML)),
-   "../data/testdata.csv")
+  "../data/testdata.csv")
 csvfilter = CSVDateValReader(Dict(
-   :filename=>fname,
-   :dateformat=>"dd/mm/yyyy HH:MM"))
+  :filename=>fname,
+  :dateformat=>"dd/mm/yyyy HH:MM"))
 valgator = DateValgator(Dict(
-   :dateinterval=>Dates.Hour(1)))
-valnner = DateValNNer(Dict(
-   :dateinterval=>Dates.Hour(1)))
+  :dateinterval=>Dates.Hour(1)))
+valputer = DateValNNer(Dict(
+  :dateinterval=>Dates.Hour(1)))
 stfier = Statifier(Dict(:processmissing=>true))
 \end{lstlisting}
 
@@ -97,7 +97,7 @@ by aggregating the time series hourly and check the data quality using the
 
 \begin{lstlisting}[language = Julia]
 apipeline = Pipeline(Dict(
-   :transformers => [csvfilter, valgator, stfier]))
+  :transformers => [csvfilter, valgator, stfier]))
 fit!(apipeline)
 mystats = transform!(apipeline)
 @show mystats
@@ -119,6 +119,8 @@ and understanding of the entire workflow. In addition, extending TSML functional
 matter of creating a new data type filter and define its own  \emph{fit} and \emph{transform} 
 functions.
 
+\vskip 3pt
+
 In the \emph{Statifier} filter result, blocks of missing data is indicated by column names starting
 with \emph{b}. Running the code above indicates that there are plenty of missing data blocks.
 We can add the \emph{ValNNer} filter to perform \emph{k} nearest neighbour imputation and check
@@ -127,7 +129,7 @@ the statistics:
 \begin{lstlisting}[language = Julia]
 bpipeline = Pipeline(Dict(
   :transformers => [csvfilter, valgator, 
-                    valnner,stfier]))
+                    valputer,stfier]))
 fit!(bpipeline)
 imputed = transform!(bpipeline)
 @show imputed
@@ -147,13 +149,14 @@ of missing blocks count is now empty.
 
 \vskip 3pt
 
-We can also visualise our time series data using the \emph{plotter} filter instead of the \emph{statifier} as show in Fig~\ref{fig:mplot}. Looking closely, you will see discontinuities in the plot due to blocks of missing data.
+We can also visualise our time series data using the \emph{plotter} filter instead of the \emph{statifier} as shown in Fig~\ref{fig:mplot}. Looking closely, you will see discontinuities in the plot due to blocks of missing data.
 
-\begin{lstlisting}
+\begin{lstlisting}[language = Julia]
 pltr=Plotter(Dict(:interactive => true))
 plpipeline = Pipeline(Dict(
-   :transformers => [csvfilter, valgator, pltr]))
-fit!(plpipeline); transform!(plpipeline)
+  :transformers => [csvfilter, valgator, pltr]))
+fit!(plpipeline)
+transform!(plpipeline)
 \end{lstlisting}
 
 \begin{figure}[htbp]
@@ -163,13 +166,14 @@ fit!(plpipeline); transform!(plpipeline)
    \label{fig:mplot}
 \end{figure}
 
-Using the imputation pipeline described before, we can visualise the result of imputation by replacing the Statifier with the Plotter filter. Figure~\ref{fig:amplot} shows the plot after imputation which gets rid of missing data.
+Using the imputation pipeline described before, we can visualise the result of imputation by replacing the \emph{Statifier} with the \emph{Plotter} filter. Figure~\ref{fig:amplot} shows the plot after imputation which gets rid of missing data.
 
 \begin{lstlisting}[language = Julia]
 bplpipeline = Pipeline(Dict(
   :transformers => [csvfilter, valgator, 
-                    valnner,pltr]))
-fit!(bplpipeline); transform!(bplpipeline)
+                    valputer,pltr]))
+fit!(bplpipeline)
+transform!(bplpipeline)
 \end{lstlisting}
 
 \begin{figure}[htbp]
@@ -179,21 +183,15 @@ fit!(bplpipeline); transform!(bplpipeline)
    \label{fig:amplot}
 \end{figure}
 
-\section{Processing Monotonic Time Series}
+\subsection{Processing Monotonic Time Series}
 In this section, we will show additional filters we use to handle monotonic data which are commonly used in energy/water meter sensors as well as in footfall sensors. In the former case, the time series type is strictly monotonically increasing while in the latter case, the monotonicity happens daily by resetting the sensor to certain baseline. We use the filter called \emph{Monotonicer} which automatically detects the two types of monotonic sensors and apply the normalisation accordingly. 
 
 \begin{lstlisting}[language = Julia]
 mono = joinpath(dirname(pathof(TSML)),
-     "../data/typedetection/monotonic.csv")
-dailymono = joinpath(dirname(pathof(TSML)),
-     "../data/typedetection/dailymonotonic.csv")
- 
+  "../data/typedetection/monotonic.csv")
 monocsv = CSVDateValReader(Dict(
-     :filename=>mono,
-     :dateformat=>"dd/mm/yyyy HH:MM"))
-dailymonocsv = CSVDateValReader(Dict(
-     :filename=>dailymono,
-     :dateformat=>"dd/mm/yyyy HH:MM"))
+  :filename=>mono,
+  :dateformat=>"dd/mm/yyyy HH:MM"))
 \end{lstlisting}
 
 Let us plot the monotonic data with the usual workflow of aggregating and imputing the data first.
@@ -202,7 +200,8 @@ Let us plot the monotonic data with the usual workflow of aggregating and imputi
 monopipeline = Pipeline(Dict(
   :transformers => [monofilecsv,valgator,
                     valputer,pltr]))
-fit!(monopipeline); transform!(monopipeline)
+fit!(monopipeline)
+transform!(monopipeline)
 \end{lstlisting}
 
 \begin{figure}[htbp]
@@ -213,14 +212,13 @@ fit!(monopipeline); transform!(monopipeline)
 \end{figure}
 
 Let us now normalise the data by adding the \emph{Monotonicer} filter in the pipeline and plot.
-
 \begin{lstlisting}[language = Julia]
 mononicer = Monotonicer(Dict())
-
 monopipeline = Pipeline(Dict(
   :transformers => [monofilecsv,valgator,valputer,
                     mononicer, pltr]))
-fit!(monopipeline); transform!(monopipeline)
+fit!(monopipeline) 
+transform!(monopipeline)
 \end{lstlisting}
 
 \begin{figure}[htbp]
@@ -235,11 +233,11 @@ The presence of outlierdue to some random errors during meter reading  becomes o
 \begin{lstlisting}[language = Julia]
 outliernicer = Outliernicer(
        Dict(:dateinterval=>Dates.Hour(1)))
-
 monopipeline = Pipeline(Dict(
   :transformers => [monofilecsv,valgator,valputer,
                     mononicer,outliernicer,pltr]))
-fit!(monopipeline); transform!(monopipeline)
+fit!(monopipeline)
+transform!(monopipeline)
 \end{lstlisting}
 
 \begin{figure}[htbp]
@@ -249,8 +247,64 @@ fit!(monopipeline); transform!(monopipeline)
    \label{fig:outnicer}
 \end{figure}
 
-We follow similar workflow of normalizing daily monotonic time series. We visualise first the original data, apply the monotonic and outlier filters, and plot the cleaned data to make sure monotonicity is gone.
+\subsection{Processing Daily Monotonic Time Series}
+We follow similar workflow in the previous subsection to normalize daily monotonic time series. We visualise first the original data, apply the \emph{Monotonicer} and \emph{Outliernicer} filters, and plot the cleaned data to make sure monotonicity is gone.
 
+\begin{lstlisting}[language = Julia]
+dailymono = joinpath(dirname(pathof(TSML)),
+     "../data/type-detection/dailymonotonic.csv")
+dailymonocsv = CSVDateValReader(Dict(
+     :filename=>dailymono,
+     :dateformat=>"dd/mm/yyyy HH:MM"))
+dailymonopipeline = Pipeline(Dict(
+  :transformers => [dailymonocsv,valgator,
+                    valputer,pltr]))
+fit!(dailymonopipeline)
+transform!(dailymonopipeline)
+\end{lstlisting}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=\columnwidth]{dailymono.png} % requires the graphicx package
+   \caption{Daily Monotonic Time Series}
+   \label{fig:dailymono}
+\end{figure}
+
+As seen in the plot, the values in daily monotonic time series is monotonically increasing and resets to certain baseline the following day and starts to rise again until the end of the daily cycle.
+\vskip 2pt
+Let us now reuse the \emph{Monotonicer} filter we used in the previous subsection to normalise the data.
+
+\begin{lstlisting}[language = Julia]
+dailymonopipeline = Pipeline(Dict(
+  :transformers => [dailymonocsv,valgator,
+                    valputer,mononicer,pltr]))
+fit!(dailymonopipeline)
+transform!(dailymonopipeline)
+\end{lstlisting}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=\columnwidth]{normdailymono.png}  % requires the graphicx package
+   \caption{Normalized Daily Monotonic Time Series}
+   \label{fig:ndailymono}
+\end{figure}
+
+To remove outliers, we can reuse the \emph{Outliernicer} filter in the previous subsection and plot the cleaned data.
+
+\begin{lstlisting}[language = Julia]
+dailymonopipeline = Pipeline(Dict(
+  :transformers=>[dailymonocsv,valgator,valputer,
+                  mononicer,outliernicer,pltr]))
+fit!(dailymonopipeline)
+transform!(dailymonopipeline)
+\end{lstlisting}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=\columnwidth]{outnormdailymono.png}  % requires the graphicx package
+   \caption{Normalized Daily Monotonic Time Series with Outlier Detector}
+   \label{fig:outndailymono}
+\end{figure}
 
 
 \section{Time Series Classification}
@@ -303,9 +357,13 @@ Figure~\ref{fig:tcl} shows: a) a snapshot of the output during training and test
 \begin{figure}[htbp]
    \centering
    \includegraphics[width=0.5\columnwidth]{tscl1.png} % requires the graphicx package
+   
+   ..........
+   
+   ..........
    \vskip 2pt
    \includegraphics[width=0.4\columnwidth]{tscl2.png} % requires the graphicx package
-   \caption{Extraction of Statistical Features for Training and Prediction. By convention, the TSClassifier validates the ground truth based on the filename which represents the sensor type disregarding the numerical component.}
+   \caption{Extraction of Statistical Features for Training and Prediction. By convention, the \emph{TSClassifier} validates the ground truth based on the filename which contains the label of the sensor type disregarding the numerical component.}
    \label{fig:tcl}
 \end{figure}
 
@@ -338,17 +396,8 @@ nprocs() == 1 && addprocs()
 With several workers active, we can use the \emph{@everywhere} macro to load the necessary filters and transformers to all workers.
 
 \begin{lstlisting}[language = Julia]
-@everywhere using TSML, TSMLextra, Plots
-@everywhere using TSML.TSMLTypes
-@everywhere using TSML: TSClassifier
-@everywhere using TSML.TSClassifiers.FileStats
-@everywhere using TSML.TSMLTransformers
-@everywhere using TSML.EnsembleMethods
-@everywhere using TSML.DecisionTreeLearners
-@everywhere using TSML.Utils
-@everywhere using TSMLextra.CaretLearners
-@everywhere using TSMLextra.SKLearners
-@everywhere using TSML.MLBaseWrapper
+@everywhere using TSML
+@everywhere using TSMLextra
 @everywhere using DataFrames
 @everywhere using Random
 @everywhere using Statistics
@@ -364,32 +413,25 @@ With all the necessary TSML functions loaded, we can now setup the different MLs
    CaretLearner(Dict(:learner=>"svmLinear"))
 @everywhere caret_treebag = 
    CaretLearner(Dict(:learner=>"treebag"))
-@everywhere caret_rpart = 
-   CaretLearner(Dict(:learner=>"rpart"))
-@everywhere caret_rf = 
-   CaretLearner(Dict(:learner=>"rf"))
 
 # ScikitLearn ML
-@everywhere sk_ridge = 
-   SKLearner(Dict(:learner=>"RidgeClassifier"))
-@everywhere sk_sgd = 
-   SKLearner(Dict(:learner=>"SGDClassifier"))
 @everywhere sk_knn = 
-   SKLearner(Dict(:learner=>"KNeighborsClassifier"))
+  SKLearner(Dict(:learner=>"KNeighborsClassifier"))
 @everywhere sk_gb = 
-   SKLearner(Dict(:learner=>
-   "GradientBoostingClassifier",
-   :impl_args=>Dict(:n_estimators=>10)))
+  SKLearner(Dict(:learner=>
+    "GradientBoostingClassifier",
+    :impl_args=>Dict(:n_estimators=>10)))
 @everywhere sk_extratree = 
-   SKLearner(Dict(:learner=>"ExtraTreesClassifier",
-   :impl_args=>Dict(:n_estimators=>10)))
+  SKLearner(Dict(:learner=>"ExtraTreesClassifier",
+    :impl_args=>Dict(:n_estimators=>10)))
 @everywhere sk_rf = 
-   SKLearner(Dict(:learner=>
-   "RandomForestClassifier",
-   :impl_args=>Dict(:n_estimators=>10)))
+  SKLearner(Dict(:learner=>
+    "RandomForestClassifier",
+    :impl_args=>Dict(:n_estimators=>10)))
 \end{lstlisting}
 
-Setup Julia learners and meta-ensembles:
+Let us setup instances from thebpure Julia implementation of learners and ensembles based on the \emph{DecisionTree.jl} package.
+
 \begin{lstlisting}[language = Julia]
 # Julia ML
 @everywhere jrf = RandomForest()
@@ -408,12 +450,11 @@ Setup Julia learners and meta-ensembles:
                jbest_ens,sk_rf,sk_gb]))
 \end{lstlisting}
 
-Setup pipeline for training and prediction:
+Next, we setup the pipeline for training and prediction inside the \emph{predict} function.
 
 \begin{lstlisting}[language = Julia]
 @everywhere function predict(learner,
-            data,train_ind,test_ind)
-            
+            data,train_ind,test_ind)        
   features = convert(Matrix,data[:, 1:(end-1)])
   labels = convert(Array,data[:, end])
   # Create pipeline
@@ -427,15 +468,12 @@ Setup pipeline for training and prediction:
       ]
     )
   )
-  
   # Train
   fit!(pipeline, features[train_ind, :],
-       labels[train_ind])
-       
+       labels[train_ind])  
   # Predict
   predictions = transform!(pipeline, 
       features[test_ind, :])
-  
   # Assess predictions
   result = score(:accuracy, 
       labels[test_ind], predictions)
@@ -443,8 +481,9 @@ Setup pipeline for training and prediction:
 end
 \end{lstlisting}
 
-Setup function to run learners in parallel using distributed computing.
-\begin{lstlisting}
+Finally, we setup the \emph{parallel model} function to run different learners distributed to different workers running in parallel relying on Julia's native support of parallelism.
+
+\begin{lstlisting}[language = Julia]
 function parallelmodel(learners::Dict,
          data::DataFrame;trials=5)
   models=collect(keys(learners))
@@ -472,9 +511,9 @@ function parallelmodel(learners::Dict,
 end
 \end{lstlisting}
 
-We can now benchmark the performance of the different machine learners using a sensor dataset by creating a dictionary of workers from Caret, ScikitLearn, and Julia libraries and call the \texttt{parallelmodel} function:
+We can now benchmark the performance of the different machine learners by creating a dictionary of workers containing instances of learners from Caret, ScikitLearn, and Julia libraries. We pass the dictionary of learners to the \texttt{parallelmodel} function for evaluation.
 
-\begin{lstlisting}
+\begin{lstlisting}[language = Julia]
 learners=Dict(
   :jvote_ens=>jvote_ens,:jstack_ens=>jstack_ens,
   :jbest_ens=>jbest_ens,:jrf=>jrf,:jada=>jada,
@@ -483,8 +522,7 @@ learners=Dict(
   :crt_treebag=>caret_treebag,
   :skl_knn=>sk_knn,:skl_gb=>sk_gb,
   :skl_extratree=>sk_extratree, :sk_rf=>sk_rf
-);
-
+)
 df = parallelmodel(learners,tsdata;trials=3)
 \end{lstlisting}
 
@@ -506,19 +544,9 @@ Figure~\ref{fig:sim}  shows a snapshot of running workers exploiting the distrib
 
 TODO: 
 \begin{itemize}
-\item add plots and tables
-\item add threading examples for scalability (buggy)
-\item add simulations of different datasets to show general applicability (still doing simulations)
-\item add results of simulations: Earthquakes sensor; Electric Devices; car sensors; refrigeration devices; household consumption
+\item add threading examples for scalability (buggy, need fixes)
+\item add simulations of different datasets to show general applicability (still doing simulations): Earthquakes sensor; Electric Devices; car sensors; refrigeration devices; household consumption
 \end{itemize}
-
-%\begin{verbatim}
-%\bibliographystyle{juliacon}
-%\bibliography{ref}
-%\end{verbatim}
-%When submitting the document source (.tex) file to external
-%parties, the ref.bib file should be sent with it.
-%\cite{bezanson2017julia}
 
 \input{bib.tex}
 
