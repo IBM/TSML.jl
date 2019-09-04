@@ -10,11 +10,11 @@ x = DataFrame(Date=dat,Value=vals)</code></pre><pre><code class="language-julia-
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64  │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2017-01-01T00:00:00 │ 0.830893 │
-│ 2   │ 2017-01-02T00:00:00 │ 0.402066 │
-│ 3   │ 2017-01-03T00:00:00 │ 0.596555 │
-│ 4   │ 2017-01-04T00:00:00 │ 0.919351 │
-│ 5   │ 2017-01-05T00:00:00 │ 0.803314 │</code></pre><h2><a class="nav-anchor" id="Dateifier-1" href="#Dateifier-1">Dateifier</a></h2><p>Let us create an instance of <code>Dateifier</code> passing the size of row, stride, and steps ahead to predict:</p><pre><code class="language-julia">mtr = Dateifier(Dict(:ahead=&gt;24,:size=&gt;24,:stride=&gt;5))
+│ 1   │ 2017-01-01T00:00:00 │ 0.129466 │
+│ 2   │ 2017-01-02T00:00:00 │ 0.337777 │
+│ 3   │ 2017-01-03T00:00:00 │ 0.49092  │
+│ 4   │ 2017-01-04T00:00:00 │ 0.453047 │
+│ 5   │ 2017-01-05T00:00:00 │ 0.276616 │</code></pre><h2><a class="nav-anchor" id="Dateifier-1" href="#Dateifier-1">Dateifier</a></h2><p>Let us create an instance of <code>Dateifier</code> passing the size of row, stride, and steps ahead to predict:</p><pre><code class="language-julia">mtr = Dateifier(Dict(:ahead=&gt;24,:size=&gt;24,:stride=&gt;5))
 fit!(mtr,x)
 res = transform!(mtr,x)</code></pre><pre><code class="language-julia-repl">julia&gt; first(res,5)
 5×8 DataFrame
