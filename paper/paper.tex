@@ -545,7 +545,11 @@ respar = parallelmodel(learners,tsdata;trials=3)
    \label{fig:performance}
 \end{figure}
 
-Figures~\ref{fig:sim}~and~\ref{fig:performance}  shows a snapshot of running workers exploiting the distributed library of Julia and the classification performance of each model, respectively. There are 8 workers running in parallel over 12 different machine learning classifiers. From the results, \emph{ExtraTree} from \emph{ScikitLearn} has the best performance with around 91.67\% accuracy followed by \emph{TreeBag} and \emph{SVMLinear} from \emph{Caret} library with 83.33 \% accuracy for both. With this workflow, it becomes trivial to search for optimal model by running them in parallel relying on \emph{Julia} to do the low-level tasks of scheduling, queueing, etc and making sure that compute resources are fairly optimised.
+The data used in the experiment are sample snapshots of the data in our building operations. For reproducibility, the data can be found in the  \emph{juliacon2019-paper} branch of \emph{TSML} in \emph{Github}:  /data/benchmark/tsclassifier. There are four time series types, namely: AirOffTemp, Energy, Pressure, and RetTemp.  We  took a minimal number of samples and classes for discussion and demonstration purposes.
+
+\vskip 6pt
+
+Figures~\ref{fig:sim}~and~\ref{fig:performance}  show a snapshot of running workers exploiting the distributed library of Julia and the classification performance of each model, respectively. There are 8 workers running in parallel over 12 different machine learning classifiers. From the results, \emph{ExtraTree} from \emph{ScikitLearn} has the best performance with 91.67\% accuracy followed by \emph{TreeBag} and \emph{SVMLinear} from \emph{Caret} library with 83.33 \% accuracy for both. With this workflow, it becomes trivial to search for optimal model by running them in parallel relying on \emph{Julia} to do the low-level tasks of scheduling, queueing, synchronizing, etc and making sure that dynamically available compute resources are fairly optimised.
 
 \subsection{Parallel TSML Using Threads Workflow}
 With Julia 1.3, lightweight multi-threading support in Julia becomes possible. We will be using pure Julia ML models because installing external dependencies such as Caret MLs through RCall package has some issues with the alpha version of Julia 1.3 at this point in time. We will update this documentation and add more MLs once the issues are resolved.
@@ -619,7 +623,7 @@ learners=Dict(
       :jrf => jrf,:jada=>jada,
       :jsuper_ens=>jsuper_ens);
       
-datadir = joinpath("data/")
+datadir = joinpath("tsdata/")
 tsdata = extract_features_from_timeseries(datadir)
 
 resthr = threadedmodel(learners,tsdata;trials=10)
@@ -644,7 +648,9 @@ Figures~\ref{fig:threadrunning}~and~\ref{fig:threadresult} show example snapshot
 \section{Summary and Conclusion}
 Packages for time series analysis are becoming important tools with the rapid proliferation of sensor data brought about by \textbf{Internet of Things}.  We created \emph{TSML} as a time series machine learning framework which can easily be extended to handle large volume of time series data. 
 
-\emph{TSML} main strength is the adoption of pipeline architecture containing filters and transformers to perform both preprocessing and modelling tasks. \emph{TSML}  exploits the following \emph{Julia} features: multiple dispatch, type inference, custom data types and abstraction, and parallel computations.  In addition, \emph{TSML} uses a common machine learning API for both internal and external ML libraries, distributed and threaded support for modeling, and a growing collection of filters for preprocessing and modeling. Extending \emph{TSML} can trivially be done by creating a custom data type filter and defining its corresponding \emph{fit} and \emph{transform} operations which the \emph{TSML} pipeline iteratively calls on its collection of filters.
+\vskip 6pt
+
+\emph{TSML} main strength is the adoption of pipeline architecture containing filters and transformers to perform both preprocessing and modelling tasks. \emph{TSML}  exploits the following \emph{Julia} features: multiple dispatch, type inference, custom data types and abstraction, and parallel computations.  In addition, \emph{TSML} uses a common machine learning API for both internal and external ML libraries, distributed and threaded support for modeling, and a growing collection of filters for preprocessing, classification, clustering, and prediction. Extending \emph{TSML} can trivially be done by creating a custom data type filter and defining its corresponding \emph{fit} and \emph{transform} operations which the \emph{TSML} pipeline iteratively calls on its collection of filters.
 
 %TODO: 
 %\begin{itemize}
