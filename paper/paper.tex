@@ -384,7 +384,7 @@ different languages. For illustration purposes, we will show how to
 ensemble ML libraries from ScikitLearn and Caret using \textbf{TSML} 
 meta-ensembles that support the \emph{fit} and \emph{transform} APIs.
 
-\vskip 6pt
+\subsection{Parallel TSML Using Distributed Workflow}
 
 We will use Julia's built-in support for parallelism by using the \emph{Distributed} library. We also let Julia detect the number of processors available and activate them.
 
@@ -481,7 +481,7 @@ Next, we setup the pipeline for training and prediction inside the \emph{predict
 end
 \end{lstlisting}
 
-Finally, we setup the \emph{parallel model} function to run different learners distributed to different workers running in parallel relying on Julia's native support of parallelism.
+Finally, we setup the \emph{parallel model} function to run different learners distributed to different workers running in parallel relying on Julia's native support of parallelism. Take note that there are two parallelisms in the code. The first one is the distribution of task in different trials and the second one is the distribution of tasks among different models. It is interesting to note that with this relative compact function definition, the Julia language makes it easy to define a parallel task within another parallel task without any problem.
 
 \begin{lstlisting}[language = Julia]
 function parallelmodel(learners::Dict,
@@ -523,10 +523,13 @@ learners=Dict(
   :skl_knn=>sk_knn,:skl_gb=>sk_gb,
   :skl_extratree=>sk_extratree, :sk_rf=>sk_rf
 )
-df = parallelmodel(learners,tsdata;trials=3)
-\end{lstlisting}
 
-Figure~\ref{fig:sim}  shows a snapshot of running workers exploiting the distributed library of Julia. There are 8 workers running in parallel over 12 different machine learning classifiers.
+datadir = joinpath("tsdata/")
+tsdata = extract_features_from_timeseries(datadir)
+first(tsdata,5)
+
+respar = parallelmodel(learners,tsdata;trials=3)
+\end{lstlisting}
 
 \begin{figure}[htbp]
    \centering
@@ -538,15 +541,116 @@ Figure~\ref{fig:sim}  shows a snapshot of running workers exploiting the distrib
 \begin{figure}[htbp]
    \centering
    \includegraphics[width=0.6\columnwidth]{results.png} % requires the graphicx package
-   \caption{Classification Performance in 3 Trials}
+   \caption{@distributed: Classification Performance in 3 Trials}
    \label{fig:performance}
 \end{figure}
 
-TODO: 
-\begin{itemize}
-\item add threading examples for scalability (buggy, need fixes)
-\item add simulations of different datasets to show general applicability (still doing simulations): Earthquakes sensor; Electric Devices; car sensors; refrigeration devices; household consumption
-\end{itemize}
+Figures~\ref{fig:sim}~and~\ref{fig:performance}  shows a snapshot of running workers exploiting the distributed library of Julia and the classification performance of each model, respectively. There are 8 workers running in parallel over 12 different machine learning classifiers. From the results, \emph{ExtraTree} from \emph{ScikitLearn} has the best performance with around 91.67\% accuracy followed by \emph{TreeBag} and \emph{SVMLinear} from \emph{Caret} library with 83.33 \% accuracy for both. With this workflow, it becomes trivial to search for optimal model by running them in parallel relying on \emph{Julia} to do the low-level tasks of scheduling, queueing, etc and making sure that compute resources are fairly optimised.
+
+\subsection{Parallel TSML Using Threads Workflow}
+With Julia 1.3, lightweight multi-threading support in Julia becomes possible. We will be using pure Julia ML models because installing external dependencies such as Caret MLs through RCall package has some issues with the alpha version of Julia 1.3 at this point in time. We will update this documentation and add more MLs once the issues are resolved.
+
+\vskip 6pt
+
+The main difference in the workflow between Julia's distributed computation model compared to the threaded model is the presence of \texttt{@everywhere} macro in the former for each function defined to indicate that these function definitions shall be exported to all running workers. Since threaded processes share the same memory model with the Julia main process, there is no need for this macro. Instead, threading workflow requires the use of \emph{mutex} locking in the update of the global dataframe that gathers the prediction performance of models running in their respective threads. In similar observation with the distributed framework, the \emph{threadedmodel} function contains two parallelism: threads in different trials and threads among models in each trial. The function is surprisingly compact to implement threads within threads without issues and the main bottleneck happens only during the update operation of the global \emph{ctable}.
+
+\begin{lstlisting}[language = Julia]
+function threadedmodel(learners::Dict,
+         data::DataFrame;trials=5)
+  Random.seed!(3)
+  models=collect(keys(learners))
+  global ctable = DataFrame()
+  @threads for i=1:trials
+     # Split into training and test sets
+     (train_ind, test_ind) = 
+          holdout(size(data, 1), 0.20)
+     mtx = SpinLock()
+     @threads for themodel in models
+       res=predict(learners[themodel],
+          data,train_ind,test_ind)
+       println(themodel," => ",round(res),", 
+          thread=",threadid())
+       lock(mtx)
+       global ctable=vcat(ctable,
+          DataFrame(model=themodel, acc=res))
+       unlock(mtx)
+     end
+  end
+    df = ctable |> DataFrame
+    gp=by(df,:model) do x
+       DataFrame(mean=mean(x.acc),
+          std=std(x.acc),n=nrow(x))
+    end
+    sort!(gp,:mean,rev=true)
+    return gp
+end
+\end{lstlisting}
+
+Let us define a set of learners that are written in pure Julia for this thread experiment.
+
+\begin{lstlisting}[language = Julia]
+# Julia ML
+jrf = RandomForest(Dict(:impl_args=>
+   Dict(:num_trees=>500)))
+jpt = PrunedTree()
+jada = Adaboost(Dict(:impl_args=>
+   Dict(:num_iterations=>20)))
+
+## Julia Ensembles
+jvote_ens=VoteEnsemble(Dict(:learners=>
+   [jrf,jpt,jada]))
+jstack_ens=StackEnsemble(Dict(:learners=>
+   [jrf,jpt,jada]))
+jbest_ens=BestLearner(Dict(:learners=>
+   [jrf,jpt,jada]))
+jsuper_ens=VoteEnsemble(Dict(:learners=>
+   [jvote_ens,jstack_ens,jbest_ens]));
+\end{lstlisting}
+
+Let us run in parallel the different models using the same dataset with that of the distributed workflow.
+
+\begin{lstlisting}[language = Julia]
+using Base.Threads
+
+learners=Dict(
+      :jvote_ens=>jvote_ens,
+      :jstack_ens=>jstack_ens,
+      :jbest_ens=>jbest_ens,
+      :jrf => jrf,:jada=>jada,
+      :jsuper_ens=>jsuper_ens);
+      
+datadir = joinpath("data/")
+tsdata = extract_features_from_timeseries(datadir)
+
+resthr = threadedmodel(learners,tsdata;trials=10)
+\end{lstlisting}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=0.5\columnwidth]{threadrunning.png} % requires the graphicx package
+   \caption{Output During Training Using Several Threads}
+   \label{fig:threadrunning}
+\end{figure}
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=0.5\columnwidth]{threadresult.png} % requires the graphicx package
+   \caption{@threads: Classification Performance in 10 Trials}
+   \label{fig:threadresult}
+\end{figure}
+
+Figures~\ref{fig:threadrunning}~and~\ref{fig:threadresult} show example snapshot of the running threads and the final result of classification, respectively. In this experiment, Adaboost has 85\% accuracy followed by Random Forest with 82.5\% accuracy.
+
+\section{Summary and Conclusion}
+Packages for time series analysis are becoming important tools with the rapid proliferation of sensor data brought about by \textbf{Internet of Things}.  We created \emph{TSML} as a time series machine learning framework which can easily be extended to handle large volume of time series data. 
+
+\emph{TSML} main strength is the adoption of pipeline architecture containing filters and transformers to perform both preprocessing and modelling tasks. \emph{TSML}  exploits the following \emph{Julia} features: multiple dispatch, type inference, custom data types and abstraction, and parallel computations.  In addition, \emph{TSML} uses a common machine learning API for both internal and external ML libraries, distributed and threaded support for modeling, and a growing collection of filters for preprocessing and modeling. Extending \emph{TSML} can trivially be done by creating a custom data type filter and defining its corresponding \emph{fit} and \emph{transform} operations which the \emph{TSML} pipeline iteratively calls on its collection of filters.
+
+%TODO: 
+%\begin{itemize}
+%\item add threading examples for scalability (buggy, need fixes)
+%\item add simulations of different datasets to show general applicability (still doing simulations): %Earthquakes sensor; Electric Devices; car sensors; refrigeration devices; household consumption
+%\end{itemize}
 
 \input{bib.tex}
 
