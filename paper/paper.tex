@@ -3,6 +3,9 @@
 \documentclass{juliacon}
 \setcounter{page}{1}
 
+\hyphenation{TSMLextra}
+\hyphenation{TSML}
+
 \begin{document}
 
 \input{header}
@@ -16,24 +19,24 @@
   One of the major challenges in these data-rich environments is how to extract and exploit information from 
   these large volume of data to detect anomalies, discover patterns to reduce downtimes and manufacturing 
   errors, reduce energy usage, predict faults/failures, effective maintenance schedules, etc. 
-  To address these issues, we developed TSML. Its technology is based 
+  To address these issues, we developed \textbf{TSML}. Its technology is based 
   on using the pipeline of lightweight filters as building blocks to process huge amount of industrial time series data in parallel.  
 
 \end{abstract}
 
 \section{Introduction}
 
-\textbf{TSML} is a Julia\cite{bezanson2017julia} package for time series data processing, classification, and prediction. 
-It provides common API for ML libraries from Python's ScikitLearn, 
-R's caret, and native Julia MLs for seamless integration of heterogeneous 
-libraries to create complex ensembles for robust time-series prediction, clustering, and classification.
-TSML has the following features:
+\textbf{TSML}\cite{tsml2019} is a \emph{Julia}\cite{bezanson2017julia} package for time series data processing, classification, and prediction. 
+It provides common API for ML libraries from Python's \emph{Scikit-Learn}, 
+R's \emph{Caret}, and native \emph{Julia} MLs for seamless integration of heterogeneous 
+libraries to create complex ensembles for robust time series prediction, clustering, and classification.
+\textbf{TSML} has the following features:
 \begin{enumerate}
 \item data type clustering/classification for automatic data discovery
 \item aggregation based on date/time interval
 \item imputation based on symmetric Nearest Neighbors
 \item statistical metrics for data quality assessment and classification input features
-\item ML wrapper with more than 100+ libraries from caret, scikitlearn, and julia
+\item ML wrapper with more than 100+ libraries from caret, scikit-learn, and julia
 \item date/value matrix conversion of 1-D time series using sliding windows to generate features for ML prediction
 \item pipeline API for high-level description of the processing workflow
 \item specific cleaning/normalization workflow based on data type
@@ -41,16 +44,12 @@ TSML has the following features:
 \item automatic segmentation of time-series data into matrix form for ML training and prediction 
 \item extensible architecture using just two main interfaces: fit and transform
 \item meta-ensembles for automatic feature and model selection
-\item support for distributed computation for scalability and speed
+\item support for distributed/threaded computation for scalability and speed
 \end{enumerate}
 
-The \textbf{TSML} package assumes a two-column input composed of \emph{dates} and \emph{values}. 
-The first part of the workflow aggregates values based on the specified date/time 
-interval which minimizes occurrence of missing values and noise. The aggregated 
-data is then left-joined to the complete sequence of dates in a specified date/time interval. 
-Remaining missing values are replaced by \textit{k} nearest neighbors where \textit{k} is the symmetric 
-distance from the location of missing value. This approach can be called several 
-times until there are no more missing values.
+The \textbf{TSML} package assumes a two-column input for any time series data composed of \emph{dates} and \emph{values}. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurrence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by \textit{k}-nearest neighbors (KNN) where \textit{k} is the symmetric distance from the location of missing value. This approach can be called several times until there are no more missing values.
+
+\vskip 6pt
 
 For prediction tasks, TSML extracts the date features and 
 convert the value column into matrix form parameterized by 
@@ -59,19 +58,17 @@ the size and stride of the sliding window. The final part joins
  ML with the output representing the values of the time periods 
  to be predicted ahead of time.
  
+ \vskip 6pt
+ 
 \textbf{TSML} uses a pipeline which iteratively calls the \emph{fit} and \emph{transform}
-families of functions relying on `multiple dispatch` to select the correct 
-algorithm from the steps outlined above. Machine learning functions in 
-\textbf{TSML} are wrappers to the corresponding Scikit-learn, Caret, and native Julia ML libraries. 
+families of functions relying on \emph{multiple dispatch} to dynamically select the correct algorithm from the steps outlined above. Machine learning functions in 
+\textbf{TSML} are wrappers to the corresponding Scikit-Learn, Caret, and native Julia ML libraries. 
 There are more than hundred classifiers and regression functions available using a common API.
 
 \section{TSML Workflow}
 \label{sec:tsmlworkflow}
 %
- Did
-\textbf{TSML} workflow borrows the idea of Unix pipeline\cite{orchestra2014, combineml2016}.
-The main elements in a pipeline are series of filters
-each performing one specific task and does it well. 
+\textbf{TSML} workflow borrows the idea of the  \emph{Unix} pipeline\cite{orchestra2014, combineml2016}. The main elements in a pipeline are series of filters or transformers each performing one specific task and does it well. 
 
 \vskip 6pt
 To illustrate, below describes the main steps in using \textbf{TSML}.
@@ -114,16 +111,16 @@ mystats = transform!(apipeline)
 
 Calling the \emph{fit} and \emph{transform} in the pipeline
 iteratively calls the corresponding \emph{fit} and \emph{transform} within each filter. 
-This common API relying on Julia's multi-dispatch mechanism greatly simplifies the implementations, operations, 
-and understanding of the entire workflow. In addition, extending TSML functionality is just a 
+This common API relying on \emph{Julia's} multi-dispatch mechanism greatly simplifies the implementations, operations, 
+and understanding of the entire workflow. In addition, extending \textbf{TSML} functionality is just a 
 matter of creating a new data type filter and define its own  \emph{fit} and \emph{transform} 
 functions.
 
-\vskip 3pt
+\vskip 6pt
 
 In the \emph{Statifier} filter result, blocks of missing data is indicated by column names starting
 with \emph{b}. Running the code above indicates that there are plenty of missing data blocks.
-We can add the \emph{ValNNer} filter to perform \emph{k} nearest neighbour imputation and check
+We can add the \emph{ValNNer} filter to perform \emph{k}-nearest neighbour imputation and check
 the statistics:
 
 \begin{lstlisting}[language = Julia]
@@ -147,7 +144,7 @@ imputed = transform!(bpipeline)
 The result in Fig.~\ref{fig:imputation} now indicates \emph{NaN} for all missing data statistics column because the set 
 of missing blocks count is now empty.
 
-\vskip 3pt
+\vskip 6pt
 
 We can also visualise our time series data using the \emph{plotter} filter instead of the \emph{statifier} as shown in Fig~\ref{fig:mplot}. Looking closely, you will see discontinuities in the plot due to blocks of missing data.
 
@@ -184,7 +181,7 @@ transform!(bplpipeline)
 \end{figure}
 
 \subsection{Processing Monotonic Time Series}
-In this section, we will show additional filters we use to handle monotonic data which are commonly used in energy/water meter sensors as well as in footfall sensors. In the former case, the time series type is strictly monotonically increasing while in the latter case, the monotonicity happens daily by resetting the sensor to certain baseline. We use the filter called \emph{Monotonicer} which automatically detects the two types of monotonic sensors and apply the normalisation accordingly. 
+In this subsection, we will show additional filters we use to handle monotonic data which are commonly employed in energy/water meter sensors as well as in footfall sensors. In the former case, the time series type is strictly monotonically increasing while in the latter case, the monotonicity happens daily by resetting the sensor to certain baseline at the end of the day. We use the filter called \emph{Monotonicer} which automatically detects the two types of monotonic sensors and apply the normalisation accordingly. 
 
 \begin{lstlisting}[language = Julia]
 mono = joinpath(dirname(pathof(TSML)),
@@ -211,7 +208,7 @@ transform!(monopipeline)
    \label{fig:mono}
 \end{figure}
 
-Let us now normalise the data by adding the \emph{Monotonicer} filter in the pipeline and plot.
+Let us now normalise the data by adding the \emph{Monotonicer} filter in the pipeline and plot it.
 \begin{lstlisting}[language = Julia]
 mononicer = Monotonicer(Dict())
 monopipeline = Pipeline(Dict(
@@ -228,7 +225,7 @@ transform!(monopipeline)
    \label{fig:nmono}
 \end{figure}
 
-The presence of outlierdue to some random errors during meter reading  becomes obvious after the normalisation. To remedy this issue, we can add the \emph{Outliernicer} filter which detects outliers and replace them using similar KNN imputation technique used by the \emph{DateValNNer} filter.
+The presence of outlier due to some random errors during meter reading  becomes obvious after the normalisation. To remedy this issue, we can add the \emph{Outliernicer} filter which detects outliers and replace them by using the \emph{KNN} imputation technique used by the \emph{DateValNNer} filter.
 
 \begin{lstlisting}[language = Julia]
 outliernicer = Outliernicer(
@@ -271,7 +268,9 @@ transform!(dailymonopipeline)
 \end{figure}
 
 As seen in the plot, the values in daily monotonic time series is monotonically increasing and resets to certain baseline the following day and starts to rise again until the end of the daily cycle.
-\vskip 2pt
+
+\vskip 6pt
+
 Let us now reuse the \emph{Monotonicer} filter we used in the previous subsection to normalise the data.
 
 \begin{lstlisting}[language = Julia]
@@ -309,28 +308,35 @@ transform!(dailymonopipeline)
 
 \section{Time Series Classification}
 
-We can now use the knowledge we learned in setting up 
-\emph{pipeline} and \emph{filters} to build higher level
+We can now use the knowledge we learned in setting up the \textbf{TSML}
+\emph{pipeline} and \emph{filters} or \emph{transformers} to build higher level
 operations to solve a specific industrial problem. One major problem
 which we consider relevant because it is a common issue in IOT (Internet of Things) 
  is the time series classification. This problem is prevalent nowadays 
 due to the increasing need to use many sensors to monitor status in different aspects of industrial
 operations and maintenance of cars, buildings, hospitals, supermarkets, homes, cities, etc.
 
+\vskip 6pt
+
 Rapid deployment of these sensors result to many of them not properly labeled or classified.
 Time series classification is a significant first step for optimal prediction and anomaly detection.
+Identifying the correct sensor data types can help in the choice of what the most optimal prediction 
+model to use for actuation or pre-emption to minimise wastage in resource utilisation.
 To successfully perform the latter operations, it is necessary to identify first the time series
 type so that appropriate model and cleaning routines can be selected for optimal model performance . 
 The  \emph{TSClassifier} filter aims to address this problem and its usage is described below.
 
 \vskip 6pt
+
 First, we setup the locations of files for training, testing, and saving the model.
 Next, we start the training phase by calling \emph{fit} which loads
 file in the training directory and learn the mapping between their
 statistic features extracted by \emph{Statifier} with their types indicated
-by their filenames. Once the training is done, the final model
+by a substring in their filenames. Once the training is done, the final model
 is saved in the \emph{model} directory which will be used for 
 testing accuracy and classifying new time series datasets. 
+
+\vskip 6pt
 
 The code below initialises the \emph{TSClassifier} with the locations of the training, testing, and modelling repository. Training is carried out by the \emph{fit} function which extracts the stat features of the training data and save them as a DataFrame input to the \emph{RandomForest} classifier. The trained model is saved and used during testing.
 
@@ -367,33 +373,35 @@ Figure~\ref{fig:tcl} shows: a) a snapshot of the output during training and test
    \label{fig:tcl}
 \end{figure}
 
-\section{Extending TSML with Scikitlearn and Caret}
+\section{Extending TSML with Scikit-Learn and Caret}
 In the latest \textbf{TSML} version (2.3.4 and above), 
-we refactored the base TSML
-to only include pure Julia code implementations and moved
-external libs and binary dependencies into the TSMLextra package. 
+we refactored the base \textbf{TSML}
+to only include pure \emph{Julia} code implementations and moved
+external the libs and binary dependencies into the \textbf{TSMLextra} package. 
 One major reason is to have a smaller code base so that it can be easily
-maintained and rapidly deployed in a dockerized solution or Kubernetes deployment. Moreover, smaller codes make
+maintained and rapidly deployed in a dockerized solution or 
+\emph{Kubernetes} or IBM's \emph{OpenShift} deployment. Moreover, smaller codes make
 static compilation fast for smaller docker image  
 in cloud deployment. 
 
+\vskip 6pt
+
 There are cases however where the main task of time series classification 
-requires more complex ensemble model using hierarchy or tree where 
-members are composed of heterogeneous ML learners from binaries in 
+requires more complex ensemble model using hierarchy or tree structure where 
+members are composed of heterogeneous ML learners derived from binaries in 
 different languages. For illustration purposes, we will show how to 
-ensemble ML libraries from ScikitLearn and Caret using \textbf{TSML} 
-meta-ensembles that support the \emph{fit} and \emph{transform} APIs.
+ensemble ML libraries from \emph{Scikit-Learn} and \emph{Caret} using \textbf{TSML} meta-ensembles that support the  \emph{fit} and \emph{transform} APIs.
 
 \subsection{Parallel TSML Using Distributed Workflow}
 
-We will use Julia's built-in support for parallelism by using the \emph{Distributed} library. We also let Julia detect the number of processors available and activate them.
+We will use \emph{Julia's} built-in support for parallelism by using the \emph{Distributed} standard library. We also let \emph{Julia} detect the number of processors available and activate them using the following statements:
 
 \begin{lstlisting}[language = Julia]
 using Distributed 
 nprocs() == 1 && addprocs()
 \end{lstlisting}
 
-With several workers active, we can use the \emph{@everywhere} macro to load the necessary filters and transformers to all workers.
+With several workers active, we use the \emph{@everywhere} macro to load the necessary filters and transformers to all workers.
 
 \begin{lstlisting}[language = Julia]
 @everywhere using TSML
@@ -405,7 +413,7 @@ With several workers active, we can use the \emph{@everywhere} macro to load the
 @everywhere using RDatasets
 \end{lstlisting}
 
-With all the necessary TSML functions loaded, we can now setup the different MLs starting with some learners from Caret and ScikitLearn. The list is not exhaustive for demonstration purposes.
+With all the necessary \textbf{TSML} functions loaded, we can now setup the different MLs starting with some learners from \emph{Caret} and \emph{Scikit-Learn}. The list is not exhaustive for demonstration purposes.
 
 \begin{lstlisting}[language = Julia]
 # Caret ML
@@ -414,7 +422,7 @@ With all the necessary TSML functions loaded, we can now setup the different MLs
 @everywhere caret_treebag = 
    CaretLearner(Dict(:learner=>"treebag"))
 
-# ScikitLearn ML
+# Scikit-Learn ML
 @everywhere sk_knn = 
   SKLearner(Dict(:learner=>"KNeighborsClassifier"))
 @everywhere sk_gb = 
@@ -430,7 +438,7 @@ With all the necessary TSML functions loaded, we can now setup the different MLs
     :impl_args=>Dict(:n_estimators=>10)))
 \end{lstlisting}
 
-Let us setup instances from thebpure Julia implementation of learners and ensembles based on the \emph{DecisionTree.jl} package.
+Let us setup ML instances from a pure \emph{Julia} implementation of learners and ensembles wrapped from the \emph{DecisionTree.jl} package \cite{decisiontree2008}.
 
 \begin{lstlisting}[language = Julia]
 # Julia ML
@@ -481,7 +489,8 @@ Next, we setup the pipeline for training and prediction inside the \emph{predict
 end
 \end{lstlisting}
 
-Finally, we setup the \emph{parallel model} function to run different learners distributed to different workers running in parallel relying on Julia's native support of parallelism. Take note that there are two parallelisms in the code. The first one is the distribution of task in different trials and the second one is the distribution of tasks among different models. It is interesting to note that with this relative compact function definition, the Julia language makes it easy to define a parallel task within another parallel task without any problem.
+Finally, we setup the \texttt{parallelmodel} function to run different learners distributed to different workers running in parallel relying on \emph{Julia's} native support of parallelism. Take note that there are two parallelisms in the code. The first one is the distribution of task in different trials and the second one is the distribution of tasks among different models. It is interesting to note that with this relative compact function definition, the \emph{Julia} language makes it easy to define a parallel task within another parallel task 
+In a straightforward manner without any problem.
 
 \begin{lstlisting}[language = Julia]
 function parallelmodel(learners::Dict,
@@ -511,7 +520,7 @@ function parallelmodel(learners::Dict,
 end
 \end{lstlisting}
 
-We can now benchmark the performance of the different machine learners by creating a dictionary of workers containing instances of learners from Caret, ScikitLearn, and Julia libraries. We pass the dictionary of learners to the \texttt{parallelmodel} function for evaluation.
+We can now benchmark the performance of the different machine learners by creating a dictionary of workers containing instances of learners from \emph{Caret}, \emph{Scikit-Learn}, and \emph{Julia} libraries. We pass the dictionary of learners to the \texttt{parallelmodel} function for evaluation.
 
 \begin{lstlisting}[language = Julia]
 learners=Dict(
@@ -549,14 +558,14 @@ The data used in the experiment are sample snapshots of the data in our building
 
 \vskip 6pt
 
-Figures~\ref{fig:sim}~and~\ref{fig:performance}  show a snapshot of running workers exploiting the distributed library of Julia and the classification performance of each model, respectively. There are 8 workers running in parallel over 12 different machine learning classifiers. From the results, \emph{ExtraTree} from \emph{ScikitLearn} has the best performance with 91.67\% accuracy followed by \emph{TreeBag} and \emph{SVMLinear} from \emph{Caret} library with 83.33 \% accuracy for both. With this workflow, it becomes trivial to search for optimal model by running them in parallel relying on \emph{Julia} to do the low-level tasks of scheduling, queueing, synchronizing, etc and making sure that dynamically available compute resources are fairly optimised.
+Figures~\ref{fig:sim}~and~\ref{fig:performance}  show a snapshot of running workers exploiting the distributed library of Julia and the classification performance of each model, respectively. There are 8 workers running in parallel over 12 different machine learning classifiers. From the results, \emph{ExtraTree} from \emph{Scikit-Learn} has the best performance with 91.67\% accuracy followed by \emph{TreeBag} and \emph{SVMLinear} from \emph{Caret} library with 83.33 \% accuracy for both. With this workflow, it becomes trivial to search for optimal model by running them in parallel relying on \emph{Julia} to do the low-level tasks of scheduling, queueing, synchronizing, etc and making sure that dynamically available compute resources are fairly optimised.
 
 \subsection{Parallel TSML Using Threads Workflow}
 With Julia 1.3, lightweight multi-threading support in Julia becomes possible. We will be using pure Julia ML models because installing external dependencies such as Caret MLs through RCall package has some issues with the alpha version of Julia 1.3 at this point in time. We will update this documentation and add more MLs once the issues are resolved.
 
 \vskip 6pt
 
-The main difference in the workflow between Julia's distributed computation model compared to the threaded model is the presence of \texttt{@everywhere} macro in the former for each function defined to indicate that these function definitions shall be exported to all running workers. Since threaded processes share the same memory model with the Julia main process, there is no need for this macro. Instead, threading workflow requires the use of \emph{mutex} locking in the update of the global dataframe that gathers the prediction performance of models running in their respective threads. In similar observation with the distributed framework, the \emph{threadedmodel} function contains two parallelism: threads in different trials and threads among models in each trial. The function is surprisingly compact to implement threads within threads without issues and the main bottleneck happens only during the update operation of the global \emph{ctable}.
+The main difference in the workflow between Julia's distributed computation model compared to the threaded model is the presence of \texttt{@everywhere} macro in the former for each function defined to indicate that these function definitions shall be exported to all running workers. Since threaded processes share the same memory model with the Julia main process, there is no need for this macro. Instead, threading workflow requires the use of \emph{mutex} locking in the update of the global dataframe that gathers the prediction performance of models running in their respective threads. In similar observation with the distributed framework, the \texttt{threadedmodel} function contains two parallelism: threads in different trials and threads among models in each trial. The function is surprisingly compact to implement threads within threads without issues and the main bottleneck happens only during the update operation of the global \emph{ctable}.
 
 \begin{lstlisting}[language = Julia]
 function threadedmodel(learners::Dict,
