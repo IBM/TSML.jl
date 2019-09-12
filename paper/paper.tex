@@ -47,7 +47,7 @@ libraries to create complex ensembles for robust time series prediction, cluster
 \item support for distributed/threaded computation for scalability and speed
 \end{enumerate}
 
-The \textbf{TSML} package assumes a two-column input for any time series data composed of \emph{dates} and \emph{values}. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurrence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by the median/mean or user-defined aggregation function of the \textit{k}-nearest neighbors (KNN) where \textit{k} is the symmetric distance from the location of missing value. This approach can be called several times until there are no more missing values.
+The \textbf{TSML} package assumes a two-column input for any time series data composed of \emph{dates} and \emph{values}. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurrence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by the median/mean or user-defined aggregation function of the \textit{k}-nearest neighbors (\emph{KNN}) where \textit{k} is the symmetric distance from the location of missing value. This approach can be called several times until there are no more missing values.
 
 \vskip 6pt
 
@@ -323,8 +323,7 @@ Time series classification is a significant first step for optimal prediction an
 Identifying the correct sensor data types can help in the choice of what the most optimal prediction 
 model to use for actuation or pre-emption to minimise wastage in resource utilisation.
 To successfully perform the latter operations, it is necessary to identify first the time series
-type so that appropriate model and cleaning routines can be selected for optimal model performance . 
-The  \emph{TSClassifier} filter aims to address this problem and its usage is described below.
+type so that appropriate model and cleaning routines can be selected for optimal model performance. The  \emph{TSClassifier} filter aims to address this problem and its usage is described below.
 
 \vskip 6pt
 
@@ -556,18 +555,18 @@ The data used in the experiment are sample snapshots of the data in our building
 
 \vskip 6pt
 
-Figures~\ref{fig:sim}~and~\ref{fig:performance}  show a snapshot of running workers exploiting the distributed library of Julia and the classification performance of each model, respectively. There are 8 workers running in parallel over 12 different machine learning classifiers. 
+Figures~\ref{fig:sim}~and~\ref{fig:performance}  show a snapshot of running workers exploiting the distributed library of \emph{Julia} and the classification performance of each model, respectively. There are 8 workers running in parallel over 12 different machine learning classifiers. 
 
 \vskip 6pt
 
 From the results, \emph{ExtraTree} from \emph{Scikit-Learn} has the best performance with 91.67\% accuracy followed by \emph{TreeBag} and \emph{SVMLinear} from \emph{Caret} library with 83.33 \% accuracy for both. With this workflow, it becomes trivial to search for optimal model by running them in parallel relying on \emph{Julia} to do the low-level tasks of scheduling and queueing as well as making sure that  the dynamically available compute resources such as cpu cores and memory resources are fairly optimised.           
 
 \subsection{Parallel TSML Using Threads Workflow}
-With \emph{Julia} 1.3, lightweight multi-threading support in Julia becomes possible. We will be using the pure \emph{Julia}-written ML models because installing external dependencies such as \emph{Caret} MLs through \emph{RCall} package has some issues with the alpha version of \emph{Julia} 1.3 at this point in time. We will update this documentation and add more MLs once the issues are resolved.
+With \emph{Julia} 1.3, lightweight multi-threading support in \emph{Julia} becomes possible. We will be using the pure \emph{Julia}-written ML models because installing external dependencies such as \emph{Caret} MLs through \emph{RCall} package has some issues with the alpha version of \emph{Julia} 1.3 at this point in time. We will update this documentation and add more MLs once the issues are resolved.
 
 \vskip 6pt
 
-The main difference in the workflow between Julia's distributed computation model compared to the threaded model is the presence of \texttt{@everywhere} macro in the former for each function defined to indicate that these function definitions shall be exported to all running workers. Since threaded processes share the same memory model with the Julia main process, there is no need for this macro. Instead, threading workflow requires the use of \emph{mutex} locking in the update of the global dataframe that accumulates the prediction performance of models running in their respective threads. In similar observation with the distributed framework, the \texttt{threadedmodel} function contains two parallelism: threads in different trials and threads among models in each trial. The function is surprisingly compact to implement threads within threads without issues and the main bottleneck happens only during the update operation of the global \emph{ctable} dataframe.
+The main difference in the workflow between \emph{Julia's} distributed computation model compared to the threaded model is the presence of \texttt{@everywhere} macro in the former for each function defined to indicate that these function definitions shall be exported to all running workers. Since threaded processes share the same memory model with the \emph{Julia} main process, there is no need for this macro. Instead, threading workflow requires the use of \emph{mutex} locking in the update of the global dataframe that accumulates the prediction performance of models running in their respective threads. In similar observation with the distributed framework, the \texttt{threadedmodel} function contains two parallelism: threads in different trials and threads among models in each trial. The function is surprisingly compact to implement threads within threads without issues and the main bottleneck happens only during the update operation of the global \emph{ctable} dataframe.
 
 \begin{lstlisting}[language = Julia]
 function threadedmodel(learners::Dict,
@@ -666,21 +665,21 @@ only 4 datasets, namely: ElectricDevices, RefrigerationDevices, FordB, and Earth
 
 ElectricDevices dataset covers 251 households, sampled in 2-minute intervals over a month. The target is to collect 
 how consumers use electricity within the home based on the devices they use at a particular time of the day.  The dataset
-is highly imbalanced with the following total count in each class, repectively: 1394, 4187, 1606, 2639, 4275, 1252, 1284. This dataset is a good test on the robustness of the classifier to handle bias during training. The class distribution in training is consist of: 727, 2231, 851, 1471, 2406, 509, 728. For testing, the class distribution is: 667, 1956,  755, 1165, 1869,  743,  556. This hihgly imbalanced dataset is a good problem to determine which among the classifiers has the best method to deal with this sampling bias. There are 96 input features and 6 output classes in a total of 16637  samples. \vskip 6pt
+is highly imbalanced with the following total count in each class, repectively: 1394, 4187, 1606, 2639, 4275, 1252, 1284. This dataset is a good test on the robustness of the classifier to handle bias during training. The class distribution in training is consist of: 727, 2231, 851, 1471, 2406, 509, 728. For testing, the class distribution is: 667, 1956,  755, 1165, 1869,  743,  556. Using this highly imbalanced dataset is a good way to determine which among the classifiers has the best method to deal with this sampling bias. There are 96 input features and 6 output classes in a total of 16637  samples. 
 
 \vskip 6pt
 
-Similarly, RefrigerationDevices dataset is based on similar study with that of ElectricalDevices dataset. The dataset uses the same set of households and sampling protocol for gathering electric consumption data from three types of refrigeration devices: Fridge/Freezer, Refrigerator, Upright Freezer. Unlike in ElectricDevices, the class distribution in RefrigerationDevices are balanced, i.e., 250 for each class in training and 125 for each class during testing. There are 720 input features and 3 output classes in a total of 
+RefrigerationDevices dataset is based on similar study with that of ElectricalDevices dataset. The dataset uses the same set of households and sampling protocol for gathering electric consumption data from three types of refrigeration devices: Fridge/Freezer, Refrigerator, Upright Freezer. Unlike in ElectricDevices, the class distribution in RefrigerationDevices are balanced, i.e., 250 for each class in training and 125 for each class during testing. There are 720 input features and 3 output classes in a total of 
 750 samples.
 
 \vskip 6pt
 
 The Earthquakes classification problem requires predicting whether a major event is about to occur based on the most recent readings in the surrounding area. The data is aggregated hourly with the Rictor scale reading over 5 indicating a  major event. There are 368 negative cases versus 93 positive cases of major events. This dataset is highly imbalanced in class distribution which makes predicting whether a major event occurs very problematic. The training set is composed of 264 negative examples and only 58 positive examples. The testing data is composed of 104 negative cases and only 35 positive cases.
-There are 512 input features and 2 output classes in a total of 461 samples. The highly imbalanced distribution of this dataset will provide a good discrimination to determine which among the classifiers are robust to deal with this bias.
+There are 512 input features and 2 output classes in a total of 461 samples. The highly imbalanced distribution of this dataset will provide a good way to determine which among the classifiers are robust to deal with this bias.
 
 \vskip 6pt
 
-FordB dataset is a classification problem to diagnose whether a certain symptom exists or does not exist in an automative system. There are 500 measurements of engine noise. The training data were collected in typical operating conditions while the test data were collected under noisy conditions. The dataset is slightly imbalanced consisting of 1860 class1 vs 1776 class2 in training while 401 class1 and 409 class2 in testing. There are 500 input features and 2 output classes in a total of 4446 samples.
+FordB dataset is a classification problem to diagnose whether a certain symptom exists in an automative system. There are 500 measurements of engine noise. The training data were collected in typical operating conditions while the test data were collected under noisy conditions. The dataset is slightly imbalanced consisting of 1860 class1 vs 1776 class2 in training while 401 class1 and 409 class2 in testing. There are 500 input features and 2 output classes in a total of 4446 samples.
 
 \vskip 6pt
 
@@ -700,7 +699,7 @@ Table~\ref{tab:balance} summarizes the differences and similarities among the di
 
 \vskip 6pt
 
-One thing to note is that the Refrigeration dataset has almost the same number of features with its total number of samples. We expect that this will result into a much harder classification problem eventhough it does not suffer from imbalanced class distribution. Ideally, there must be more samples than features in order for the classifier to properly extract the correct subset of features.
+One thing to note is that the Refrigeration dataset has almost the same number of features with its total number of samples. We expect that this will result into a much harder classification problem eventhough it does not suffer from imbalanced class distribution. Ideally, there must be more samples than features in order for the classifier to properly extract the correct subset of features for robust classification.
 
 
 \subsection{Results}
@@ -761,7 +760,9 @@ j-super & 0.60 & 0.03 & 10 \\\hline
 \label{tab:fordb}
 \end{table}
 
-Due to the data imbalance, accuracy measurement will not be able to capture the performance of the algorithms because its value may be dominated by the dominant class. In this regard, we use Fscore to measure the performance of a given classifier to each class and get the mean of this Fscores.
+Due to the data imbalance, the typical accuracy measurement will not be able to capture the performance of the algorithms because its value may be overshadowed by the dominant class. In this regard, we use F-score to measure the performance of a given classifier to each of its classes and get the mean of these F-scores.
+
+\vskip 6pt
 
 Table~\ref{tab:elec} shows the top 5 performing classifiers together with the 2 worst performing classifiers. The first letter of each classifier's name indicates whether the classifier comes from (c)aret, (s)cikitLearn, or (j)ulia. The table indicates that \emph{Random Forest} and \emph{TreeBag} from \emph{Caret} performed the best followed by \emph{ExtraTree} of \emph{ScikitLearn}. Julia's \emph{Vote} ensemble and \emph{Random Forest} complete the top 5. On the other hand, Julia's \emph{Adaboost} and Caret's \emph{RPart} are the worst classifiers for this problem.  
 
@@ -778,11 +779,11 @@ For Earthquakes classification problem (Table~\ref{tab:earth}), the top 3 best c
 For the FordB dataset (Table~\ref{tab:fordb}), the best performers are: \emph{Random Forest} from \emph{Caret}, \emph{KNN} from \emph{ScikitLearn}, and \emph{Vote Ensemble} from \emph{Julia}. The worst performers are similar to Tables~\ref{tab:elec}~and~\ref{tab:ref}.
 
 \subsection{Discussion}
-Comparing the performances of different classifiers among the four problems indicate that the most difficult problem to classify is the Refrigeration Devices while the easiest one is the Earthquakes problem. As we expected, there is no enough sample for the classifiers to learn the mapping in Refrigeration dataset relative to its feature dimension. One way to alleviate this problem is to remove features that are correlated or perform PCA to reduce the feature dimension. This is beyond the scope of the current paper which focuses mainly on the applicability of TSML MLs to different set of problems. 
+Comparing the performances of different classifiers among the four problems indicate that the most difficult problem to classify is the Refrigeration Devices while the easiest one is the Earthquakes problem. As we expected, there is no enough sample for the classifiers to learn the mapping in Refrigeration dataset relative to its feature dimension. One way to alleviate this problem is to remove features that are highly correlated or perform PCA to reduce the feature dimension. This is beyond the scope of the current paper which focuses mainly on the applicability of TSML MLs to different set of problems. 
 
 \vskip 6pt
 
-Among the classifiers, the \emph{Random Forest} from \emph{Caret} is the top performer in all problems. On the other hand, \emph{TreeBag} from \emph{Caret} and \emph{Gradient Boosting} from \emph{ScikitLearn} are the top performers in Refrigeration Devices and Earthquakes, respectively. It is interesting to note that among the \emph{Random Forest} implementations, the top performer \emph{Caret's} version was written by Breiman\cite{Breiman2001} who was the original author of the said algorithm in \emph{fortran}. The superior performance of Breiman's \emph{Random Forest} can be highlighted in the FordB classification performance.  \emph{k}NN, the next best classifier is 4\% lower than Breiman's \emph{Random Forest}. In all other cases, the next best performer has almost same performance with  Breiman's \emph{Random Forest}.
+Among the classifiers, the \emph{Random Forest} from \emph{Caret} is the top performer in all problems. On the other hand, \emph{TreeBag} from \emph{Caret} and \emph{Gradient Boosting} from \emph{ScikitLearn} are the top performers in Refrigeration Devices and Earthquakes, respectively. It is interesting to note that among the \emph{Random Forest} implementations, the top performer is the \emph{Caret's} version written by Breiman\cite{Breiman2001} who was the original author of the said algorithm in \emph{fortran}. The superior performance of Breiman's \emph{Random Forest} can be highlighted in the FordB classification performance.  \emph{k}NN, the next best classifier is 4\% lower than Breiman's \emph{Random Forest}. In all other cases, the next best performer has almost same performance with  Breiman's \emph{Random Forest}.
  
 \vskip 6pt
  
