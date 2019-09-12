@@ -47,7 +47,7 @@ libraries to create complex ensembles for robust time series prediction, cluster
 \item support for distributed/threaded computation for scalability and speed
 \end{enumerate}
 
-The \textbf{TSML} package assumes a two-column input for any time series data composed of \emph{dates} and \emph{values}. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurrence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by \textit{k}-nearest neighbors (KNN) where \textit{k} is the symmetric distance from the location of missing value. This approach can be called several times until there are no more missing values.
+The \textbf{TSML} package assumes a two-column input for any time series data composed of \emph{dates} and \emph{values}. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurrence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by the median/mean or user-defined aggregation function of the \textit{k}-nearest neighbors (KNN) where \textit{k} is the symmetric distance from the location of missing value. This approach can be called several times until there are no more missing values.
 
 \vskip 6pt
 
@@ -72,7 +72,7 @@ There are more than hundred classifiers and regression functions available using
 
 \vskip 6pt
 To illustrate, below describes the main steps in using \textbf{TSML}.
-First, we create filters for csv reading, aggregation, imputation, data quality
+First, we create filters for csv reading, aggregation, imputation, and data quality
 assessment.
 
 \begin{lstlisting}[language = Julia]
@@ -146,7 +146,7 @@ of missing blocks count is now empty.
 
 \vskip 6pt
 
-We can also visualise our time series data using the \emph{plotter} filter instead of the \emph{statifier} as shown in Fig~\ref{fig:mplot}. Looking closely, you will see discontinuities in the plot due to blocks of missing data.
+We can also visualise our time series data using the \emph{Plotter} filter instead of the \emph{Statifier} as shown in Fig~\ref{fig:mplot}. Looking closely, you will see discontinuities in the plot due to blocks of missing data.
 
 \begin{lstlisting}[language = Julia]
 pltr=Plotter(Dict(:interactive => true))
@@ -163,7 +163,7 @@ transform!(plpipeline)
    \label{fig:mplot}
 \end{figure}
 
-Using the imputation pipeline described before, we can visualise the result of imputation by replacing the \emph{Statifier} with the \emph{Plotter} filter. Figure~\ref{fig:amplot} shows the plot after imputation which gets rid of missing data.
+Using the imputation pipeline described before, we can visualise the result by replacing the \emph{Statifier} with the \emph{Plotter} filter. Figure~\ref{fig:amplot} shows the plot after imputation which gets rid of missing data.
 
 \begin{lstlisting}[language = Julia]
 bplpipeline = Pipeline(Dict(
@@ -271,7 +271,7 @@ As seen in the plot, the values in daily monotonic time series is monotonically 
 
 \vskip 6pt
 
-Let us now reuse the \emph{Monotonicer} filter we used in the previous subsection to normalise the data.
+Let us now reuse the \emph{Monotonicer} filter in the previous subsection to normalise the data.
 
 \begin{lstlisting}[language = Julia]
 dailymonopipeline = Pipeline(Dict(
@@ -308,13 +308,13 @@ transform!(dailymonopipeline)
 
 \section{Time Series Classification}
 
-We can now use the knowledge we learned in setting up the \textbf{TSML}
+We can use the knowledge we learned in setting up the \textbf{TSML}
 \emph{pipeline} and \emph{filters} or \emph{transformers} to build higher level
 operations to solve a specific industrial problem. One major problem
 which we consider relevant because it is a common issue in IOT (Internet of Things) 
  is the time series classification. This problem is prevalent nowadays 
 due to the increasing need to use many sensors to monitor status in different aspects of industrial
-operations and maintenance of cars, buildings, hospitals, supermarkets, homes, cities, etc.
+operations and maintenance of cars, buildings, hospitals, supermarkets, homes, and cities.
 
 \vskip 6pt
 
@@ -376,17 +376,15 @@ Figure~\ref{fig:tcl} shows: a) a snapshot of the output during training and test
 \section{Extending TSML with Scikit-Learn and Caret}
 In the latest \textbf{TSML} version (2.3.4 and above), 
 we refactored the base \textbf{TSML}
-to only include pure \emph{Julia} code implementations and moved
-external the libs and binary dependencies into the \textbf{TSMLextra} package. 
+to only include pure \emph{Julia} code implementations and moved the external libs and binary dependencies into the \textbf{TSMLextra} package. 
 One major reason is to have a smaller code base so that it can be easily
-maintained and rapidly deployed in a dockerized solution or 
-\emph{Kubernetes} or IBM's \emph{OpenShift} deployment. Moreover, smaller codes make
+maintained and rapidly deployed in a dockerized solution for \emph{Kubernetes} or IBM's \emph{OpenShift} cluster. Moreover, smaller codes make
 static compilation fast for smaller docker image  
 in cloud deployment. 
 
 \vskip 6pt
 
-There are cases however where the main task of time series classification 
+There are cases where the main task of time series classification 
 requires more complex ensemble model using hierarchy or tree structure where 
 members are composed of heterogeneous ML learners derived from binaries in 
 different languages. For illustration purposes, we will show how to 
@@ -438,7 +436,7 @@ With all the necessary \textbf{TSML} functions loaded, we can now setup the diff
     :impl_args=>Dict(:n_estimators=>10)))
 \end{lstlisting}
 
-Let us setup ML instances from a pure \emph{Julia} implementation of learners and ensembles wrapped from the \emph{DecisionTree.jl} package \cite{decisiontree2008}.
+Let us setup ML instances from a pure \emph{Julia} implementation of learners and ensembles wrapped from the \emph{DecisionTree.jl} package \cite{decisiontree2008,orchestra2014,combineml2016,tsmlextra2019}.
 
 \begin{lstlisting}[language = Julia]
 # Julia ML
@@ -458,7 +456,7 @@ Let us setup ML instances from a pure \emph{Julia} implementation of learners an
                jbest_ens,sk_rf,sk_gb]))
 \end{lstlisting}
 
-Next, we setup the pipeline for training and prediction inside the \emph{predict} function.
+Next, we setup the pipeline for training and prediction.
 
 \begin{lstlisting}[language = Julia]
 @everywhere function predict(learner,
@@ -489,8 +487,8 @@ Next, we setup the pipeline for training and prediction inside the \emph{predict
 end
 \end{lstlisting}
 
-Finally, we setup the \texttt{parallelmodel} function to run different learners distributed to different workers running in parallel relying on \emph{Julia's} native support of parallelism. Take note that there are two parallelisms in the code. The first one is the distribution of task in different trials and the second one is the distribution of tasks among different models. It is interesting to note that with this relative compact function definition, the \emph{Julia} language makes it easy to define a parallel task within another parallel task 
-In a straightforward manner without any problem.
+Finally, we setup the \texttt{parallelmodel} function to run different learners distributed to different workers running in parallel relying on \emph{Julia's} native support of parallelism. Take note that there are two parallelisms in the code. The first one is the distribution of task in different trials and the second one is the distribution of tasks among different models for each trial. It is interesting to note that with this relative compact function definition, the \emph{Julia} language makes it easy to define a parallel task within another parallel task 
+in a straightforward manner without any problem.
 
 \begin{lstlisting}[language = Julia]
 function parallelmodel(learners::Dict,
@@ -520,7 +518,7 @@ function parallelmodel(learners::Dict,
 end
 \end{lstlisting}
 
-We can now benchmark the performance of the different machine learners by creating a dictionary of workers containing instances of learners from \emph{Caret}, \emph{Scikit-Learn}, and \emph{Julia} libraries. We pass the dictionary of learners to the \texttt{parallelmodel} function for evaluation.
+We benchmark the performance of the different machine learners by creating a dictionary of workers containing instances of learners from \emph{Caret}, \emph{Scikit-Learn}, and \emph{Julia} libraries. We pass the dictionary of learners to the \texttt{parallelmodel} function for evaluation.
 
 \begin{lstlisting}[language = Julia]
 learners=Dict(
@@ -554,18 +552,22 @@ respar = parallelmodel(learners,tsdata;trials=3)
    \label{fig:performance}
 \end{figure}
 
-The data used in the experiment are sample snapshots of the data in our building operations. For reproducibility, the data can be found in the  \emph{juliacon2019-paper} branch of \emph{TSML} in \emph{Github}:  /data/benchmark/tsclassifier. There are four time series types, namely: AirOffTemp, Energy, Pressure, and RetTemp.  We  took a minimal number of samples and classes for discussion and demonstration purposes.
+The data used in the experiment are sample snapshots of the data in our building operations. For reproducibility, the data can be found in the  \emph{juliacon2019-paper} branch of \textbf{TSML} in \emph{Github}:  /data/benchmark/tsclassifier. There are four time series types, namely: AirOffTemp, Energy, Pressure, and RetTemp.  We  took a minimal number of samples and classes for the sake of discussion and demonstration purposes in this paper.
 
 \vskip 6pt
 
-Figures~\ref{fig:sim}~and~\ref{fig:performance}  show a snapshot of running workers exploiting the distributed library of Julia and the classification performance of each model, respectively. There are 8 workers running in parallel over 12 different machine learning classifiers. From the results, \emph{ExtraTree} from \emph{Scikit-Learn} has the best performance with 91.67\% accuracy followed by \emph{TreeBag} and \emph{SVMLinear} from \emph{Caret} library with 83.33 \% accuracy for both. With this workflow, it becomes trivial to search for optimal model by running them in parallel relying on \emph{Julia} to do the low-level tasks of scheduling, queueing, synchronizing, etc and making sure that dynamically available compute resources are fairly optimised.
+Figures~\ref{fig:sim}~and~\ref{fig:performance}  show a snapshot of running workers exploiting the distributed library of Julia and the classification performance of each model, respectively. There are 8 workers running in parallel over 12 different machine learning classifiers. 
+
+\vskip 6pt
+
+From the results, \emph{ExtraTree} from \emph{Scikit-Learn} has the best performance with 91.67\% accuracy followed by \emph{TreeBag} and \emph{SVMLinear} from \emph{Caret} library with 83.33 \% accuracy for both. With this workflow, it becomes trivial to search for optimal model by running them in parallel relying on \emph{Julia} to do the low-level tasks of scheduling and queueing as well as making sure that  the dynamically available compute resources such as cpu cores and memory resources are fairly optimised.           
 
 \subsection{Parallel TSML Using Threads Workflow}
-With Julia 1.3, lightweight multi-threading support in Julia becomes possible. We will be using pure Julia ML models because installing external dependencies such as Caret MLs through RCall package has some issues with the alpha version of Julia 1.3 at this point in time. We will update this documentation and add more MLs once the issues are resolved.
+With \emph{Julia} 1.3, lightweight multi-threading support in Julia becomes possible. We will be using the pure \emph{Julia}-written ML models because installing external dependencies such as \emph{Caret} MLs through \emph{RCall} package has some issues with the alpha version of \emph{Julia} 1.3 at this point in time. We will update this documentation and add more MLs once the issues are resolved.
 
 \vskip 6pt
 
-The main difference in the workflow between Julia's distributed computation model compared to the threaded model is the presence of \texttt{@everywhere} macro in the former for each function defined to indicate that these function definitions shall be exported to all running workers. Since threaded processes share the same memory model with the Julia main process, there is no need for this macro. Instead, threading workflow requires the use of \emph{mutex} locking in the update of the global dataframe that gathers the prediction performance of models running in their respective threads. In similar observation with the distributed framework, the \texttt{threadedmodel} function contains two parallelism: threads in different trials and threads among models in each trial. The function is surprisingly compact to implement threads within threads without issues and the main bottleneck happens only during the update operation of the global \emph{ctable}.
+The main difference in the workflow between Julia's distributed computation model compared to the threaded model is the presence of \texttt{@everywhere} macro in the former for each function defined to indicate that these function definitions shall be exported to all running workers. Since threaded processes share the same memory model with the Julia main process, there is no need for this macro. Instead, threading workflow requires the use of \emph{mutex} locking in the update of the global dataframe that accumulates the prediction performance of models running in their respective threads. In similar observation with the distributed framework, the \texttt{threadedmodel} function contains two parallelism: threads in different trials and threads among models in each trial. The function is surprisingly compact to implement threads within threads without issues and the main bottleneck happens only during the update operation of the global \emph{ctable} dataframe.
 
 \begin{lstlisting}[language = Julia]
 function threadedmodel(learners::Dict,
@@ -599,7 +601,7 @@ function threadedmodel(learners::Dict,
 end
 \end{lstlisting}
 
-Let us define a set of learners that are written in pure Julia for this thread experiment.
+Let us define a set of learners that are written in pure \emph{Julia} for this thread experiment.
 
 \begin{lstlisting}[language = Julia]
 # Julia ML
@@ -652,14 +654,146 @@ resthr = threadedmodel(learners,tsdata;trials=10)
    \label{fig:threadresult}
 \end{figure}
 
-Figures~\ref{fig:threadrunning}~and~\ref{fig:threadresult} show example snapshot of the running threads and the final result of classification, respectively. In this experiment, Adaboost has 85\% accuracy followed by Random Forest with 82.5\% accuracy.
+Figures~\ref{fig:threadrunning}~and~\ref{fig:threadresult} show example snapshot of the running threads and the final result of classification, respectively. In this experiment, Adaboost has 85.0\% accuracy followed by Random Forest with 82.5\% accuracy.
 
-\section{Summary and Conclusion}
-Packages for time series analysis are becoming important tools with the rapid proliferation of sensor data brought about by \textbf{Internet of Things}.  We created \emph{TSML} as a time series machine learning framework which can easily be extended to handle large volume of time series data. 
+\section{Applications Using Public IoT Datasets}
+
+This section summarizes the results of applying the TSML workflow for classification tasks using data in this site: 
+\emph{http://www.timeseriesclassification.com/}. Among the hundreds of datasets available, we handpicked 
+only 4 datasets, namely: ElectricDevices, RefrigerationDevices, FordB, and Earthquakes. 
 
 \vskip 6pt
 
-\emph{TSML} main strength is the adoption of pipeline architecture containing filters and transformers to perform both preprocessing and modelling tasks. \emph{TSML}  exploits the following \emph{Julia} features: multiple dispatch, type inference, custom data types and abstraction, and parallel computations.  In addition, \emph{TSML} uses a common machine learning API for both internal and external ML libraries, distributed and threaded support for modeling, and a growing collection of filters for preprocessing, classification, clustering, and prediction. Extending \emph{TSML} can trivially be done by creating a custom data type filter and defining its corresponding \emph{fit} and \emph{transform} operations which the \emph{TSML} pipeline iteratively calls on its collection of filters.
+ElectricDevices dataset covers 251 households, sampled in 2-minute intervals over a month. The target is to collect 
+how consumers use electricity within the home based on the devices they use at a particular time of the day.  The dataset
+is highly imbalanced with the following total count in each class, repectively: 1394, 4187, 1606, 2639, 4275, 1252, 1284. This dataset is a good test on the robustness of the classifier to handle bias during training. The class distribution in training is consist of: 727, 2231, 851, 1471, 2406, 509, 728. For testing, the class distribution is: 667, 1956,  755, 1165, 1869,  743,  556. This hihgly imbalanced dataset is a good problem to determine which among the classifiers has the best method to deal with this sampling bias. There are 96 input features and 6 output classes in a total of 16637  samples. \vskip 6pt
+
+\vskip 6pt
+
+Similarly, RefrigerationDevices dataset is based on similar study with that of ElectricalDevices dataset. The dataset uses the same set of households and sampling protocol for gathering electric consumption data from three types of refrigeration devices: Fridge/Freezer, Refrigerator, Upright Freezer. Unlike in ElectricDevices, the class distribution in RefrigerationDevices are balanced, i.e., 250 for each class in training and 125 for each class during testing. There are 720 input features and 3 output classes in a total of 
+750 samples.
+
+\vskip 6pt
+
+The Earthquakes classification problem requires predicting whether a major event is about to occur based on the most recent readings in the surrounding area. The data is aggregated hourly with the Rictor scale reading over 5 indicating a  major event. There are 368 negative cases versus 93 positive cases of major events. This dataset is highly imbalanced in class distribution which makes predicting whether a major event occurs very problematic. The training set is composed of 264 negative examples and only 58 positive examples. The testing data is composed of 104 negative cases and only 35 positive cases.
+There are 512 input features and 2 output classes in a total of 461 samples. The highly imbalanced distribution of this dataset will provide a good discrimination to determine which among the classifiers are robust to deal with this bias.
+
+\vskip 6pt
+
+FordB dataset is a classification problem to diagnose whether a certain symptom exists or does not exist in an automative system. There are 500 measurements of engine noise. The training data were collected in typical operating conditions while the test data were collected under noisy conditions. The dataset is slightly imbalanced consisting of 1860 class1 vs 1776 class2 in training while 401 class1 and 409 class2 in testing. There are 500 input features and 2 output classes in a total of 4446 samples.
+
+\vskip 6pt
+
+\begin{table}
+\tbl{Classification Problems}{
+\begin{tabular}{|r|c|c|c|}\hline
+\textbf{Problem} & \textbf{Classes} & \textbf{Imbalance} & \textbf{Dimension}\\\hline
+Electric Devices & 6 & Y & 16637 x 96\\\hline
+Refrigeration Devices & 3 & N & 750 x 720\\\hline
+Earthquakes & 2 & Y & 461 x 512\\\hline
+FordB & 2 & N & 4446 x 500 \\\hline
+\end{tabular}}
+\label{tab:balance}
+\end{table}
+
+Table~\ref{tab:balance} summarizes the differences and similarities among the different classification problems under consideration. Two of the problems have highly imbalanced dataset, namely: Electric Devices and Earthquakes. Both FordB and Refrigeration Devices have no or slightly less imbalanced data. 
+
+\vskip 6pt
+
+One thing to note is that the Refrigeration dataset has almost the same number of features with its total number of samples. We expect that this will result into a much harder classification problem eventhough it does not suffer from imbalanced class distribution. Ideally, there must be more samples than features in order for the classifier to properly extract the correct subset of features.
+
+
+\subsection{Results}
+
+\begin{table}
+\tbl{Electric Devices}{
+\begin{tabular}{|r|c|c|c|}\hline
+\textbf{Model} & \textbf{Mean} & \textbf{Std} & \textbf{Trials}\\\hline
+c-rf & 0.56 & 0.00 & 10\\\hline
+c-treebag & 0.54 & 0.01 & 10\\\hline
+s-extratree & 0.52 & 0.01 & 10\\\hline
+j-vote & 0.51 & 0.01 & 10 \\\hline
+j-rf & 0.51 & 0.01 & 10 \\\hline
+... & ... & ... & ...\\\hline
+j-ada & 0.22 & 0.00 & 10 \\\hline
+c-rpart & 0.06 & 0.00 & 10 \\\hline
+\end{tabular}}
+\label{tab:elec}
+\end{table}
+
+\begin{table}
+\tbl{Refrigeration Devices}{
+\begin{tabular}{|r|c|c|c|}\hline
+\textbf{Model} & \textbf{Mean} & \textbf{Std} & \textbf{Trials}\\\hline
+s-gb & 0.51 & 0.00 & 10\\\hline
+c-rf & 0.51 & 0.01 & 10\\\hline
+c-treebag & 0.50 & 0.01 & 10\\\hline
+j-super & 0.50 & 0.02 & 10 \\\hline
+s-rf & 0.48 & 0.03 & 10 \\\hline
+... & ... & ... & ...\\\hline
+j-ada & 0.33 & 0.00 & 10 \\\hline
+c-rpart & 0.12 & 0.00 & 10 \\\hline
+\end{tabular}}
+\label{tab:ref}
+\end{table}
+
+\begin{table}
+\tbl{Earthquakes}{
+\begin{tabular}{|r|c|c|c|}\hline
+\textbf{Model} & \textbf{Mean} & \textbf{Std} & \textbf{Trials}\\\hline
+c-treebag & 0.86 & 0.01 & 10\\\hline
+c-rf & 0.86 & 0.00 & 10\\\hline
+c-rpart & 0.86 & 0.00 & 10\\\hline
+s-extratree & 0.85 & 0.01 & 10 \\\hline
+s-gb & 0.85 & 0.00 & 10 \\\hline
+... & ... & ... & ...\\\hline
+c-svmlinear & 0.77 & 0.00 & 10 \\\hline
+j-pt & 0.76 & 0.01 & 10 \\\hline
+\end{tabular}}
+\label{tab:earth}
+\end{table}
+
+\begin{table}
+\tbl{FordB}{
+\begin{tabular}{|r|c|c|c|}\hline
+\textbf{Model} & \textbf{Mean} & \textbf{Std} & \textbf{Trials}\\\hline
+c-rf & 0.66 & 0.01 & 10\\\hline
+s-knn & 0.62 & 0.00 & 10\\\hline
+j-vote & 0.61 & 0.01 & 10\\\hline
+j-rf & 0.61 & 0.01 & 10 \\\hline
+j-super & 0.60 & 0.03 & 10 \\\hline
+... & ... & ... & ...\\\hline
+j-ada & 0.13 & 0.00 & 10 \\\hline
+c-rpart & 0.00 & 0.00 & 10 \\\hline
+\end{tabular}}
+\label{tab:fordb}
+\end{table}
+
+
+
+Table~\ref{tab:elec} shows the top 5 performing classifiers together with the 2 worst performing classifiers. The first letter of each classifier's name indicates whether the classifier comes from (c)aret, (s)cikitLearn, or (j)ulia. The table indicates that \emph{Random Forest} and \emph{TreeBag} from \emph{Caret} performed the best followed by \emph{ExtraTree} of \emph{ScikitLearn}. Julia's \emph{Vote} ensemble and \emph{Random Forest} complete the top 5. On the other hand, Julia's \emph{Adaboost} and Caret's \emph{RPart} are the worst classifiers for this problem.  
+
+\vskip 6pt
+
+Using similar naming convention, Table~\ref{tab:ref} indicates that \emph{GradientBoost} from \emph{ScikitLearn} and \emph{Random Forest} from \emph{Caret} are the best classifiers for the Refrigeration Devices problem. The two worst algorithms are the same as in Table~\ref{tab:elec}.
+
+\vskip 6pt
+
+For Earthquakes classification problem (Table~\ref{tab:earth}), the top 3 best classifiers are dominated by those from \emph{Caret} library, namely: \emph{TreeBag}, \emph{Random Forest}, and \emph{RPart}. The worst performers are from \emph{Caret's} \emph{SVMLinear} and \emph{Julia's} \emph{PartitionTree}.
+
+\vskip 6pt
+
+For the FordB dataset (Table~\ref{tab:fordb}), the best performers are: \emph{Random Forest} from \emph{Caret}, \emph{KNN} from \emph{ScikitLearn}, and \emph{Vote Ensemble} from \emph{Julia}. The worst performers are similar to Tables~\ref{tab:elec}~and~\ref{tab:ref}.
+
+\subsection{Discussion}
+Comparing the performances of different classifiers among the four problems indicate that the most difficult problem to classify is the Refrigeration Devices while the easiest one is the Earthquakes problem. 
+
+\section{Summary and Conclusion}
+Packages for time series analysis are becoming important tools with the rapid proliferation of sensor data brought about by \textbf{IoT}.  We created \textbf{TSML} as a time series machine learning framework which can easily be extended to handle large volume of time series data. 
+
+\vskip 6pt
+
+\textbf{TSML} main strength is the adoption \emph{UNIX} of pipeline architecture containing filters and transformers to perform both preprocessing and modelling tasks. \textbf{TSML}  exploits the following \emph{Julia} features: multiple dispatch, type inference, custom data types and abstraction, and parallel computations.  In addition, \textbf{TSML} uses a common machine learning API for both internal and external ML libraries, distributed and threaded support for modeling, and a growing collection of filters for preprocessing, classification, clustering, and prediction. Extending \textbf{TSML} can trivially be done by creating a custom data type filter and defining its corresponding \emph{fit} and \emph{transform} operations which the \textbf{TSML} pipeline iteratively calls among its collection of filters.
 
 %TODO: 
 %\begin{itemize}
