@@ -708,15 +708,13 @@ One thing to note is that the Refrigeration dataset has almost the same number o
 \begin{table}
 \tbl{Electric Devices}{
 \begin{tabular}{|r|c|c|c|}\hline
-\textbf{Model} & \textbf{Mean} & \textbf{Std} & \textbf{Trials}\\\hline
+\textbf{Model} & \textbf{MeanFscore} & \textbf{Std} & \textbf{Trials}\\\hline
 c-rf & 0.56 & 0.00 & 10\\\hline
 c-treebag & 0.54 & 0.01 & 10\\\hline
 s-extratree & 0.52 & 0.01 & 10\\\hline
 j-vote & 0.51 & 0.01 & 10 \\\hline
 j-rf & 0.51 & 0.01 & 10 \\\hline
 ... & ... & ... & ...\\\hline
-j-ada & 0.22 & 0.00 & 10 \\\hline
-c-rpart & 0.06 & 0.00 & 10 \\\hline
 \end{tabular}}
 \label{tab:elec}
 \end{table}
@@ -724,15 +722,13 @@ c-rpart & 0.06 & 0.00 & 10 \\\hline
 \begin{table}
 \tbl{Refrigeration Devices}{
 \begin{tabular}{|r|c|c|c|}\hline
-\textbf{Model} & \textbf{Mean} & \textbf{Std} & \textbf{Trials}\\\hline
+\textbf{Model} & \textbf{MeanFscore} & \textbf{Std} & \textbf{Trials}\\\hline
 s-gb & 0.51 & 0.00 & 10\\\hline
 c-rf & 0.51 & 0.01 & 10\\\hline
 c-treebag & 0.50 & 0.01 & 10\\\hline
 j-super & 0.50 & 0.02 & 10 \\\hline
 s-rf & 0.48 & 0.03 & 10 \\\hline
 ... & ... & ... & ...\\\hline
-j-ada & 0.33 & 0.00 & 10 \\\hline
-c-rpart & 0.12 & 0.00 & 10 \\\hline
 \end{tabular}}
 \label{tab:ref}
 \end{table}
@@ -740,15 +736,13 @@ c-rpart & 0.12 & 0.00 & 10 \\\hline
 \begin{table}
 \tbl{Earthquakes}{
 \begin{tabular}{|r|c|c|c|}\hline
-\textbf{Model} & \textbf{Mean} & \textbf{Std} & \textbf{Trials}\\\hline
+\textbf{Model} & \textbf{MeanFscore} & \textbf{Std} & \textbf{Trials}\\\hline
 c-treebag & 0.86 & 0.01 & 10\\\hline
 c-rf & 0.86 & 0.00 & 10\\\hline
 c-rpart & 0.86 & 0.00 & 10\\\hline
 s-extratree & 0.85 & 0.01 & 10 \\\hline
 s-gb & 0.85 & 0.00 & 10 \\\hline
 ... & ... & ... & ...\\\hline
-c-svmlinear & 0.77 & 0.00 & 10 \\\hline
-j-pt & 0.76 & 0.01 & 10 \\\hline
 \end{tabular}}
 \label{tab:earth}
 \end{table}
@@ -756,20 +750,18 @@ j-pt & 0.76 & 0.01 & 10 \\\hline
 \begin{table}
 \tbl{FordB}{
 \begin{tabular}{|r|c|c|c|}\hline
-\textbf{Model} & \textbf{Mean} & \textbf{Std} & \textbf{Trials}\\\hline
+\textbf{Model} & \textbf{MeanFscore} & \textbf{Std} & \textbf{Trials}\\\hline
 c-rf & 0.66 & 0.01 & 10\\\hline
 s-knn & 0.62 & 0.00 & 10\\\hline
 j-vote & 0.61 & 0.01 & 10\\\hline
 j-rf & 0.61 & 0.01 & 10 \\\hline
 j-super & 0.60 & 0.03 & 10 \\\hline
 ... & ... & ... & ...\\\hline
-j-ada & 0.13 & 0.00 & 10 \\\hline
-c-rpart & 0.00 & 0.00 & 10 \\\hline
 \end{tabular}}
 \label{tab:fordb}
 \end{table}
 
-
+Due to the data imbalance, accuracy measurement will not be able to capture the performance of the algorithms because its value may be dominated by the dominant class. In this regard, we use Fscore to measure the performance of a given classifier to each class and get the mean of this Fscores.
 
 Table~\ref{tab:elec} shows the top 5 performing classifiers together with the 2 worst performing classifiers. The first letter of each classifier's name indicates whether the classifier comes from (c)aret, (s)cikitLearn, or (j)ulia. The table indicates that \emph{Random Forest} and \emph{TreeBag} from \emph{Caret} performed the best followed by \emph{ExtraTree} of \emph{ScikitLearn}. Julia's \emph{Vote} ensemble and \emph{Random Forest} complete the top 5. On the other hand, Julia's \emph{Adaboost} and Caret's \emph{RPart} are the worst classifiers for this problem.  
 
@@ -786,14 +778,27 @@ For Earthquakes classification problem (Table~\ref{tab:earth}), the top 3 best c
 For the FordB dataset (Table~\ref{tab:fordb}), the best performers are: \emph{Random Forest} from \emph{Caret}, \emph{KNN} from \emph{ScikitLearn}, and \emph{Vote Ensemble} from \emph{Julia}. The worst performers are similar to Tables~\ref{tab:elec}~and~\ref{tab:ref}.
 
 \subsection{Discussion}
-Comparing the performances of different classifiers among the four problems indicate that the most difficult problem to classify is the Refrigeration Devices while the easiest one is the Earthquakes problem. 
-
-\section{Summary and Conclusion}
-Packages for time series analysis are becoming important tools with the rapid proliferation of sensor data brought about by \textbf{IoT}.  We created \textbf{TSML} as a time series machine learning framework which can easily be extended to handle large volume of time series data. 
+Comparing the performances of different classifiers among the four problems indicate that the most difficult problem to classify is the Refrigeration Devices while the easiest one is the Earthquakes problem. As we expected, there is no enough sample for the classifiers to learn the mapping in Refrigeration dataset relative to its feature dimension. One way to alleviate this problem is to remove features that are correlated or perform PCA to reduce the feature dimension. This is beyond the scope of the current paper which focuses mainly on the applicability of TSML MLs to different set of problems. 
 
 \vskip 6pt
 
-\textbf{TSML} main strength is the adoption \emph{UNIX} of pipeline architecture containing filters and transformers to perform both preprocessing and modelling tasks. \textbf{TSML}  exploits the following \emph{Julia} features: multiple dispatch, type inference, custom data types and abstraction, and parallel computations.  In addition, \textbf{TSML} uses a common machine learning API for both internal and external ML libraries, distributed and threaded support for modeling, and a growing collection of filters for preprocessing, classification, clustering, and prediction. Extending \textbf{TSML} can trivially be done by creating a custom data type filter and defining its corresponding \emph{fit} and \emph{transform} operations which the \textbf{TSML} pipeline iteratively calls among its collection of filters.
+Among the classifiers, the \emph{Random Forest} from \emph{Caret} is the top performer in all problems. On the other hand, \emph{TreeBag} from \emph{Caret} and \emph{Gradient Boosting} from \emph{ScikitLearn} are the top performers in Refrigeration Devices and Earthquakes, respectively. It is interesting to note that among the \emph{Random Forest} implementations, the top performer \emph{Caret's} version was written by Breiman\cite{Breiman2001} who was the original author of the said algorithm in \emph{fortran}. The superior performance of Breiman's Random Forest can be highlighted in the FordB classification performance. The next best which is \emph{k}NN is 4\% lower. In all other cases, the next best performer has almost same performance with  Breiman's \emph{Random Forest}.
+ 
+\vskip 6pt
+ 
+As we expected based on past studies, the different ensemble models dominated the top 5 performers. While not shown in the table, the most consistent worst performer is the \emph{Caret's} \emph{RPart}. This is consistent to Breiman's observation that the Random Forest performs well by using unstable or inferior ML models to its leaves. In \emph{Caret's} \emph{Random Forest}, its leaves are composed of \emph{RPart} models which has the poorest performance in all problems. The combination of boosting and bagging weak learners such \emph{RPart} makes the \emph{Random Forest} robust from datasets imbalances.
+ 
+\section{Summary and Conclusion}
+Packages for time series analysis are becoming important tools with the rapid proliferation of sensor data brought about by \textbf{IoT}.  We created \textbf{TSML} as a time series machine learning framework which can easily be extended to handle large volume of time series data. 
+\textbf{TSML}  exploits the following \emph{Julia} features: multiple dispatch, type inference, custom data types and abstraction, and parallel computations. 
+
+\vskip 6pt
+
+\textbf{TSML} main strength is the adoption of \emph{UNIX} pipeline architecture containing filters or transformers to perform both preprocessing and modelling tasks.  In addition, \textbf{TSML} uses a common machine learning API for both internal and external ML libraries, distributed and threaded support for modeling, and a growing collection of filters for preprocessing, classification, clustering, and prediction. 
+
+\vskip 6pt
+
+Extending \textbf{TSML} can easily be done by creating a custom data type filter and defining its corresponding \emph{fit} and \emph{transform} operations which the \textbf{TSML} pipeline iteratively calls for each filter in the workflow.
 
 %TODO: 
 %\begin{itemize}
