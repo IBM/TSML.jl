@@ -10,7 +10,8 @@ alt="TSML Logo" width="250"></img> </div>
 
 The design/framework of this package is influenced heavily by Samuel Jenkins' [Orchestra.jl](https://github.com/svs14/Orchestra.jl) and Paulito Palmes [CombineML.jl](https://github.com/ppalmes/CombineML.jl) packages.
 
-Follow this link for a quick [Jupyter Notebook TSML Demo](https://github.com/IBM/TSML.jl/blob/master/docs/StaticPlotting.jl.ipynb).
+Follow these links for a quick [Jupyter Notebook TSML Demo](https://github.com/IBM/TSML.jl/blob/master/docs/StaticPlotting.jl.ipynb)
+and the [JuliaCon 2019 Proceedings Paper](https://github.com/IBM/TSML.jl/blob/master/docs/JuliaCon2019Paper.pdf).
 
 ## Package Features
 
