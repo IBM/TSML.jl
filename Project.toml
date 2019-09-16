@@ -1,7 +1,7 @@
 name = "TSML"
 uuid = "198dc43e-9e51-5cd7-9d40-d9794d335912"
 authors = ["Paulito Palmes <ppalmes@gmail.com>"]
-version = "2.3.8"
+version = "2.3.9"
 
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
