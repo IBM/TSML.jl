@@ -50,6 +50,6 @@ deploydocs(
    repo = "github.com/IBM/TSML.jl.git",
    root = ROOT,
    target = "pdf/build/pdfdir",
-   branch = "master",
+   branch = "gh-pages-pdf",
    forcepush = true,
 )
