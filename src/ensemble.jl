@@ -22,7 +22,21 @@ export VoteEnsemble,
        fit!, 
        transform!
 
-# Set of machine learners that majority vote to decide prediction.
+"""
+    VoteEnsemble(
+       Dict( 
+          # Output to train against
+          # (:class).
+          :output => :class,
+          # Learners in voting committee.
+          :learners => [PrunedTree(), Adaboost(), RandomForest()]
+       )
+    )
+
+Set of machine learners employing majority vote to decide prediction.
+
+Implements: `fit!`, `transform!`
+"""
 mutable struct VoteEnsemble <: TSLearner
   model
   args
@@ -39,6 +53,11 @@ mutable struct VoteEnsemble <: TSLearner
   end
 end
 
+"""
+    fit!(ve::VoteEnsemble, instances::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
+
+Training phase of the ensemble.
+"""
 function fit!(ve::VoteEnsemble, instances::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   # Train all learners
   learners = ve.args[:learners]
@@ -48,6 +67,11 @@ function fit!(ve::VoteEnsemble, instances::T, labels::Vector) where {T<:Union{Ve
   ve.model = Dict( :learners => learners )
 end
 
+"""
+    transform!(ve::VoteEnsemble, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
+
+Prediction phase of the ensemble.
+"""
 function transform!(ve::VoteEnsemble, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
   # Make learners vote
   learners = ve.args[:learners]
@@ -56,7 +80,25 @@ function transform!(ve::VoteEnsemble, instances::T) where {T<:Union{Vector,Matri
   return StatsBase.mode(predictions)
 end
 
-# Ensemble where a 'stack' learner learns on a set of learners' predictions.
+"""
+    StackEnsemble(
+       Dict(    
+          # Output to train against
+          # (:class).
+          :output => :class,
+          # Set of learners that produce feature space for stacker.
+          :learners => [PrunedTree(), Adaboost(), RandomForest()],
+          # Machine learner that trains on set of learners' outputs.
+          :stacker => RandomForest(),
+          # Proportion of training set left to train stacker itself.
+          :stacker_training_proportion => 0.3,
+          # Provide original features on top of learner outputs to stacker.
+          :keep_original_features => false
+       )
+    )
+
+An ensemble where a 'stack' of learners is used for training and prediction.
+"""
 mutable struct StackEnsemble <: TSLearner
   model
   args
@@ -79,6 +121,18 @@ mutable struct StackEnsemble <: TSLearner
   end
 end
 
+"""
+    fit!(se::StackEnsemble, instances::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
+
+Training phase of the stack of learners.
+
+- perform holdout to obtain indices for 
+- partition learner and stacker training sets
+- partition training set for learners and stacker
+- train all learners
+- train stacker on learners' outputs
+- build final model from the trained learners
+"""
 function fit!(se::StackEnsemble, instances::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   learners = se.args[:learners]
   num_learners = size(learners, 1)
@@ -120,6 +174,11 @@ function fit!(se::StackEnsemble, instances::T, labels::Vector) where {T<:Union{V
   )
 end
 
+"""
+    transform!(se::StackEnsemble, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
+
+Build stacker instances and predict
+"""
 function transform!(se::StackEnsemble, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
   # Build stacker instances
   learners = se.model[:learners]
@@ -165,8 +224,32 @@ function build_stacker_instances(
   return stacker_instances
 end
 
-# Selects best learner out of set. 
-# Will perform a grid search on learners if options grid is provided.
+"""
+    BestLearner(
+       Dict(
+          # Output to train against
+          # (:class).
+          :output => :class,
+          # Function to return partitions of instance indices.
+          :partition_generator => (instances, labels) -> kfold(size(instances, 1), 5),
+          # Function that selects the best learner by index.
+          # Arg learner_partition_scores is a (learner, partition) score matrix.
+          :selection_function => (learner_partition_scores) -> findmax(mean(learner_partition_scores, dims=2))[2],      
+          # Score type returned by score() using respective output.
+          :score_type => Real,
+          # Candidate learners.
+          :learners => [PrunedTree(), Adaboost(), RandomForest()],
+          # Options grid for learners, to search through by BestLearner.
+          # Format is [learner_1_options, learner_2_options, ...]
+          # where learner_options is same as a learner's options but
+          # with a list of values instead of scalar.
+          :learner_options_grid => nothing
+       )
+    )
+
+Selects best learner from the set by performing a 
+grid search on learners if grid option is indicated.
+"""
 mutable struct BestLearner <: TSLearner
   model
   args
@@ -195,6 +278,17 @@ mutable struct BestLearner <: TSLearner
   end
 end
 
+"""
+    fit!(bls::BestLearner, instances::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
+
+Training phase:
+
+- obtain learners as is if grid option is not present 
+- generate learners if grid option is present 
+- foreach prototype learner, generate learners with specific options found in grid
+- generate partitions
+- train each learner on each partition and obtain validation output
+"""
 function fit!(bls::BestLearner, instances::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
   # Obtain learners as is if no options grid present 
   if bls.args[:learner_options_grid] == nothing
@@ -275,6 +369,11 @@ function fit!(bls::BestLearner, instances::T, labels::Vector) where {T<:Union{Ma
   )
 end
 
+""" 
+    transform!(bls::BestLearner, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
+
+Choose the best learner based on cross-validation results and use it for prediction.
+"""
 function transform!(bls::BestLearner, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
   transform!(bls.model[:best_learner], instances)
 end

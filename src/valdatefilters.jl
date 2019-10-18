@@ -1,13 +1,64 @@
-# Convert a 1-D timeseries into sliding window matrix for ML training
-# using Plots
+@reexport module ValDateFilters
+
+using TSML.TSMLTypes
+import TSML.TSMLTypes.fit! # to overload
+import TSML.TSMLTypes.transform! # to overload
+using TSML.Utils
+
+using Dates
+using DataFrames
+using Statistics
+using CSV
+using CodecBzip2
+
+using MLDataUtils: slidingwindow
+
+export fit!,transform!
+
+export Matrifier,Dateifier
+export DateValizer,DateValgator,DateValNNer
+export CSVDateValReader, CSVDateValWriter
+export BzCSVDateValReader
+
+
+
 
 const gAggDict = Dict(
     :median => Statistics.median,
     :mean =>   Statistics.mean,
     :maximum => Statistics.maximum,
-    :minimum => Statistics.minimum
+    :minimum => Statistics.minimum,
+    :sum => sum
 )
 
+"""
+    Matrifier(Dict(
+       Dict(
+        :ahead => 1,
+        :size => 7,
+        :stride => 1,
+      )
+    )
+
+Converts a 1-D timeseries into sliding window matrix for ML training:
+- `:ahead` => steps ahead to predict
+- `:size` => size of sliding window
+- `:stride` => amount of overlap in sliding window
+
+Example:
+
+    mtr = Matrifier(Dict(:ahead=>24,:size=>24,:stride=>5))
+    lower = DateTime(2017,1,1)
+    upper = DateTime(2017,1,5)
+    dat=lower:Dates.Hour(1):upper |> collect
+    vals = 1:length(dat)
+    x = DataFrame(Date=dat,Value=vals)
+    fit!(mtr,x)
+    res = transform!(mtr,x)
+
+
+Implements: `fit!`, `transform`
+"""
 mutable struct Matrifier <: Transformer
   model
   args
@@ -22,6 +73,12 @@ mutable struct Matrifier <: Transformer
   end
 end
 
+
+"""
+    fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector,DataFrame}}
+
+Checks and validate inputs are in correct structure
+"""
 function fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input is not a dataframe")
   x = deepcopy(xx.Value)
@@ -29,6 +86,11 @@ function fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Ve
   mtr.model = mtr.args
 end
 
+"""
+    transform!(mtr::Matrifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
+
+Applies the parameters of sliding windows to create the corresponding matrix
+"""
 function transform!(mtr::Matrifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input is not a dataframe")
   x = deepcopy(xx.Value)
@@ -60,7 +122,31 @@ end
 
 ### ====
 
-# Convert a 1-D date series into sliding window matrix for ML training
+
+"""
+    Dateifier(args=Dict())
+       Dict(
+        :ahead => 1,
+        :size => 7,
+        :stride => 1
+       )
+    )
+
+Converts a 1-D date series into sliding window matrix for ML training
+
+Example: 
+
+    dtr = Dateifier(Dict())
+    lower = DateTime(2017,1,1)
+    upper = DateTime(2018,1,31)
+    dat=lower:Dates.Day(1):upper |> collect
+    vals = rand(length(dat))
+    x=DataFrame(Date=dat,Value=vals)
+    fit!(dtr,x)
+    res = transform!(dtr,x)
+
+Implements: `'fit!`, `transform!`
+"""
 mutable struct Dateifier <: Transformer
   model
   args
@@ -75,6 +161,11 @@ mutable struct Dateifier <: Transformer
   end
 end
 
+"""
+    fit!(dtr::Dateifier,xx::T,y::Vector=[]) where {T<:Union{Matrix,Vector,DataFrame}}
+
+Computes range of dates to be used during transform.
+"""
 function fit!(dtr::Dateifier,xx::T,y::Vector=[]) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input not a dataframe")
   x = deepcopy(xx.Date)
@@ -84,7 +175,11 @@ function fit!(dtr::Dateifier,xx::T,y::Vector=[]) where {T<:Union{Matrix,Vector,D
   dtr.model = dtr.args
 end
 
-# transform to day of the month, day of the week, etc
+"""
+    transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
+
+Transforms to day of the month, day of the week, etc
+"""
 function transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
   typeof(xx) <: DataFrame || error("input not a dataframe")
   x = deepcopy(xx.Date)
@@ -107,9 +202,35 @@ function transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFram
 end
 
 
-### ====
+"""
+    DateValgator(args=Dict())
+       Dict(
+        :dateinterval => Dates.Hour(1),
+        :aggregator => :median
+      )
+    )
 
-# Date,Val time series
+Aggregates values based on date period specified.
+
+Example:
+
+    # generate random values with missing data
+    Random.seed!(123)
+    gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
+    gval = Array{Union{Missing,Float64}}(rand(length(gdate)))
+    gmissing = 50000
+    gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
+    X = DataFrame(Date=gdate,Value=gval)
+    X.Value[gndxmissing] .= missing
+
+    dtvlmean = DateValgator(Dict(
+          :dateinterval=>Dates.Hour(1),
+          :aggregator => :mean))
+    fit!(dtvlmean,X)
+    res = transform!(dtvlmean,X)
+
+Implements: `fit!`, `transform!`
+"""
 mutable struct DateValgator <: Transformer
   model
   args
@@ -130,7 +251,11 @@ function validdateval!(x::T) where {T<:DataFrame}
   rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
 end
 
+"""
+    fit!(dvmr::DateValgator,xx::T,y::Vector=[]) where {T<:Union{Matrix,DataFrame}}
 
+Checks and validates arguments.
+"""
 function fit!(dvmr::DateValgator,xx::T,y::Vector=[]) where {T<:Union{Matrix,DataFrame}}
   x = deepcopy(xx)
   validdateval!(x)
@@ -139,6 +264,12 @@ function fit!(dvmr::DateValgator,xx::T,y::Vector=[]) where {T<:Union{Matrix,Data
   dvmr.model=dvmr.args
 end
 
+"""
+    transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
+
+Aggregates values grouped by date-time period using aggregate 
+function such as mean, median, maximum, minimum. Default is mean.
+"""
 function transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
   x = deepcopy(xx)
   validdateval!(x)
@@ -162,10 +293,35 @@ function transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
   joined
 end
 
-### ====
+"""
+    DateValizer(
+       Dict(
+        :medians => DataFrame(),
+        :dateinterval => Dates.Hour(1)
+      )
+    )
 
-# Date,Val time series
-# Normalize and clean date,val by replacing missings with medians
+Normalizes and cleans time series by replacing `missings` with global medians 
+computed based on time period groupings.
+
+Example:
+
+    # generate random values with missing data
+    Random.seed!(123)
+    gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
+    gval = Array{Union{Missing,Float64}}(rand(length(gdate)))
+    gmissing = 50000
+    gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
+    X = DataFrame(Date=gdate,Value=gval)
+    X.Value[gndxmissing] .= missing
+
+    dvzr = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
+    fit!(dvzr,X)
+    transform!(dvzr,X)
+
+
+Implements: `fit!`, `transform!`
+"""
 mutable struct DateValizer <: Transformer
   model
   args
@@ -211,6 +367,11 @@ function fullaggregate!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   joined
 end
 
+"""
+    fit!(dvzr::DateValizer,xx::T,y::Vector=[]) where {T<:DataFrame}
+
+Validates input and computes global medians grouped by time period.
+"""
 function fit!(dvzr::DateValizer,xx::T,y::Vector=[]) where {T<:DataFrame}
   x = deepcopy(xx)
   validdateval!(x)
@@ -223,6 +384,11 @@ function fit!(dvzr::DateValizer,xx::T,y::Vector=[]) where {T<:DataFrame}
   dvzr.model=dvzr.args
 end
 
+"""
+    transform!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
+
+Replaces `missing` with the corresponding global medians with respect to time period.
+"""
 function transform!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   x = deepcopy(xx)
   validdateval!(x)
@@ -251,9 +417,47 @@ function transform!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
   joined[:,[:Date,:Value]]
 end
 
-### ====
+"""
+    DateValNNer(
+       Dict(
+          :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
+          :dateinterval => Dates.Hour(1),
+          :nnsize => 1,
+          :strict => true,
+          :aggregator => :median
+      )
+    )
+ 
 
-# fill-in missings with nearest-neighbors median
+Fills `missings` with their nearest-neighbors.
+- `:missdirection` => direction to fill missing data (:symmetric, :reverse, :forward) 
+- `:dateinterval` => time period to use for grouping,
+- `:nnsize` => neighborhood size,
+- `:strict` => boolean value to indicate whether to be strict about replacement or not,
+- `:aggregator => function to aggregate based on date interval
+
+Example:
+
+    Random.seed!(123)
+    gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
+    gval = Array{Union{Missing,Float64}}(rand(length(gdate)))
+    gmissing = 50000
+    gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
+    X = DataFrame(Date=gdate,Value=gval)
+    X.Value[gndxmissing] .= missing
+
+    dnnr = DateValNNer(Dict(
+          :dateinterval=>Dates.Hour(1),
+          :nnsize=>10,
+          :missdirection => :symmetric,
+          :strict=>true,
+          :aggregator => :mean))
+    fit!(dnnr,X)
+    transform!(dnnr,X)
+
+ 
+Implements: `fit!`, transform!`
+"""
 mutable struct DateValNNer <: Transformer
   model
   args
@@ -270,6 +474,11 @@ mutable struct DateValNNer <: Transformer
   end
 end
 
+"""
+    fit!(dnnr::DateValNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
+
+Validates and checks arguments for errors.
+"""
 function fit!(dnnr::DateValNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
   x = deepcopy(xx)
   validdateval!(x)
@@ -278,6 +487,11 @@ function fit!(dnnr::DateValNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
   dnnr.model=dnnr.args
 end
 
+"""
+transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
+
+Replaces `missings` by nearest neighbor looping over the dataset until all missing values are gone.
+"""
 function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   x = deepcopy(xx)
   validdateval!(x)
@@ -345,8 +559,38 @@ function transform_worker!(dnnr::DateValNNer,joinc::T) where {T<:DataFrame}
   joined
 end
 
-# =========
+"""
+    CSVDateValReader(
+       Dict(
+          :filename => "",
+          :dateformat => ""
+       )
+    )
 
+Reads csv file and parse date using the given format.
+- `:filename` => complete path including filename of csv file
+- `:dateformat` => date format to parse
+
+Example:
+
+    inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
+    csvreader = CSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
+    fit!(csvreader)
+    df = transform!(csvreader)
+
+    # using pipeline workflow
+    filter1 = DateValgator()
+    filter2 = DateValNNer(Dict(:nnsize=>1))
+    mypipeline = Pipeline(Dict(
+          :transformers => [csvreader,filter1,filter2]
+      )
+    )
+    fit!(mypipeline)
+    res=transform!(mypipeline)
+
+
+Implements: `fit!`, `transform!`
+"""
 mutable struct CSVDateValReader <: Transformer
     model
     args
@@ -358,6 +602,12 @@ mutable struct CSVDateValReader <: Transformer
         new(nothing,mergedict(default_args,args))
     end
 end
+
+"""
+    fit!(csvrdr::CSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+
+Makes sure filename and dateformat are not empty strings.
+"""
 function fit!(csvrdr::CSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
     fname = csvrdr.args[:filename]
     fmt = csvrdr.args[:dateformat]
@@ -365,18 +615,55 @@ function fit!(csvrdr::CSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{Dat
     csvrdr.model = csvrdr.args
 end
 
+"""
+    transform!(csvrdr::CSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+
+Uses CSV package to read the csv file and converts it to dataframe.
+"""
 function transform!(csvrdr::CSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
     fname = csvrdr.args[:filename]
     fmt = csvrdr.args[:dateformat]
     df = CSV.read(fname) |> DataFrame
     ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
     rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
-    df.Date = DateTime.(df.Date,fmt)
+    if !(eltype(df.Date) <: DateTime )
+      df.Date = DateTime.(df.Date,fmt)
+    end
     df
 end
 
-# ========
+"""
+    CSVDateValWriter(
+       Dict(
+          :filename => "",
+          :dateformat => ""
+       )
+    )
 
+Writes the time series dataframe into a file with the given date format.
+
+Example:
+
+    inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
+    outputfile = joinpath("/tmp/test.csv")
+    csvreader = CSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
+    csvwtr = CSVDateValWriter(Dict(:filename=>outputfile,:dateformat=>"d/m/y H:M"))
+    filter1 = DateValgator()
+    filter2 = DateValNNer(Dict(:nnsize=>1))
+    mypipeline = Pipeline(Dict(
+          :transformers => [csvreader,filter1,filter2,csvwtr]
+      )
+    )
+    fit!(mypipeline)
+    res=transform!(mypipeline)
+
+    # read back what was written to validate
+    csvreader = CSVDateValReader(Dict(:filename=>outputfile,:dateformat=>"y-m-d HH:MM:SS"))
+    fit!(csvreader)
+    transform!(csvreader)
+
+Implements: `fit!`, `transform!`
+"""
 mutable struct CSVDateValWriter <: Transformer
     model
     args
@@ -389,6 +676,11 @@ mutable struct CSVDateValWriter <: Transformer
     end
 end
 
+"""
+    fit!(csvwtr::CSVDateValWriter,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+
+Makes sure filename and dateformat are not empty strings.
+"""
 function fit!(csvwtr::CSVDateValWriter,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
     fname = csvwtr.args[:filename]
     fmt = csvwtr.args[:dateformat]
@@ -396,6 +688,11 @@ function fit!(csvwtr::CSVDateValWriter,x::T=[],y::Vector=[]) where {T<:Union{Dat
     csvwtr.model = csvwtr.args
 end
 
+"""
+    transform!(csvwtr::CSVDateValWriter,x::T) where {T<:Union{DataFrame,Vector,Matrix}}
+
+Uses CSV package to write the dataframe into a csv file.
+"""
 function transform!(csvwtr::CSVDateValWriter,x::T) where {T<:Union{DataFrame,Vector,Matrix}}
     fname = csvwtr.args[:filename]
     fmt = csvwtr.args[:dateformat]
@@ -408,8 +705,33 @@ function transform!(csvwtr::CSVDateValWriter,x::T) where {T<:Union{DataFrame,Vec
     return df
 end
 
-# =========
+"""
+    BzCSVDateValReader(
+       Dict(
+          :filename => "",
+          :dateformat => ""
+       )
+    )
 
+Reads Bzipped csv file and parse date using the given format.
+- `:filename` => complete path including filename of csv file
+- `:dateformat` => date format to parse
+
+Example:
+
+    inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv.bz2")
+    csvreader = BzCSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
+    filter1 = DateValgator()
+    filter2 = DateValNNer(Dict(:nnsize=>1))
+    mypipeline = Pipeline(Dict(
+          :transformers => [csvreader,filter1,filter2]
+      )
+    )
+    fit!(mypipeline)
+    res=transform!(mypipeline)
+
+Implements: `fit!`, `transform!`
+"""
 mutable struct BzCSVDateValReader <: Transformer
     model
     args
@@ -421,6 +743,12 @@ mutable struct BzCSVDateValReader <: Transformer
         new(nothing,mergedict(default_args,args))
     end
 end
+
+"""
+    fit!(bzcsvrdr::BzCSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+
+Makes sure filename and dateformat are not empty strings.
+"""
 function fit!(bzcsvrdr::BzCSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
     fname = bzcsvrdr.args[:filename]
     fmt = bzcsvrdr.args[:dateformat]
@@ -428,6 +756,11 @@ function fit!(bzcsvrdr::BzCSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union
     bzcsvrdr.model = bzcsvrdr.args
 end
 
+"""
+    transform!(bzcsvrdr::BzCSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+
+Uses CodecBzip2 package to read the csv file and converts it to dataframe.
+"""
 function transform!(bzcsvrdr::BzCSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
     fname = bzcsvrdr.args[:filename]
     fmt = bzcsvrdr.args[:dateformat]
@@ -439,4 +772,4 @@ function transform!(bzcsvrdr::BzCSVDateValReader,x::T=[]) where {T<:Union{DataFr
     df
 end
 
-
+end

@@ -18,22 +18,22 @@ const X,Y = generateXY()
 function test_decisiontree()
     Random.seed!(123)
     learners = Dict(:rf=>RandomForest(),:ada=>Adaboost(),:ptree=>PrunedTree())
-    results = Dict(:rf=>98.0,:ada=>95.0,:ptree=>100.0)
+    results = Dict(:rf=>50.0,:ada=>50.0,:ptree=>50.0)
     for (name,obj) in learners
 	fit!(obj,X,Y)
 	res = transform!(obj,X)
 	@testset "$name: Full dataset" begin
-	    @test sum(res .== Y)/length(Y)*100 |> floor == results[name]
+	    @test sum(res .== Y)/length(Y)*100 |> floor > results[name]
 	end
     end
     trndx = 1:80
     tstndx = 81:nrow(X)
-    results = Dict(:rf=>95.0,:ada=>92.0,:ptree=>95.0)
+    results = Dict(:rf=>50.0,:ada=>50.0,:ptree=>50.0)
     for (name,obj) in learners
         fit!(obj,X[trndx,:],Y[trndx])
         res = transform!(obj,X[tstndx,:])
         @testset "$name: partial dataset" begin
-            @test sum(res .== Y[tstndx])/length(Y[tstndx])*100 |> floor == results[name]
+            @test sum(res .== Y[tstndx])/length(Y[tstndx])*100 |> floor > results[name]
         end
     end
 end

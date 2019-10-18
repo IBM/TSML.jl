@@ -182,8 +182,7 @@ function test_dateifier()
   dat=lower:Dates.Day(1):upper |> collect 
   vals = rand(length(dat))
   x=DataFrame(Date=dat,Value=vals)
-  y = x
-  fit!(dtr,x,[])
+  fit!(dtr,x)
   res = transform!(dtr,x)
   @test sum(size(res) .== (389,8)) == 2
   dtr.args[:stride]=2
@@ -202,8 +201,7 @@ function test_matrifier()
   dat=lower:Dates.Hour(1):upper |> collect 
   vals = 1:length(dat)
   x = DataFrame(Date=dat,Value=vals)
-  y=[]
-  fit!(mtr,x,y)
+  fit!(mtr,x)
   res = transform!(mtr,x)
   @test sum(size(res) .== (10,25)) == 2
   mtr.args = Dict(:ahead=>24,:size=>24,:stride=>1)
@@ -213,7 +211,7 @@ function test_matrifier()
   res = transform!(mtr,x)
   @test sum(size(res) .== (6,25)) == 2
   dtr = Matrifier()
-  fit!(dtr,x,y)
+  fit!(dtr,x)
   res = transform!(dtr,x)
   res
   @test sum(size(res) .== (90,8)) == 2
@@ -229,7 +227,7 @@ function test_pipeline()
   dtvalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:strict=>true,:nnsize=>1,:missdirection=>:symmetric))
   dtr = Dateifier(Dict())
   mtr = Matrifier(Dict())
-  TSML.TSMLTransformers.fit!(mtr,XX,YY)
+  fit!(mtr,XX,YY)
   ## try pipeline 
   mydatepipeline = Pipeline(Dict(
     :transformers => [

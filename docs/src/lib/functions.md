@@ -10,7 +10,8 @@ Modules = [TSML.DecisionTreeLearners,
    TSML.Outliernicers, TSML.Plotters,
    TSML.BaselineAlgos,TSML.EnsembleMethods,
    TSML.MLBaseWrapper,TSML.Monotonicers,
-   TSML.Statifiers,TSML.TSMLTransformers,TSML.TSClassifiers,
+   TSML.Statifiers,TSML.BaseFilters,TSML.ValDateFilters,
+   TSML.TSClassifiers,
    TSML.TSMLTypes]
 ```
 
@@ -20,6 +21,7 @@ Modules = [TSML.DecisionTreeLearners,
    TSML.Outliernicers, TSML.Plotters,
    TSML.BaselineAlgos,TSML.EnsembleMethods,
    TSML.MLBaseWrapper,TSML.Monotonicers,
-   TSML.Statifiers,TSML.TSMLTransformers,TSML.TSClassifiers,
+   TSML.Statifiers,TSML.BaseFilters,TSML.ValDateFilters,
+   TSML.TSClassifiers,
    TSML.TSMLTypes]
 ```

@@ -70,7 +70,7 @@ end
 """
     fit!(tree::PrunedTree, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
 
-Function to optimize the hyperparameters of `PrunedTree` instance.
+Optimize the hyperparameters of `PrunedTree` instance.
 """
 function fit!(tree::PrunedTree, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   instances = features
@@ -93,7 +93,7 @@ end
 """
     transform!(tree::PrundTree, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
 
-Function to predict using the optimized hyperparameters of the trained `PrunedTree` instance.
+Predict using the optimized hyperparameters of the trained `PrunedTree` instance.
 """
 function transform!(tree::PrunedTree, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   instances = features
@@ -159,7 +159,7 @@ end
 """
     fit!(forest::RandomForest, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
 
-Function to optimize the parameters of the `RandomForest` instance.
+Optimize the parameters of the `RandomForest` instance.
 """
 function fit!(forest::RandomForest, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   instances = features
@@ -184,7 +184,7 @@ end
     transform!(forest::RandomForest, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
 
 
-Function to predict using the optimized hyperparameters of the trained `RandomForest` instance.
+Predict using the optimized hyperparameters of the trained `RandomForest` instance.
 """
 function transform!(forest::RandomForest, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   instances = features
@@ -235,7 +235,7 @@ end
 """
     fit!(adaboost::Adaboost, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
 
-Function to optimize the hyperparameters of `Adaboost` instance.
+Optimize the hyperparameters of `Adaboost` instance.
 """
 function fit!(adaboost::Adaboost, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
   instances = features
@@ -258,7 +258,7 @@ end
 """
     transform!(adaboost::Adaboost, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
 
-Function to predict using the optimized hyperparameters of the trained `Adaboost` instance.
+Predict using the optimized hyperparameters of the trained `Adaboost` instance.
 """
 function transform!(adaboost::Adaboost, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   instances = features

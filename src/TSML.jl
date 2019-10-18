@@ -15,8 +15,11 @@ using .TSMLTypes
 include("utils.jl")
 using .Utils
 
-include("transformers.jl")
-using .TSMLTransformers
+include("basefilters.jl")
+using .BaseFilters
+
+include("valdatefilters.jl")
+using .ValDateFilters
 
 include("baseline.jl")
 using .BaselineAlgos

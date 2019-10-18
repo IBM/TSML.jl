@@ -15,6 +15,34 @@ using TSML.Utils
 
 # Transforms instances with nominal features into one-hot form
 # and coerces the instance matrix to be of element type Float64.
+
+"""
+    Monotonicer()
+
+Monotonic filter to detect and normalize two types of dataset: 
+- daily monotonic 
+- entirely non-decreasing/non-increasing data
+
+Example: 
+
+    fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
+    csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
+    valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
+    valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
+    stfier = Statifier(Dict(:processmissing=>true))
+    mono = Monotonicer(Dict())
+    
+    mypipeline = Pipeline(Dict(
+        :transformers => [csvfilter,valgator,mono,stfier]
+       )
+    )
+    fit!(mypipeline)
+    result = transform!(mypipeline)
+
+
+Implements: `fit!`, `transform!`
+
+"""
 mutable struct Monotonicer <: Transformer
   model
   args
@@ -26,12 +54,23 @@ mutable struct Monotonicer <: Transformer
   end
 end
 
+"""
+    fit!(st::Monotonicer,features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+
+A function that checks if `features` are two-column data of  Dates and Values
+"""
 function fit!(st::Monotonicer, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   typeof(features) <: DataFrame || error("Monotonicer.fit!: data should be a dataframe: Date,Val ")
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   st.model = st.args
 end
 
+
+"""
+    transform!(st::Monotonicer, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
+
+Normalize monotonic or daily monotonic data by taking the diffs and counting the flips.
+"""
 function transform!(st::Monotonicer, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   features != [] || return DataFrame()
   typeof(features) <: DataFrame || error("Monotonicer.fit!: data should be a dataframe: Date,Val ")

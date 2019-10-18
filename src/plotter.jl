@@ -12,7 +12,7 @@ import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
 
 using TSML.TSMLTypes
-using TSML.TSMLTransformers
+using TSML.ValDateFilters
 using TSML.Utils
 
 # setup plotting for publication
@@ -30,9 +30,30 @@ function setupplot(pdfoutput::Bool)
 end
 
 """
-    Plotter()
+    Plotter(
+       Dict(
+           :interactive => false,
+           :pdfoutput => false
+       )
+    )
 
 Plots a TS by default but performs interactive plotting if specified during instance creation.
+- `:interactive` => boolean to indicate whether to use interactive plotting with `false` as default
+- `:pdfoutput` => boolean to indicate whether ouput will be saved as pdf with `false` as default
+
+Example:
+
+    csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
+    pltr = Plotter(Dict(:interactive => false))
+
+    mpipeline = Pipeline(Dict(
+         :transformers => [csvfilter,pltr]
+       )
+    )
+    fit!(mpipeline)
+    myplot = transform!(mpipeline)
+
+Implements: `fit!`, `transform!`
 """
 mutable struct Plotter <: Transformer
   model
@@ -48,6 +69,11 @@ mutable struct Plotter <: Transformer
   end
 end
 
+"""
+    fit!(pltr::Plotter, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+
+Check validity of `features`: 2-column Date,Val data
+"""
 function fit!(pltr::Plotter, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   typeof(features) <: DataFrame || error("Outliernicer.fit!: data should be a dataframe: Date,Val ")
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
@@ -55,7 +81,9 @@ function fit!(pltr::Plotter, features::T, labels::Vector=[]) where {T<:Union{Vec
 end
 
 """
-Convert missing into NaN for plotting discontinuity
+    transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
+
+Convert `missing` into `NaN` to allow plotting of discontinuities.
 """
 function transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   features != [] || return DataFrame()
