@@ -24,7 +24,6 @@ using TSML.TSMLTypes
 import TSML.TSMLTypes.fit!
 import TSML.TSMLTypes.transform!
 using TSML.Utils
-using TSML.TSMLTransformers
 
 using TSML.DecisionTreeLearners: RandomForest
 using TSML.Statifiers

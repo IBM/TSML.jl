@@ -229,7 +229,7 @@ function test_pipeline()
   dtvalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:strict=>true,:nnsize=>1,:missdirection=>:symmetric))
   dtr = Dateifier(Dict())
   mtr = Matrifier(Dict())
-  TSML.TSMLTransformers.fit!(mtr,XX,YY)
+  fit!(mtr,XX,YY)
   ## try pipeline 
   mydatepipeline = Pipeline(Dict(
     :transformers => [

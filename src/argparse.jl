@@ -2,11 +2,9 @@
 
 using TSML
 using TSML.TSMLTypes
-using TSML.TSMLTransformers
 using TSML.Utils
 
-using TSML: CSVDateValReader
-using TSML: CSVDateValWriter
+using TSML.ValDateFilters: CSVDateValReader, CSVDateValWriter
 using TSML.Statifiers
 using TSML.Monotonicers
 using TSML.Outliernicers

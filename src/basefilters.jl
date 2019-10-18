@@ -1,4 +1,4 @@
-@reexport module TSMLTransformers
+@reexport module BaseFilters
 
 using Dates
 using DataFrames
@@ -8,25 +8,26 @@ using CodecBzip2
 
 export fit!,transform!
 
-using MLDataUtils: slidingwindow
-
-export Transformer,TSLearner
-export Imputer,Pipeline,SKLLearner,OneHotEncoder,Wrapper
-
-export Matrifier,Dateifier
-export DateValizer,DateValgator,DateValNNer
-export CSVDateValReader, CSVDateValWriter
-export BzCSVDateValReader
+export Imputer,Pipeline,OneHotEncoder,Wrapper
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
 using TSML.Utils
 
-include("valdate.jl")
-
 # Transforms instances with nominal features into one-hot form
 # and coerces the instance matrix to be of element type Float64.
+
+#"""
+#    OneHotEncoder(Dict(
+#       # Nominal columns
+#       :nominal_columns => nothing,
+#
+#       # Nominal column values map. Key is column index, value is list of
+#       # possible values for that column.
+#       :nominal_column_values_map => nothing
+#    ))
+#"""
 mutable struct OneHotEncoder <: Transformer
   model
   args
