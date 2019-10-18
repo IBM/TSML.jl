@@ -15,19 +15,21 @@ import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
 using TSML.Utils
 
-# Transforms instances with nominal features into one-hot form
-# and coerces the instance matrix to be of element type Float64.
 
-#"""
-#    OneHotEncoder(Dict(
-#       # Nominal columns
-#       :nominal_columns => nothing,
-#
-#       # Nominal column values map. Key is column index, value is list of
-#       # possible values for that column.
-#       :nominal_column_values_map => nothing
-#    ))
-#"""
+"""
+    OneHotEncoder(Dict(
+       # Nominal columns
+       :nominal_columns => nothing,
+
+       # Nominal column values map. Key is column index, value is list of
+       # possible values for that column.
+       :nominal_column_values_map => nothing
+    ))
+
+
+Transforms instances with nominal features into one-hot form
+and coerces the instance matrix to be of element type Float64.
+"""
 mutable struct OneHotEncoder <: Transformer
   model
   args
@@ -108,10 +110,14 @@ function transform!(ohe::OneHotEncoder, features::T) where {T<:Union{Vector,Matr
   return transformed_instances
 end
 
-# Finds all nominal columns.
-#
-# Nominal columns are those that do not have Real type nor
-# do all their elements correspond to Real.
+"""
+    find_nominal_columns(features::T) where {T<:Union{Vector,Matrix,DataFrame}}
+
+Finds all nominal columns.
+
+Nominal columns are those that do not have Real type nor
+do all their elements correspond to Real.
+"""
 function find_nominal_columns(features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   nominal_columns = Int[]
@@ -124,7 +130,17 @@ function find_nominal_columns(features::T) where {T<:Union{Vector,Matrix,DataFra
   return nominal_columns
 end
 
-# Imputes NaN values from Float64 features.
+"""
+    Imputer(
+       Dict(
+          # Imputation strategy.
+          # Statistic that takes a vector such as mean or median.
+          :strategy => mean
+       )
+    )
+
+Imputes NaN values from Float64 features.
+"""
 mutable struct Imputer <: Transformer
   model
   args
@@ -164,8 +180,33 @@ function transform!(imp::Imputer, features::T)  where {T<:Union{Vector,Matrix,Da
   return new_instances
 end
 
+"""
+    Pipeline(
+       Dict(
+          # Transformers as list to chain in sequence.
+          :transformers => [OneHotEncoder(), Imputer()],
+          # Transformer args as list applied to same index transformer.
+          :transformer_args => nothing
+       )
+    )
 
-# Chains multiple transformers in sequence.
+Chains multiple transformers in sequence.
+
+Examples:
+
+    inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
+    csvreader = CSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
+    filter1 = DateValgator()
+    filter2 = DateValNNer(Dict(:nnsize=>1))
+    mypipeline = Pipeline(Dict(
+          :transformers => [csvreader,filter1,filter2]
+      )
+    )
+    fit!(mypipeline)
+    res=transform!(mypipeline)
+
+Implements: `fit!`, `transform!`
+"""
 mutable struct Pipeline <: Transformer
   model
   args
@@ -223,8 +264,18 @@ function transform!(pipe::Pipeline, features::T=[]) where {T<:Union{Vector,Matri
   return current_instances
 end
 
-
-# Wraps around an CombineML transformer.
+"""
+    Wrapper(
+       default_args = Dict(
+          # Transformer to call.
+          :transformer => OneHotEncoder(),
+          # Transformer args.
+          :transformer_args => nothing
+       )
+    )
+       
+Wraps around a TSML transformer.
+"""
 mutable struct Wrapper <: Transformer
   model
   args
@@ -264,11 +315,16 @@ function transform!(wrapper::Wrapper, instances::T) where {T<:Union{Vector,Matri
   return transform!(transformer, instances)
 end
 
-# Create transformer
-#
-# @param prototype Prototype transformer to base new transformer on.
-# @param options Additional options to override prototype's options.
-# @return New transformer.
+"""
+    createtransformer(prototype::Transformer, args=nothing)
+
+Create transformer
+
+- `prototype`: prototype transformer to base new transformer on
+- `options`: additional options to override prototype's options
+
+Returns: new transformer.
+"""
 function createtransformer(prototype::Transformer, args=nothing)
   new_args = copy(prototype.args)
   if args != nothing

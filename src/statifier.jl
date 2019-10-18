@@ -56,12 +56,22 @@ mutable struct Statifier <: Transformer
   end
 end
 
+"""
+    fit!(st::Statifier, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+
+Validate argument to make sure it's a 2-column format.
+"""
 function fit!(st::Statifier, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   typeof(features) <: DataFrame || error("Statifier.fit!: data should be a dataframe: Date,Val ")
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   st.model = st.args
 end
 
+"""
+    transform!(st::Statifier, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+
+Compute statistics.
+"""
 function transform!(st::Statifier, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   features != [] || return DataFrame()
   typeof(features) <: DataFrame || error("Statifier.fit!: data should be a dataframe: Date,Val ")

@@ -62,7 +62,7 @@ end
 """
     fit!(st::Outliernicer, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
 
-Checks that `features` are two-colum data.
+Check that `features` are two-colum data.
 """
 function fit!(st::Outliernicer, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   typeof(features) <: DataFrame || error("Outliernicer.fit!: data should be a dataframe: Date,Val ")
@@ -73,7 +73,7 @@ end
 """
     transform!(st::Outliernicer, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
 
-Locates outliers based on IQR factor and calls DateValNNer to replace them with nearest neighbors.
+Locate outliers based on IQR factor and calls DateValNNer to replace them with nearest neighbors.
 """
 function transform!(st::Outliernicer, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   features != [] || return DataFrame()

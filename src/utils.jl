@@ -22,12 +22,17 @@ using CSV
 
 import MLBase: Kfold
 
-# Holdout method that partitions a collection
-# into two partitions.
-#
-# @param n Size of collection to partition.
-# @param right_prop Percentage of collection placed in right partition.
-# @return Two partitions of indices, left and right.
+"""
+    holdout(n, right_prop)
+    
+Holdout method that partitions a collection
+into two partitions.
+
+- `n`: Size of collection to partition
+- `right_prop`: Percentage of collection placed in right partition
+
+Returns: two partitions of indices, left and right
+"""
 function holdout(n, right_prop)
   shuffled_indices = randperm(n)
   partition_pivot = round(Int,right_prop * n)
@@ -36,24 +41,34 @@ function holdout(n, right_prop)
   return (left, right)
 end
 
-# Returns k-fold partitions.
-#
-# @param num_instances Total number of instances.
-# @param num_partitions Number of partitions required.
-# @return Returns training set partition.
+"""
+    kfold(num_instances, num_partitions)
+
+Returns k-fold partitions.
+
+- `num_instances`: total number of instances
+- `num_partitions`: number of partitions required
+
+Returns: training set partition.
+"""
 function kfold(num_instances, num_partitions)
   return collect(Kfold(num_instances, num_partitions))
 end
 
-# Score learner predictions against ground truth values.
-#
-# Available metrics:
-# - :accuracy
-#
-# @param metric Metric to assess with.
-# @param actual Ground truth values.
-# @param predicted Predicted values.
-# @return Score of learner.
+"""
+    score(metric::Symbol, actual, predicted)
+
+Score learner predictions against ground truth values.
+
+Available metrics:
+- :accuracy
+
+- `metric`: metric to assess with
+- `actual`: ground truth values
+- `predicted`: predicted values
+
+Returns: score of learner
+"""
 function score(metric::Symbol, actual, predicted)
   if metric == :accuracy
     mean(actual .== predicted) * 100.0
@@ -62,12 +77,17 @@ function score(metric::Symbol, actual, predicted)
   end
 end
 
-# Returns element type of vector unless it is Any.
-# If Any, returns the most specific type that can be
-# inferred from the vector elements.
-#
-# @param vector Vector to infer element type on.
-# @return Inferred element type.
+"""
+    infer_eltype(vector::Vector)
+
+Returns element type of vector unless it is Any.
+If Any, returns the most specific type that can be
+inferred from the vector elements.
+
+- `vector`: vector to infer element type on
+
+Returns: inferred element type
+"""
 function infer_eltype(vector::Vector)
   # Obtain element type of vector
   vec_eltype = eltype(vector)
@@ -86,10 +106,15 @@ function infer_eltype(vector::Vector)
   return vec_eltype
 end
 
-# Converts nested dictionary to list of tuples
-#
-# @param dict Dictionary that can have other dictionaries as values.
-# @return List where elements are ([outer-key, inner-key, ...], value).
+"""
+    nested_dict_to_tuples(dict::Dict)
+
+Converts nested dictionary to list of tuples
+
+- `dict`: dictionary that can have other dictionaries as values
+
+Returns: list where elements are ([outer-key, inner-key, ...], value)
+"""
 function nested_dict_to_tuples(dict::Dict)
   set = Set()
   for (entry_id, entry_val) in dict
@@ -107,11 +132,15 @@ function nested_dict_to_tuples(dict::Dict)
   return set
 end
 
-# Set value in a nested dictionary.
-#
-# @param dict Nested dictionary to assign value.
-# @param keys Keys to access nested dictionaries in sequence.
-# @param value Value to assign.
+"""
+    nested_dict_set!(dict::Dict, keys::Array{T, 1}, value) where {T}
+
+Set value in a nested dictionary.
+
+- `dict`: nested dictionary to assign value
+- `keys`: keys to access nested dictionaries in sequence
+- `value`: value to assign
+"""
 function nested_dict_set!(dict::Dict, keys::Array{T, 1}, value) where {T}
   inner_dict = dict
   for key in keys[1:end-1]
@@ -120,16 +149,21 @@ function nested_dict_set!(dict::Dict, keys::Array{T, 1}, value) where {T}
   inner_dict[keys[end]] = value
 end
 
-# Second nested dictionary is merged into first.
-#
-# If a second dictionary's value as well as the first
-# are both dictionaries, then a merge is conducted between
-# the two inner dictionaries.
-# Otherwise the second's value overrides the first.
-#
-# @param first First nested dictionary.
-# @param second Second nested dictionary.
-# @return Merged nested dictionary.
+"""
+    nested_dict_merge(first::Dict, second::Dict)
+    
+Second nested dictionary is merged into first.
+
+If a second dictionary's value as well as the first
+are both dictionaries, then a merge is conducted between
+the two inner dictionaries.
+Otherwise the second's value overrides the first.
+
+- `first`: first nested dictionary
+- `second`: second nested dictionary
+
+Returns: merged nested dictionary
+"""
 function nested_dict_merge(first::Dict, second::Dict)
   target = copy(first)
   for (second_key, second_value) in second
@@ -145,11 +179,16 @@ function nested_dict_merge(first::Dict, second::Dict)
   return target
 end
 
-# Create transformer
-#
-# @param prototype Prototype transformer to base new transformer on.
-# @param options Additional options to override prototype's options.
-# @return New transformer.
+"""
+    create_transformer(prototype::Transformer, options=nothing)
+
+Create transformer
+
+- `prototype`: prototype transformer to base new transformer on
+- `options`: additional options to override prototype's options
+
+Returns: new transformer
+"""
 function create_transformer(prototype::Transformer, options=nothing)
   new_options = copy(prototype.options)
   if options != nothing
@@ -160,7 +199,11 @@ function create_transformer(prototype::Transformer, options=nothing)
   return prototype_type(new_options)
 end
 
-# closure to create aggregator closure with skipmissing features
+"""
+    aggregatorclskipmissing(fn::Function)
+    
+Function to create aggregator closure with skipmissing features
+"""
 function aggregatorclskipmissing(fn::Function)
   function skipagg(x::Union{AbstractArray,DataFrame})
     if length(collect(skipmissing(x))) == 0
@@ -197,6 +240,22 @@ function skipstd(x::T) where {T<:Union{AbstractArray,DataFrame}}
   end
 end
 
+
+"""
+    mergedict(first::Dict, second::Dict)
+    
+Second nested dictionary is merged into first.
+
+If a second dictionary's value as well as the first
+are both dictionaries, then a merge is conducted between
+the two inner dictionaries.
+Otherwise the second's value overrides the first.
+
+- `first`: first nested dictionary
+- `second`: second nested dictionary
+
+Returns: merged nested dictionary
+"""
 function mergedict(first::Dict, second::Dict)
   target = copy(first)
   for (second_key, second_value) in second

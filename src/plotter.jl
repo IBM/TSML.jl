@@ -72,7 +72,7 @@ end
 """
     fit!(pltr::Plotter, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
 
-Checks validity of `features`: 2-column Date,Val data
+Check validity of `features`: 2-column Date,Val data
 """
 function fit!(pltr::Plotter, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   typeof(features) <: DataFrame || error("Outliernicer.fit!: data should be a dataframe: Date,Val ")
@@ -83,7 +83,7 @@ end
 """
     transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
 
-Converts `missing` into `NaN` to allow plotting of discontinuities.
+Convert `missing` into `NaN` to allow plotting of discontinuities.
 """
 function transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
   features != [] || return DataFrame()
