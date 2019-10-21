@@ -68,7 +68,29 @@ There are more than hundred classifiers and regression functions available using
 \section{TSML Workflow}
 \label{sec:tsmlworkflow}
 %
-\textbf{TSML} workflow borrows the idea of the  \emph{Unix} pipeline\cite{orchestra2014, combineml2016}. The main elements in a pipeline are series of filters or transformers each performing one specific task and does it well. 
+
+All major data types in \textbf{TSML} is a subtype of \emph{Transformer}. There are two major types of transformers, namely: \emph{filters} for data processing and \emph{learners} for machine learning. Both transformers implement \texttt{fit!} and \texttt{transform!} multidispatch functions. 
+
+\vskip 6pt
+
+Filters are normally used for pre-processing tasks such as: imputation, normalization, feature extraction, feature transformation, scaling, etc.
+Consequently, filter's \texttt{fit!} and \texttt{transform!} functions expect one argument which represents an input data for feature processing. Each data type must implement \texttt{fit!} and \texttt{transform!} although in many cases of preprocessing data, only \texttt{transform!} operation is needed. The reason for this is explained below in the discussion of \emph{Pipeline} implementation. All filters are direct subtypes of \emph{Transformer}.
+
+\vskip 6pt
+
+On the other hand, a \emph{learner} requires learning of parameters between input and output. The training part to learn the parameters is handled by \texttt{fit!} function and \texttt{transform!} for the prediction. All learners are subtypes of \emph{TSLearner <: Transformer}. 
+
+\vskip 6pt
+
+\textbf{TSML} workflow borrows the idea of the  \emph{Unix} pipeline\cite{orchestra2014, combineml2016}. The main elements in a \textbf{TSML} pipeline are series of filters or transformers each performing one specific task and does it well. In machine learning tasks for prediction or classification, a series of filters will be terminated by a machine learner which learns the mapping between the extracted features done by the filters together with the output argument.
+
+\vskip 6pt
+
+\emph{Pipeline} is also a subtype of \emph{Transformer}. It is a container of transformers to perform pre-processing, training, and prediction or classification. The \texttt{fit!} function in \emph{Pipeline} iteratively calls the \texttt{fit!} and \texttt{transform!} functions in a series of filters with possibly a learner at the endpoint. If the last transformer is a learner, the last transformed output from a series of filters will become input features of the learner for training. 
+
+\vskip 6pt
+
+The  pipeline expects two arguments: input and output. The input argument is processed by filters while the transformed input together with the output arguments will be processed by the learner to learn the input and output mapping. During the prediction task, \texttt{transform!} in the \emph{Pipeline} iteratively calls the \texttt{transform!} operations in each filter and learner. The transform operation is direct application of the parameters computed during normalization, scaling, training, etc. to the new data. If the last element in the pipeline during transform is a learner, it performs prediction or classification. Otherwise, transform operation acts as a feature extractor/transformer if they are composed of filters only.
 
 \vskip 6pt
 To illustrate, below describes the main steps in using \textbf{TSML}.
