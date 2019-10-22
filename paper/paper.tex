@@ -47,7 +47,7 @@ libraries to create complex ensembles for robust time series prediction, cluster
 \item support for distributed/threaded computation for scalability and speed
 \end{enumerate}
 
-The \textbf{TSML} package assumes a two-column input for any time series data composed of \emph{dates} and \emph{values}. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurrence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by the median/mean or user-defined aggregation function of the \textit{k}-nearest neighbors (\emph{KNN}) where \textit{k} is the symmetric distance from the location of missing value. This approach can be called several times until there are no more missing values.
+The \textbf{TSML} package assumes a two-column input for any time series data composed of \emph{dates} and \emph{values}. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurrence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by the median/mean or user-defined aggregation function of the \textit{k}-nearest neighbors (\emph{k-NN}) where \textit{k} is the symmetric distance from the location of missing value. This approach can be called several times until there are no more missing values.
 
 \vskip 6pt
 
@@ -69,32 +69,32 @@ There are more than hundreds of classifiers and regression functions available u
 \label{sec:tsmlworkflow}
 %
 
-All major data processing types in \textbf{TSML} are a subtype of the \texttt{Transformer}. There are two major types of transformers, namely: \emph{filters} for data processing and \emph{learners} for machine learning. Both transformers implement the \texttt{fit!} and \texttt{transform!} multidispatch functions. All filters are direct subtypes of the \texttt{Transformer} while all learners are subtypes of the \texttt{TSLearner}. The \texttt{TSLearner} is a direct subtype of the \texttt{Transformer}
+All major data processing types in \textbf{TSML} are subtypes of the \texttt{Transformer}. There are two major types of transformers, namely: \emph{filters} for data processing and \emph{learners} for machine learning. Both transformers implement the \texttt{fit!} and \texttt{transform!} multi-dispatch functions. All filters are direct subtypes of the \texttt{Transformer} while all learners are subtypes of the \texttt{TSLearner}. The \texttt{TSLearner} is a direct subtype of the \texttt{Transformer}
 
 
 \vskip 6pt
 
-Filters are normally used for pre-processing tasks such as: imputation, normalization, feature extraction, feature transformation, scaling, etc.
-Consequently, filter's \texttt{fit!} and \texttt{transform!} functions expect one argument which represents an input data for feature processing. Each data type must implement \texttt{fit!} and \texttt{transform!} although in some cases, only \texttt{transform!} operation is needed. For instance, square-root or log-transform filters do not require any initial computation of parameters to transform their inputs. On the other hand, feature transformations such as scaling, normalization, PCA, ICA, etc. require initial computation of certain parameters in its input before applying it to new datasets. The initial computations of these parameters are performed by the \texttt{fit!} function while their applications to new datasets are done by the \texttt{transform!} function. 
+Filters are normally used for pre-processing tasks such as imputation, normalization, feature extraction, feature transformation, scaling, etc.
+Consequently, filter's \texttt{fit!} and \texttt{transform!} functions expect one argument which represents an input data for feature extraction or transformation. Each data type must implement \texttt{fit!} and \texttt{transform!} although in some cases, only \texttt{transform!} operation is needed. For instance, \emph{square root} or \emph{log} filters do not require any initial computation of parameters to transform their inputs. On the other hand, feature transformations such as scaling, normalization, PCA, ICA, etc. require initial computation of certain parameters in their input before applying the transformation to new datasets. In these cases, initial computations of these parameters are performed by the \texttt{fit!} function while their applications to new datasets are done by the \texttt{transform!} function. 
 
 \vskip 6pt
 
-Learners, on the other hand, expect two arguments (input vs output) and requires training cycle to optimize its parameters for optimal \emph{input-to-output} mapping. The training part is handled by the \texttt{fit!} function while prediction is handled by the \texttt{transform!} function. 
+Learners, on the other hand, expect two arguments (input vs output) and require training cycle to optimize their parameters for optimal \emph{input--output} mapping. The training part is handled by the \texttt{fit!} function while the prediction part is handled by the \texttt{transform!} function. 
 
 \vskip 6pt
 
 The \textbf{TSML} workflow borrows the idea of the  \emph{Unix} pipeline\cite{orchestra2014, combineml2016}. 
-The \texttt{Pipeline} data type is also a subtype of the \texttt{Transformer} and expects two arguments: input and output. The main elements in a \textbf{TSML} pipeline are series of transformers with each performing one specific task and does it well. The series of filters are used to perform pre-processing the input while a machine learner at the end of the pipeline is used to learn the \emph{input-to-output} mapping.
+The \texttt{Pipeline} data type is also a subtype of the \texttt{Transformer} and expects two arguments: input and output. The main elements in a \textbf{TSML} pipeline are series of transformers with each performing one specific task and does it well. The series of filters are used to perform pre-processing of the input while a machine learner at the end of the pipeline is used to learn the \emph{input--output} mapping. From the perspective of using the \texttt{Pipeline} where the last component is a machine learner, the \texttt{fit!} function is the training phase while the \texttt{transform!} function the prediction or classification phase.
 \vskip 6pt
 
-The \texttt{fit!} function in the \texttt{Pipeline} iteratively calls the \texttt{fit!} and \texttt{transform!} functions in a series of transformers. If the last transformer is a learner, the last transformed output from a series of filters will be used as input features for the \texttt{fit!} or training operation of the said learner. 
+The \texttt{fit!} function in the \texttt{Pipeline} iteratively calls the \texttt{fit!} and \texttt{transform!} functions in a series of transformers. If the last transformer in the pipeline is a learner, the last transformed output from a series of filters will be used as input features for the \texttt{fit!} or training phase of the said learner.
 
 \vskip 6pt
 
 During the prediction task, the \texttt{transform!} function in the \texttt{Pipeline} iteratively calls the \texttt{transform!} operations in each filter and learner. The transform operation is direct application of the parameters computed during normalization, scaling, training, etc. to the new data. If the last element in the pipeline during transform is a learner, it performs prediction or classification. Otherwise, the transform operation acts as a feature extractor if they are composed of filters only.
 
 \vskip 6pt
-To illustrate, below describes the main steps in using \textbf{TSML}.
+To illustrate, below describes the main steps in using the \textbf{TSML}.
 First, we create filters for csv reading, aggregation, imputation, and data quality
 assessment.
 
@@ -106,21 +106,22 @@ csvfilter = CSVDateValReader(Dict(
   :dateformat=>"dd/mm/yyyy HH:MM"))
 valgator = DateValgator(Dict(
   :dateinterval=>Dates.Hour(1)))
-valputer = DateValNNer(Dict(
+valnner = DateValNNer(Dict(
   :dateinterval=>Dates.Hour(1)))
 stfier = Statifier(Dict(:processmissing=>true))
 \end{lstlisting}
 
+
 We can then setup a pipeline containing these filters to process the csv data
 by aggregating the time series hourly and check the data quality using the
-\texttt{Statifier} filter.
+\texttt{Statifier} filter (Fig.~\ref{fig:dataquality}).
 
 \begin{lstlisting}[language = Julia]
 apipeline = Pipeline(Dict(
   :transformers => [csvfilter, valgator, stfier]))
 fit!(apipeline)
 mystats = transform!(apipeline)
-@show mystats
+@show mystats 
 \end{lstlisting}
 
 \begin{figure}[htbp]
@@ -132,7 +133,7 @@ mystats = transform!(apipeline)
    \label{fig:dataquality}
 \end{figure}
 
-Calling the \texttt{fit!} and \texttt{transform!} in the pipeline
+A mentioned previously, the \texttt{fit!} and \texttt{transform!} in the pipeline
 iteratively calls the corresponding \texttt{fit!} and \texttt{transform!} within each filter. 
 This common API relying on \emph{Julia's} multi-dispatch mechanism greatly simplifies the implementations, operations, 
 and understanding of the entire workflow. In addition, extending \textbf{TSML} functionality is just a 
@@ -142,14 +143,14 @@ functions.
 \vskip 6pt
 
 In the \texttt{Statifier} filter result, blocks of missing data is indicated by column names starting
-with \emph{b}. Running the code above indicates that there are plenty of missing data blocks.
-We can add the \texttt{ValNNer} filter to perform \emph{k}-nearest neighbour imputation and check
-the statistics:
+with \emph{b}. Running the code indicates that there are plenty of missing data blocks.
+We can add the \texttt{ValNNer} filter to perform \emph{k}-nearest neighbour (\emph{k-NN}) imputation and check
+the statistics (Fig.~\ref{fig:imputation}):
 
 \begin{lstlisting}[language = Julia]
 bpipeline = Pipeline(Dict(
   :transformers => [csvfilter, valgator, 
-                    valputer,stfier]))
+                    valnner,stfier]))
 fit!(bpipeline)
 imputed = transform!(bpipeline)
 @show imputed
@@ -164,7 +165,7 @@ imputed = transform!(bpipeline)
    \label{fig:imputation}
 \end{figure}
 
-The result in Fig.~\ref{fig:imputation} now indicates \emph{NaN} for all missing data statistics column because the set 
+The result in Fig.~\ref{fig:imputation} indicates \emph{NaN} for all missing data statistics column because the set 
 of missing blocks count is now empty.
 
 \vskip 6pt
@@ -191,10 +192,11 @@ Using the imputation pipeline described before, we can visualise the result by r
 \begin{lstlisting}[language = Julia]
 bplpipeline = Pipeline(Dict(
   :transformers => [csvfilter, valgator, 
-                    valputer,pltr]))
+                    valnner,pltr]))
 fit!(bplpipeline)
 transform!(bplpipeline)
 \end{lstlisting}
+
 
 \begin{figure}[htbp]
    \centering
@@ -204,22 +206,21 @@ transform!(bplpipeline)
 \end{figure}
 
 \subsection{Processing Monotonic Time Series}
-In this subsection, we will show additional filters we use to handle monotonic data which are commonly employed in energy/water meter sensors as well as in footfall sensors. In the former case, the time series type is strictly monotonically increasing while in the latter case, the monotonicity happens daily by resetting the sensor to certain baseline at the end of the day. We use the filter called \texttt{Monotonicer} which automatically detects the two types of monotonic sensors and apply the normalisation accordingly. 
+This subsection dicusses additional filters to handle monotonic data which are commonly employed in energy/water meter and footfall sensors. In the former case, the time series type is strictly monotonically increasing while in the latter case, the monotonicity happens daily. We use the filter called \texttt{Monotonicer} which automatically detects these two types of monotonic sensors and apply the normalisation accordingly. 
 
 \begin{lstlisting}[language = Julia]
 mono = joinpath(dirname(pathof(TSML)),
   "../data/typedetection/monotonic.csv")
-monocsv = CSVDateValReader(Dict(
-  :filename=>mono,
+monocsv = CSVDateValReader(Dict(:filename=>mono,
   :dateformat=>"dd/mm/yyyy HH:MM"))
 \end{lstlisting}
 
-Let us plot the monotonic data with the usual workflow of aggregating and imputing the data first.
+Let us plot in Fig.~\ref{fig:mono} the monotonic data with the usual workflow of aggregating and imputing the data first.
 
 \begin{lstlisting}[language = Julia]
 monopipeline = Pipeline(Dict(
   :transformers => [monofilecsv,valgator,
-                    valputer,pltr]))
+                    valnner,pltr]))
 fit!(monopipeline)
 transform!(monopipeline)
 \end{lstlisting}
@@ -231,11 +232,12 @@ transform!(monopipeline)
    \label{fig:mono}
 \end{figure}
 
-Let us now normalise the data by adding the \texttt{Monotonicer} filter in the pipeline and plot it.
+Let us now normalise using \texttt{Monotonicer} and show the plot in Fig.~\ref{fig:nmono}.
+
 \begin{lstlisting}[language = Julia]
 mononicer = Monotonicer(Dict())
 monopipeline = Pipeline(Dict(
-  :transformers => [monofilecsv,valgator,valputer,
+  :transformers => [monofilecsv,valgator,valnner,
                     mononicer, pltr]))
 fit!(monopipeline) 
 transform!(monopipeline)
@@ -248,13 +250,13 @@ transform!(monopipeline)
    \label{fig:nmono}
 \end{figure}
 
-The presence of outlier due to some random errors during meter reading  becomes obvious after the normalisation. To remedy this issue, we can add the \texttt{Outliernicer} filter which detects outliers and replace them by using the \emph{KNN} imputation technique used by the \texttt{DateValNNer} filter.
+The presence of outlier due to some random errors during meter reading  becomes obvious after the normalisation. To remedy this issue, we add the \texttt{Outliernicer} filter which detects outliers and replace them  using the \emph{k-NN} imputation technique used by the \texttt{DateValNNer} filter (Fig.~\ref{fig:outnicer}).
 
 \begin{lstlisting}[language = Julia]
 outliernicer = Outliernicer(
        Dict(:dateinterval=>Dates.Hour(1)))
 monopipeline = Pipeline(Dict(
-  :transformers => [monofilecsv,valgator,valputer,
+  :transformers => [monofilecsv,valgator,valnner,
                     mononicer,outliernicer,pltr]))
 fit!(monopipeline)
 transform!(monopipeline)
@@ -268,7 +270,7 @@ transform!(monopipeline)
 \end{figure}
 
 \subsection{Processing Daily Monotonic Time Series}
-We follow similar workflow in the previous subsection to normalize daily monotonic time series. We visualise first the original data, apply the \texttt{Monotonicer} and \texttt{Outliernicer} filters, and plot the cleaned data to make sure monotonicity is gone.
+We follow similar workflow in the previous subsection to normalize daily monotonic time series. First, let us visualize the original data after aggregation and imputation (Fig.~\ref{fig:dailymono}). 
 
 \begin{lstlisting}[language = Julia]
 dailymono = joinpath(dirname(pathof(TSML)),
@@ -278,7 +280,7 @@ dailymonocsv = CSVDateValReader(Dict(
      :dateformat=>"dd/mm/yyyy HH:MM"))
 dailymonopipeline = Pipeline(Dict(
   :transformers => [dailymonocsv,valgator,
-                    valputer,pltr]))
+                    valnner,pltr]))
 fit!(dailymonopipeline)
 transform!(dailymonopipeline)
 \end{lstlisting}
@@ -290,16 +292,15 @@ transform!(dailymonopipeline)
    \label{fig:dailymono}
 \end{figure}
 
-As seen in the plot, the values in daily monotonic time series is monotonically increasing and resets to certain baseline the following day and starts to rise again until the end of the daily cycle.
 
 \vskip 6pt
 
-Let us now reuse the \texttt{Monotonicer} filter in the previous subsection to normalise the data.
+Then, we reuse the \texttt{Monotonicer} filter in the previous subsection to normalise the data and plot (Fig.~\ref{fig:ndailymono}).
 
 \begin{lstlisting}[language = Julia]
 dailymonopipeline = Pipeline(Dict(
   :transformers => [dailymonocsv,valgator,
-                    valputer,mononicer,pltr]))
+                    valnner,mononicer,pltr]))
 fit!(dailymonopipeline)
 transform!(dailymonopipeline)
 \end{lstlisting}
@@ -311,11 +312,11 @@ transform!(dailymonopipeline)
    \label{fig:ndailymono}
 \end{figure}
 
-To remove outliers, we can reuse the \texttt{Outliernicer} filter in the previous subsection and plot the cleaned data.
+To remove outliers, we can reuse the \texttt{Outliernicer} filter in the previous subsection and plot the cleaned data (Fig.~\ref{fig:outndailymono}).
 
 \begin{lstlisting}[language = Julia]
 dailymonopipeline = Pipeline(Dict(
-  :transformers=>[dailymonocsv,valgator,valputer,
+  :transformers=>[dailymonocsv,valgator,valnner,
                   mononicer,outliernicer,pltr]))
 fit!(dailymonopipeline)
 transform!(dailymonopipeline)
@@ -360,7 +361,7 @@ testing accuracy and classifying new time series datasets.
 
 \vskip 6pt
 
-The code below initialises the \texttt{TSClassifier} with the locations of the \emph{training}, \emph{testing}, and \emph{modelling} repository. Training is carried out by the \texttt{fit!} function which extracts the stat features of the training data and save them as a \emph{dataframe} input to the \emph{RandomForest} classifier. The trained model is saved and used during testing.
+The code below initialises the \texttt{TSClassifier} with the locations of the \emph{training}, \emph{testing}, and \emph{model} repository. Training is carried out by the \texttt{fit!} function which extracts the stat features of the training data and save them as a \emph{dataframe}  to be processed by the \emph{RandomForest} classifier. The trained model is saved in the \emph{model} directory and used during testing.
 
 \begin{lstlisting}[language = Julia]
 trdirname = joinpath(dirname(pathof(TSML)),
@@ -799,14 +800,14 @@ For Earthquakes classification problem (Table~\ref{tab:earth}), the top 3 best c
 
 \vskip 6pt
 
-For the FordB dataset (Table~\ref{tab:fordb}), the best performers are: \emph{Random Forest} from \emph{Caret}, \emph{KNN} from \emph{ScikitLearn}, and \emph{Vote Ensemble} from \emph{Julia}. The worst performers are similar to Tables~\ref{tab:elec}~and~\ref{tab:ref}.
+For the FordB dataset (Table~\ref{tab:fordb}), the best performers are: \emph{Random Forest} from \emph{Caret}, \emph{k-NN} from \emph{ScikitLearn}, and \emph{Vote Ensemble} from \emph{Julia}. The worst performers are similar to Tables~\ref{tab:elec}~and~\ref{tab:ref}.
 
 \subsection{Discussion}
 Comparing the performances of different classifiers among the four problems indicate that the most difficult problem to classify is the Refrigeration Devices while the easiest one is the Earthquakes problem. As we expected, there is no enough sample for the classifiers to learn the mapping in Refrigeration dataset relative to its feature dimension. One way to alleviate this problem is to remove features that are highly correlated or perform PCA to reduce the feature dimension. This is beyond the scope of the current paper which focuses mainly on the applicability of TSML MLs to different set of problems. 
 
 \vskip 6pt
 
-Among the classifiers, the \emph{Random Forest} from \emph{Caret} is the top performer in all problems. On the other hand, \emph{TreeBag} from \emph{Caret} and \emph{Gradient Boosting} from \emph{ScikitLearn} are the top performers in Refrigeration Devices and Earthquakes, respectively. It is interesting to note that among the \emph{Random Forest} implementations, the top performer is the \emph{Caret's} version written by Breiman\cite{Breiman2001} who was the original author of the said algorithm in \emph{fortran}. The superior performance of Breiman's \emph{Random Forest} can be highlighted in the FordB classification performance.  \emph{k}NN, the next best classifier is 4\% lower than Breiman's \emph{Random Forest}. In all other cases, the next best performer has almost same performance with  Breiman's \emph{Random Forest}.
+Among the classifiers, the \emph{Random Forest} from \emph{Caret} is the top performer in all problems. On the other hand, \emph{TreeBag} from \emph{Caret} and \emph{Gradient Boosting} from \emph{ScikitLearn} are the top performers in Refrigeration Devices and Earthquakes, respectively. It is interesting to note that among the \emph{Random Forest} implementations, the top performer is the \emph{Caret's} version written by Breiman\cite{Breiman2001} who was the original author of the said algorithm in \emph{Fortran}. The superior performance of Breiman's \emph{Random Forest} can be highlighted in the FordB classification performance.  \emph{k}NN, the next best classifier is 4\% lower than Breiman's \emph{Random Forest}. In all other cases, the next best performer has almost same performance with  Breiman's \emph{Random Forest}.
  
 \vskip 6pt
  
