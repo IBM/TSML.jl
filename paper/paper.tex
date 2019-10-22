@@ -27,7 +27,7 @@
 \section{Introduction}
 
 \textbf{TSML}\cite{tsml2019} is a \emph{Julia}\cite{bezanson2017julia} package for time series data processing, classification, and prediction. 
-It provides common API for ML libraries from Python's \emph{Scikit-Learn}, 
+It provides common API for ML (Machine Learning) libraries from Python's \emph{Scikit-Learn}, 
 R's \emph{Caret}, and native \emph{Julia} MLs for seamless integration of heterogeneous 
 libraries to create complex ensembles for robust time series prediction, clustering, and classification.
 \textbf{TSML} has the following features:
@@ -60,37 +60,38 @@ the size and stride of the sliding window. The final part joins
  
  \vskip 6pt
  
-\textbf{TSML} uses a pipeline which iteratively calls the \emph{fit} and \emph{transform}
+\textbf{TSML} uses a pipeline which iteratively calls the \texttt{fit!} and \texttt{transform!}
 families of functions relying on \emph{multiple dispatch} to dynamically select the correct algorithm from the steps outlined above. Machine learning functions in 
 \textbf{TSML} are wrappers to the corresponding Scikit-Learn, Caret, and native Julia ML libraries. 
-There are more than hundred classifiers and regression functions available using a common API.
+There are more than hundreds of classifiers and regression functions available using \textbf{TSML}'s common API.
 
 \section{TSML Workflow}
 \label{sec:tsmlworkflow}
 %
 
-All major data types in \textbf{TSML} is a subtype of \emph{Transformer}. There are two major types of transformers, namely: \emph{filters} for data processing and \emph{learners} for machine learning. Both transformers implement \texttt{fit!} and \texttt{transform!} multidispatch functions. 
+All major data processing types in \textbf{TSML} are a subtype of the \texttt{Transformer}. There are two major types of transformers, namely: \emph{filters} for data processing and \emph{learners} for machine learning. Both transformers implement the \texttt{fit!} and \texttt{transform!} multidispatch functions. All filters are direct subtypes of the \texttt{Transformer} while all learners are subtypes of the \texttt{TSLearner}. The \texttt{TSLearner} is a direct subtype of the \texttt{Transformer}
+
 
 \vskip 6pt
 
 Filters are normally used for pre-processing tasks such as: imputation, normalization, feature extraction, feature transformation, scaling, etc.
-Consequently, filter's \texttt{fit!} and \texttt{transform!} functions expect one argument which represents an input data for feature processing. Each data type must implement \texttt{fit!} and \texttt{transform!} although in many cases of preprocessing data, only \texttt{transform!} operation is needed. The reason for this is explained below in the discussion of \emph{Pipeline} implementation. All filters are direct subtypes of \emph{Transformer}.
+Consequently, filter's \texttt{fit!} and \texttt{transform!} functions expect one argument which represents an input data for feature processing. Each data type must implement \texttt{fit!} and \texttt{transform!} although in some cases, only \texttt{transform!} operation is needed. For instance, square-root or log-transform filters do not require any initial computation of parameters to transform their inputs. On the other hand, feature transformations such as scaling, normalization, PCA, ICA, etc. require initial computation of certain parameters in its input before applying it to new datasets. The initial computations of these parameters are performed by the \texttt{fit!} function while their applications to new datasets are done by the \texttt{transform!} function. 
 
 \vskip 6pt
 
-On the other hand, a \emph{learner} requires learning of parameters between input and output. The training part to learn the parameters is handled by \texttt{fit!} function and \texttt{transform!} for the prediction. All learners are subtypes of \emph{TSLearner <: Transformer}. 
+Learners, on the other hand, expect two arguments (input vs output) and requires training cycle to optimize its parameters for optimal \emph{input-to-output} mapping. The training part is handled by the \texttt{fit!} function while prediction is handled by the \texttt{transform!} function. 
 
 \vskip 6pt
 
-\textbf{TSML} workflow borrows the idea of the  \emph{Unix} pipeline\cite{orchestra2014, combineml2016}. The main elements in a \textbf{TSML} pipeline are series of filters or transformers each performing one specific task and does it well. In machine learning tasks for prediction or classification, a series of filters will be terminated by a machine learner which learns the mapping between the extracted features done by the filters together with the output argument.
+The \textbf{TSML} workflow borrows the idea of the  \emph{Unix} pipeline\cite{orchestra2014, combineml2016}. 
+The \texttt{Pipeline} data type is also a subtype of the \texttt{Transformer} and expects two arguments: input and output. The main elements in a \textbf{TSML} pipeline are series of transformers with each performing one specific task and does it well. The series of filters are used to perform pre-processing the input while a machine learner at the end of the pipeline is used to learn the \emph{input-to-output} mapping.
+\vskip 6pt
+
+The \texttt{fit!} function in the \texttt{Pipeline} iteratively calls the \texttt{fit!} and \texttt{transform!} functions in a series of transformers. If the last transformer is a learner, the last transformed output from a series of filters will be used as input features for the \texttt{fit!} or training operation of the said learner. 
 
 \vskip 6pt
 
-\emph{Pipeline} is also a subtype of \emph{Transformer}. It is a container of transformers to perform pre-processing, training, and prediction or classification. The \texttt{fit!} function in \emph{Pipeline} iteratively calls the \texttt{fit!} and \texttt{transform!} functions in a series of filters with possibly a learner at the endpoint. If the last transformer is a learner, the last transformed output from a series of filters will become input features of the learner for training. 
-
-\vskip 6pt
-
-The  pipeline expects two arguments: input and output. The input argument is processed by filters while the transformed input together with the output arguments will be processed by the learner to learn the input and output mapping. During the prediction task, \texttt{transform!} in the \emph{Pipeline} iteratively calls the \texttt{transform!} operations in each filter and learner. The transform operation is direct application of the parameters computed during normalization, scaling, training, etc. to the new data. If the last element in the pipeline during transform is a learner, it performs prediction or classification. Otherwise, transform operation acts as a feature extractor/transformer if they are composed of filters only.
+During the prediction task, the \texttt{transform!} function in the \texttt{Pipeline} iteratively calls the \texttt{transform!} operations in each filter and learner. The transform operation is direct application of the parameters computed during normalization, scaling, training, etc. to the new data. If the last element in the pipeline during transform is a learner, it performs prediction or classification. Otherwise, the transform operation acts as a feature extractor if they are composed of filters only.
 
 \vskip 6pt
 To illustrate, below describes the main steps in using \textbf{TSML}.
@@ -112,7 +113,7 @@ stfier = Statifier(Dict(:processmissing=>true))
 
 We can then setup a pipeline containing these filters to process the csv data
 by aggregating the time series hourly and check the data quality using the
-\emph{Statifier} filter.
+\texttt{Statifier} filter.
 
 \begin{lstlisting}[language = Julia]
 apipeline = Pipeline(Dict(
@@ -131,18 +132,18 @@ mystats = transform!(apipeline)
    \label{fig:dataquality}
 \end{figure}
 
-Calling the \emph{fit} and \emph{transform} in the pipeline
-iteratively calls the corresponding \emph{fit} and \emph{transform} within each filter. 
+Calling the \texttt{fit!} and \texttt{transform!} in the pipeline
+iteratively calls the corresponding \texttt{fit!} and \texttt{transform!} within each filter. 
 This common API relying on \emph{Julia's} multi-dispatch mechanism greatly simplifies the implementations, operations, 
 and understanding of the entire workflow. In addition, extending \textbf{TSML} functionality is just a 
-matter of creating a new data type filter and define its own  \emph{fit} and \emph{transform} 
+matter of creating a new data type filter and define its own  \texttt{fit!} and \texttt{transform!} 
 functions.
 
 \vskip 6pt
 
-In the \emph{Statifier} filter result, blocks of missing data is indicated by column names starting
+In the \texttt{Statifier} filter result, blocks of missing data is indicated by column names starting
 with \emph{b}. Running the code above indicates that there are plenty of missing data blocks.
-We can add the \emph{ValNNer} filter to perform \emph{k}-nearest neighbour imputation and check
+We can add the \texttt{ValNNer} filter to perform \emph{k}-nearest neighbour imputation and check
 the statistics:
 
 \begin{lstlisting}[language = Julia]
@@ -168,7 +169,7 @@ of missing blocks count is now empty.
 
 \vskip 6pt
 
-We can also visualise our time series data using the \emph{Plotter} filter instead of the \emph{Statifier} as shown in Fig~\ref{fig:mplot}. Looking closely, you will see discontinuities in the plot due to blocks of missing data.
+We can also visualise our time series data using the \texttt{Plotter} filter instead of the \texttt{Statifier} as shown in Fig~\ref{fig:mplot}. Looking closely, you will see discontinuities in the plot due to blocks of missing data.
 
 \begin{lstlisting}[language = Julia]
 pltr=Plotter(Dict(:interactive => true))
@@ -185,7 +186,7 @@ transform!(plpipeline)
    \label{fig:mplot}
 \end{figure}
 
-Using the imputation pipeline described before, we can visualise the result by replacing the \emph{Statifier} with the \emph{Plotter} filter. Figure~\ref{fig:amplot} shows the plot after imputation which gets rid of missing data.
+Using the imputation pipeline described before, we can visualise the result by replacing the \texttt{Statifier} with the \texttt{Plotter} filter. Figure~\ref{fig:amplot} shows the plot after imputation which gets rid of missing data.
 
 \begin{lstlisting}[language = Julia]
 bplpipeline = Pipeline(Dict(
@@ -203,7 +204,7 @@ transform!(bplpipeline)
 \end{figure}
 
 \subsection{Processing Monotonic Time Series}
-In this subsection, we will show additional filters we use to handle monotonic data which are commonly employed in energy/water meter sensors as well as in footfall sensors. In the former case, the time series type is strictly monotonically increasing while in the latter case, the monotonicity happens daily by resetting the sensor to certain baseline at the end of the day. We use the filter called \emph{Monotonicer} which automatically detects the two types of monotonic sensors and apply the normalisation accordingly. 
+In this subsection, we will show additional filters we use to handle monotonic data which are commonly employed in energy/water meter sensors as well as in footfall sensors. In the former case, the time series type is strictly monotonically increasing while in the latter case, the monotonicity happens daily by resetting the sensor to certain baseline at the end of the day. We use the filter called \texttt{Monotonicer} which automatically detects the two types of monotonic sensors and apply the normalisation accordingly. 
 
 \begin{lstlisting}[language = Julia]
 mono = joinpath(dirname(pathof(TSML)),
@@ -230,7 +231,7 @@ transform!(monopipeline)
    \label{fig:mono}
 \end{figure}
 
-Let us now normalise the data by adding the \emph{Monotonicer} filter in the pipeline and plot it.
+Let us now normalise the data by adding the \texttt{Monotonicer} filter in the pipeline and plot it.
 \begin{lstlisting}[language = Julia]
 mononicer = Monotonicer(Dict())
 monopipeline = Pipeline(Dict(
@@ -247,7 +248,7 @@ transform!(monopipeline)
    \label{fig:nmono}
 \end{figure}
 
-The presence of outlier due to some random errors during meter reading  becomes obvious after the normalisation. To remedy this issue, we can add the \emph{Outliernicer} filter which detects outliers and replace them by using the \emph{KNN} imputation technique used by the \emph{DateValNNer} filter.
+The presence of outlier due to some random errors during meter reading  becomes obvious after the normalisation. To remedy this issue, we can add the \texttt{Outliernicer} filter which detects outliers and replace them by using the \emph{KNN} imputation technique used by the \texttt{DateValNNer} filter.
 
 \begin{lstlisting}[language = Julia]
 outliernicer = Outliernicer(
@@ -267,7 +268,7 @@ transform!(monopipeline)
 \end{figure}
 
 \subsection{Processing Daily Monotonic Time Series}
-We follow similar workflow in the previous subsection to normalize daily monotonic time series. We visualise first the original data, apply the \emph{Monotonicer} and \emph{Outliernicer} filters, and plot the cleaned data to make sure monotonicity is gone.
+We follow similar workflow in the previous subsection to normalize daily monotonic time series. We visualise first the original data, apply the \texttt{Monotonicer} and \texttt{Outliernicer} filters, and plot the cleaned data to make sure monotonicity is gone.
 
 \begin{lstlisting}[language = Julia]
 dailymono = joinpath(dirname(pathof(TSML)),
@@ -293,7 +294,7 @@ As seen in the plot, the values in daily monotonic time series is monotonically 
 
 \vskip 6pt
 
-Let us now reuse the \emph{Monotonicer} filter in the previous subsection to normalise the data.
+Let us now reuse the \texttt{Monotonicer} filter in the previous subsection to normalise the data.
 
 \begin{lstlisting}[language = Julia]
 dailymonopipeline = Pipeline(Dict(
@@ -310,7 +311,7 @@ transform!(dailymonopipeline)
    \label{fig:ndailymono}
 \end{figure}
 
-To remove outliers, we can reuse the \emph{Outliernicer} filter in the previous subsection and plot the cleaned data.
+To remove outliers, we can reuse the \texttt{Outliernicer} filter in the previous subsection and plot the cleaned data.
 
 \begin{lstlisting}[language = Julia]
 dailymonopipeline = Pipeline(Dict(
@@ -331,7 +332,7 @@ transform!(dailymonopipeline)
 \section{Time Series Classification}
 
 We can use the knowledge we learned in setting up the \textbf{TSML}
-\emph{pipeline} and \emph{filters} or \emph{transformers} to build higher level
+\emph{pipeline} containing \emph{filters} and \emph{machine learners} to build higher level
 operations to solve a specific industrial problem. One major problem
 which we consider relevant because it is a common issue in IOT (Internet of Things) 
  is the time series classification. This problem is prevalent nowadays 
@@ -345,21 +346,21 @@ Time series classification is a significant first step for optimal prediction an
 Identifying the correct sensor data types can help in the choice of what the most optimal prediction 
 model to use for actuation or pre-emption to minimise wastage in resource utilisation.
 To successfully perform the latter operations, it is necessary to identify first the time series
-type so that appropriate model and cleaning routines can be selected for optimal model performance. The  \emph{TSClassifier} filter aims to address this problem and its usage is described below.
+type so that appropriate model and cleaning routines can be selected for optimal model performance. The  \texttt{TSClassifier} filter aims to address this problem and its usage is described below.
 
 \vskip 6pt
 
 First, we setup the locations of files for training, testing, and saving the model.
-Next, we start the training phase by calling \emph{fit} which loads
+Next, we start the training phase by calling \texttt{fit!} which loads
 file in the training directory and learn the mapping between their
-statistic features extracted by \emph{Statifier} with their types indicated
+statistic features extracted by \texttt{Statifier} with their types indicated
 by a substring in their filenames. Once the training is done, the final model
 is saved in the \emph{model} directory which will be used for 
 testing accuracy and classifying new time series datasets. 
 
 \vskip 6pt
 
-The code below initialises the \emph{TSClassifier} with the locations of the training, testing, and modelling repository. Training is carried out by the \emph{fit} function which extracts the stat features of the training data and save them as a DataFrame input to the \emph{RandomForest} classifier. The trained model is saved and used during testing.
+The code below initialises the \texttt{TSClassifier} with the locations of the \emph{training}, \emph{testing}, and \emph{modelling} repository. Training is carried out by the \texttt{fit!} function which extracts the stat features of the training data and save them as a \emph{dataframe} input to the \emph{RandomForest} classifier. The trained model is saved and used during testing.
 
 \begin{lstlisting}[language = Julia]
 trdirname = joinpath(dirname(pathof(TSML)),
@@ -390,7 +391,7 @@ Figure~\ref{fig:tcl} shows: a) a snapshot of the output during training and test
    ..........
    \vskip 2pt
    \includegraphics[width=0.4\columnwidth]{tscl2.png} % requires the graphicx package
-   \caption{Extraction of Statistical Features for Training and Prediction. By convention, the \emph{TSClassifier} validates the ground truth based on the filename which contains the label of the sensor type disregarding the numerical component.}
+   \caption{Extraction of Statistical Features for Training and Prediction. By convention, the \texttt{TSClassifier} validates the ground truth based on the filename which contains the label of the sensor type disregarding the numerical component.}
    \label{fig:tcl}
 \end{figure}
 
@@ -409,7 +410,7 @@ There are cases where the main task of time series classification
 requires more complex ensemble model using hierarchy or tree structure where 
 members are composed of heterogeneous ML learners derived from binaries in 
 different languages. For illustration purposes, we will show how to 
-ensemble ML libraries from \emph{Scikit-Learn} and \emph{Caret} using \textbf{TSML} meta-ensembles that support the  \emph{fit} and \emph{transform} APIs.
+ensemble ML libraries from \emph{Scikit-Learn} and \emph{Caret} using \textbf{TSML} meta-ensembles that support the  \texttt{fit!} and \texttt{transform!} APIs.
 
 \subsection{Parallel TSML Using Distributed Workflow}
 
@@ -588,7 +589,7 @@ With \emph{Julia} 1.3, lightweight multi-threading support in \emph{Julia} becom
 
 \vskip 6pt
 
-The main difference in the workflow between \emph{Julia's} distributed computation model compared to the threaded model is the presence of \texttt{@everywhere} macro in the former for each function defined to indicate that these function definitions shall be exported to all running workers. Since threaded processes share the same memory model with the \emph{Julia} main process, there is no need for this macro. Instead, threading workflow requires the use of \emph{mutex} locking in the update of the global dataframe that accumulates the prediction performance of models running in their respective threads. In similar observation with the distributed framework, the \texttt{threadedmodel} function contains two parallelism: threads in different trials and threads among models in each trial. The function is surprisingly compact to implement threads within threads without issues and the main bottleneck happens only during the update operation of the global \emph{ctable} dataframe.
+The main difference in the workflow between \emph{Julia's} distributed computation model compared to the threaded model is the presence of \texttt{@everywhere} macro in the former for each function defined to indicate that these function definitions shall be exported to all running workers. Since threaded processes share the same memory model with the \emph{Julia} main process, there is no need for this macro. Instead, threading workflow requires the use of \emph{ReentrantLock} in the update of the global dataframe that accumulates the prediction performance of models running in their respective threads. In similar observation with the distributed framework, the \texttt{threadedmodel} function contains two parallelism: threads in different trials and threads among models in each trial. The function is surprisingly compact to implement threads within threads without issues and the main bottleneck happens only during the update operation of the global \emph{ctable} dataframe.
 
 \begin{lstlisting}[language = Julia]
 function threadedmodel(learners::Dict,
@@ -817,11 +818,11 @@ Packages for time series analysis are becoming important tools with the rapid pr
 
 \vskip 6pt
 
-\textbf{TSML} main strength is the adoption of \emph{UNIX} pipeline architecture containing filters or transformers to perform both preprocessing and modelling tasks.  In addition, \textbf{TSML} uses a common machine learning API for both internal and external ML libraries, distributed and threaded support for modeling, and a growing collection of filters for preprocessing, classification, clustering, and prediction. 
+\textbf{TSML} main strength is the adoption of \emph{UNIX} pipeline architecture containing filters and machine learners to perform both preprocessing and modelling tasks.  In addition, \textbf{TSML} uses a common machine learning API for both internal and external ML libraries, distributed and threaded support for modeling, and a growing collection of filters for preprocessing, classification, clustering, and prediction. 
 
 \vskip 6pt
 
-Extending \textbf{TSML} can easily be done by creating a custom data type filter and defining its corresponding \emph{fit} and \emph{transform} operations which the \textbf{TSML} pipeline iteratively calls for each filter in the workflow.
+Extending \textbf{TSML} can easily be done by creating a custom data type filter and defining its corresponding \texttt{fit!} and \texttt{transform!} operations which the \textbf{TSML} pipeline iteratively calls for each transformer in the workflow.
 
 %TODO: 
 %\begin{itemize}

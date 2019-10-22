@@ -58,7 +58,7 @@ function threadedmodel(learners::Dict,data::DataFrame;trials=5)
     @threads for i=1:trials
         # Split into training and test sets
         (train_ind, test_ind) = holdout(size(data, 1), 0.20)
-        mtx = SpinLock()
+        mtx = ReentrantLock()
         @threads for themodel in models
             res=predict(learners[themodel],data,train_ind,test_ind)
             println(themodel," => ",round(res),", thread=",threadid())
