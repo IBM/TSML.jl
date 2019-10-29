@@ -12,9 +12,13 @@ keywords:
 authors:
   - name: Paulito Palmes
     orcid: 0000-0002-3145-6356
+    affiliation: 1
   - name: Joern Ploennigs
+    affiliation: 1
   - name: Niall Brady
+    affiliation: 1
 affiliations:
   - name: IBM Dublin Research Lab
+    index: 1
 date: 27 August 2019
 bibliography: ref.bib
