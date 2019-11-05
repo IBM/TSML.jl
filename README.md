@@ -13,6 +13,8 @@ The design/framework of this package is influenced heavily by Samuel Jenkins' [O
 Follow these links for a quick [Jupyter Notebook TSML Demo](https://github.com/IBM/TSML.jl/blob/master/docs/StaticPlotting.jl.ipynb)
 and the [JuliaCon 2019 Proceedings Paper](https://github.com/IBM/TSML.jl/blob/master/docs/JuliaCon2019Paper.pdf).
 
+[TSML Notebooks Live Demo](https://mybinder.org/v2/gh/IBM/TSML.jl/binder_support?filepath=docs)
+
 ## Package Features
 
 - TS data type clustering/classification for automatic data discovery
