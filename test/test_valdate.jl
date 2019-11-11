@@ -341,6 +341,51 @@ end
   test_statoutputwriter()
 end
 
+function test_datevalmultinner()
+  Random.seed!(123)
+  gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
+  gval1 = Array{Union{Missing,Float64}}(rand(length(gdate)))
+  gval2 = Array{Union{Missing,Float64}}(rand(length(gdate)))
+  gval3 = Array{Union{Missing,Float64}}(rand(length(gdate)))
+  gmissing = 50000
+  gndxmissing1 = Random.shuffle(1:length(gdate))[1:gmissing]
+  gndxmissing2 = Random.shuffle(1:length(gdate))[1:gmissing]
+  gndxmissing3 = Random.shuffle(1:length(gdate))[1:gmissing]
+  X = DataFrame(Date=gdate,Temperature=gval1,Humidity=gval2,Ozone=gval3)
+  X.Temperature[gndxmissing1] .= missing
+  X.Humidity[gndxmissing2] .= missing
+  X.Ozone[gndxmissing3] .= missing
+  dnnr = DateValMultiNNer(Dict(:type=>:linear))
+  fit!(dnnr,X)
+  res = transform!(dnnr,X)
+  mysum(x)=sum(skipmissing(x))
+  @test mysum.(eachcol(res[:,2:end])) |> sum == 26363.629570617708
+  dnnr = DateValMultiNNer(Dict(:type=>:knn))
+  fit!(dnnr,X)
+  res = transform!(dnnr,X)
+  @test mysum.(eachcol(res[:,2:end]))  |> sum == 26368.053898361875
+  dnnr = DateValMultiNNer()
+  @test_throws ErrorException fit!(dnnr,X[:,1:2])
+  @test_throws ErrorException fit!(dnnr,DataFrame(Date=X.Date,Value1=X.Date,Value2=X.Temperature))
+end
+@testset "DateValMultiNNer: multicolumn imputation" begin
+  test_datevalmultinner()
+end
 
+function test_datevallinearimputer()
+    Random.seed!(123)
+    gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
+    gval = Array{Union{Missing,Float64}}(rand(length(gdate)))
+    gmissing = 50000
+    gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
+    X = DataFrame(Date=gdate,Value=gval)
+    X.Value[gndxmissing] .= missing
+    dnnr = DateValLinearImputer()
+    fit!(dnnr,X)
+    @assert transform!(dnnr,X) |> x-> sum(x.Value) == 8791.719321255328
+end
+@testset "DateValLinearImputer: linear imputation" begin
+  test_datevallinearimputer()
+end
 
 end
