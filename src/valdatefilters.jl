@@ -5,6 +5,7 @@ import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
 using TSML.Utils
 
+using Impute: interp, locf, nocb
 using Dates
 using DataFrames
 using Statistics
@@ -16,12 +17,9 @@ using MLDataUtils: slidingwindow
 export fit!,transform!
 
 export Matrifier,Dateifier
-export DateValizer,DateValgator,DateValNNer
+export DateValizer,DateValgator,DateValNNer,DateValMultiNNer
 export CSVDateValReader, CSVDateValWriter
 export BzCSVDateValReader
-
-
-
 
 const gAggDict = Dict(
     :median => Statistics.median,
@@ -770,6 +768,146 @@ function transform!(bzcsvrdr::BzCSVDateValReader,x::T=[]) where {T<:Union{DataFr
     rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
     df.Date = DateTime.(df.Date,fmt)
     df
+end
+
+
+"""
+    DateValMultiNNer(
+       Dict(
+          :type => :knn # :linear
+          :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
+          :dateinterval => Dates.Hour(1),
+          :nnsize => 1,
+          :strict => true,
+          :aggregator => :median
+      )
+    )
+ 
+
+Fills `missings` with their nearest-neighbors. It assumes that first column is a Date class
+and the other columns are Union{Missings,Real}. It uses DateValNNer and DateValizer+Impute to
+process each numeric column concatendate with the Date column.
+- `:type` => type of imputation which can be a linear interpolation or nearest neighbor
+- `:missdirection` => direction to fill missing data (:symmetric, :reverse, :forward) 
+- `:dateinterval` => time period to use for grouping,
+- `:nnsize` => neighborhood size,
+- `:strict` => boolean value to indicate whether to be strict about replacement or not,
+- `:aggregator => function to aggregate based on date interval
+
+Example:
+
+    Random.seed!(123)
+    gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
+    gval1 = Array{Union{Missing,Float64}}(rand(length(gdate)))
+    gval2 = Array{Union{Missing,Float64}}(rand(length(gdate)))
+    gval3 = Array{Union{Missing,Float64}}(rand(length(gdate)))
+    gmissing = 50000
+    gndxmissing1 = Random.shuffle(1:length(gdate))[1:gmissing]
+    gndxmissing2 = Random.shuffle(1:length(gdate))[1:gmissing]
+    gndxmissing3 = Random.shuffle(1:length(gdate))[1:gmissing]
+    X = DataFrame(Date=gdate,Temperature=gval1,Humidity=gval2,Ozone=gval3)
+    X.Temperature[gndxmissing1] .= missing
+    X.Humidity[gndxmissing2] .= missing
+    X.Ozone[gndxmissing3] .= missing
+
+    dnnr = DateValMultiNNer(Dict(
+          :type=>:linear,
+          :dateinterval=>Dates.Hour(1),
+          :nnsize=>10,
+          :missdirection => :symmetric,
+          :strict=>true,
+          :aggregator => :mean))
+    fit!(dnnr,X)
+    transform!(dnnr,X)
+
+ 
+Implements: `fit!`, transform!`
+"""
+mutable struct DateValMultiNNer <: Transformer
+  model
+  args
+
+  function DateValMultiNNer(args=Dict())
+    default_args = Dict{Symbol,Any}(
+        :type => :knn,
+        :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
+        :dateinterval => Dates.Hour(1),
+        :nnsize => 1,
+        :strict => true,
+        :aggregator => :median
+    )
+    new(nothing,mergedict(default_args,args))
+  end
+end
+
+function multivalidateval(x::DataFrame)
+  size(x)[2] > 2 || error("Multi Date Val timeseries need more than two columns")
+  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
+  sum(broadcast(y->eltype(y)<:Union{Missing,Real},eachcol(x[:,2:end]))) == ncol(x)-1 || error("columns 2:end should be real numbers")
+end
+
+"""
+    fit!(dnnr::DateValNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
+
+Validates and checks arguments for errors.
+"""
+function fit!(dnnr::DateValMultiNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
+  x = deepcopy(xx)
+  # validate it's multi-dimensional and first column is date
+  multivalidateval(x)
+  cnames = names(x)
+  rename!(x,Dict(cnames[1]=>:Date))
+  aggr = dnnr.args[:aggregator]
+  aggr in keys(gAggDict) || error("aggregator function passed is not recognized: ",aggr)
+  dnnr.model=dnnr.args
+end
+
+"""
+transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
+
+Replaces `missings` by nearest neighbor looping over the dataset until all missing values are gone.
+"""
+function transform!(dnnr::DateValMultiNNer,xx::T) where {T<:DataFrame}
+  x = deepcopy(xx)
+  # make sure data is valid
+  multivalidateval(x)
+  # loop each column and call ValdateNNer to impute
+  df = DataFrame()
+  if dnnr.args[:type] == :knn
+    df = knnimpute(dnnr,x)
+  elseif dnnr.args[:type] == :linear
+    df = linearimpute(dnnr,x)
+  end
+  return df
+end
+
+function knnimpute(dnnr::DateValMultiNNer,x::DataFrame)
+  valnner = DateValNNer(dnnr.args)
+  df = DataFrame(Date=x.Date) 
+  cnames = names(x)
+  for y in eachcol(x[:,2:end])
+    input = DataFrame(Date=x.Date,Value=y)
+    fit!(valnner,input)
+    res=transform!(valnner,input)
+    df = join(df,res,on=:Date,makeunique=true)
+  end
+  names!(df,cnames)
+  return df
+end
+
+function linearimpute(dnnr::DateValMultiNNer,x::DataFrame)
+  valizer = DateValgator(dnnr.args)
+  df = DataFrame(Date=x.Date) 
+  cnames = names(x)
+  for y in eachcol(x[:,2:end])
+    input = DataFrame(Date=x.Date,Value=y)
+    fit!(valizer,input)
+    res=transform!(valizer,input)
+    res.Value = Impute.interp(res.Value) |> Impute.locf() |> Impute.nocb()
+    df = join(df,res,on=:Date,makeunique=true)
+  end
+  names!(df,cnames)
+  return df
 end
 
 end
