@@ -5,6 +5,8 @@ import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
 using TSML.Utils
 
+
+using Impute
 using Impute: interp, locf, nocb
 using Dates
 using DataFrames
@@ -18,7 +20,7 @@ export fit!,transform!
 
 export Matrifier,Dateifier
 export DateValizer,DateValgator,DateValNNer,DateValMultiNNer
-export CSVDateValReader, CSVDateValWriter
+export CSVDateValReader, CSVDateValWriter, DateValLinearImputer
 export BzCSVDateValReader
 
 const gAggDict = Dict(
@@ -486,7 +488,7 @@ function fit!(dnnr::DateValNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
 end
 
 """
-transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
+    transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
 
 Replaces `missings` by nearest neighbor looping over the dataset until all missing values are gone.
 """
@@ -847,7 +849,7 @@ function multivalidateval(x::DataFrame)
 end
 
 """
-    fit!(dnnr::DateValNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
+    fit!(dnnr::DateValMultiNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
 
 Validates and checks arguments for errors.
 """
@@ -863,9 +865,10 @@ function fit!(dnnr::DateValMultiNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
 end
 
 """
-transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
+    transform!(dnnr::DateValMultiNNer,xx::T) where {T<:DataFrame}
 
-Replaces `missings` by nearest neighbor looping over the dataset until all missing values are gone.
+Replaces `missings` by nearest neighbor or linear interpolation by looping over the dataset 
+for each column until all missing values are gone.
 """
 function transform!(dnnr::DateValMultiNNer,xx::T) where {T<:DataFrame}
   x = deepcopy(xx)
@@ -896,17 +899,87 @@ function knnimpute(dnnr::DateValMultiNNer,x::DataFrame)
 end
 
 function linearimpute(dnnr::DateValMultiNNer,x::DataFrame)
-  valizer = DateValgator(dnnr.args)
+  valgator = DateValgator(dnnr.args)
+  linearputer = DateValLinearImputer(dnnr.args)
   df = DataFrame(Date=x.Date) 
   cnames = names(x)
   for y in eachcol(x[:,2:end])
     input = DataFrame(Date=x.Date,Value=y)
-    fit!(valizer,input)
-    res=transform!(valizer,input)
-    res.Value = Impute.interp(res.Value) |> Impute.locf() |> Impute.nocb()
+    fit!(valgator,input)
+    agg=transform!(valgator,input)
+    fit!(linearputer,agg)
+    res=transform!(linearputer,agg)
     df = join(df,res,on=:Date,makeunique=true)
   end
   names!(df,cnames)
+  return df
+end
+
+
+"""
+    DateValLinearImputer(
+       Dict(
+          :dateinterval => Dates.Hour(1),
+      )
+    )
+ 
+
+Fills `missings` by linear interpolation.
+- `:dateinterval` => time period to use for grouping,
+
+Example:
+
+    Random.seed!(123)
+    gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
+    gval = Array{Union{Missing,Float64}}(rand(length(gdate)))
+    gmissing = 50000
+    gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
+    X = DataFrame(Date=gdate,Value=gval)
+    X.Value[gndxmissing] .= missing
+
+    dnnr = DateValLinearImputer()
+    fit!(dnnr,X)
+    transform!(dnnr,X)
+
+ 
+Implements: `fit!`, transform!`
+"""
+mutable struct DateValLinearImputer <: Transformer
+  model
+  args
+
+  function DateValLinearImputer(args=Dict())
+    default_args = Dict{Symbol,Any}(
+        :dateinterval => Dates.Hour(1),
+    )
+    new(nothing,mergedict(default_args,args))
+  end
+end
+
+
+"""
+    fit!(dnnr::DateValLinearImputer,xx::T,y::Vector=[]) where {T<:DataFrame}
+
+Validates and checks arguments for errors.
+"""
+function fit!(dnnr::DateValLinearImputer,xx::T,y::Vector=[]) where {T<:DataFrame}
+  x = deepcopy(xx)
+  validdateval!(x)
+  dnnr.model=dnnr.args
+end
+
+"""
+    transform!(dnnr::DateValLinearImputer,xx::T) where {T<:DataFrame}
+
+Replaces `missings` by linear interpolation.
+"""
+function transform!(dnnr::DateValLinearImputer,xx::T) where {T<:DataFrame}
+  x = deepcopy(xx)
+  validdateval!(x)
+  valgator = DateValgator(dnnr.args)
+  fit!(valgator,x)
+  df=transform!(valgator,x)
+  df.Value = Impute.interp(df.Value) |> Impute.locf() |> Impute.nocb()
   return df
 end
 

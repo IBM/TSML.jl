@@ -372,5 +372,20 @@ end
   test_datevalmultinner()
 end
 
+function test_datevallinearimputer()
+    Random.seed!(123)
+    gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
+    gval = Array{Union{Missing,Float64}}(rand(length(gdate)))
+    gmissing = 50000
+    gndxmissing = Random.shuffle(1:length(gdate))[1:gmissing]
+    X = DataFrame(Date=gdate,Value=gval)
+    X.Value[gndxmissing] .= missing
+    dnnr = DateValLinearImputer()
+    fit!(dnnr,X)
+    @assert transform!(dnnr,X) |> x-> sum(x.Value) == 8791.719321255328
+end
+@testset "DateValLinearImputer: linear imputation" begin
+  test_datevallinearimputer()
+end
 
 end
