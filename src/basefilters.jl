@@ -155,7 +155,7 @@ mutable struct Imputer <: Transformer
   end
 end
 
-function fit!(imp::Imputer, instances::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
+function fit!(imp::Imputer, instances::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   imp.model = imp.args
 end
 

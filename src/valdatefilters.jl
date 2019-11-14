@@ -4,10 +4,8 @@ using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
 using TSML.Utils
+using TSML.Imputers
 
-
-using Impute
-using Impute: interp, locf, nocb
 using Dates
 using DataFrames
 using Statistics
@@ -843,7 +841,7 @@ mutable struct DateValMultiNNer <: Transformer
 end
 
 function multivalidateval(x::DataFrame)
-  size(x)[2] > 2 || error("Multi Date Val timeseries need more than two columns")
+  #size(x)[2] > 2 || error("Multi Date Val timeseries need more than two columns")
   (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
   sum(broadcast(y->eltype(y)<:Union{Missing,Real},eachcol(x[:,2:end]))) == ncol(x)-1 || error("columns 2:end should be real numbers")
 end
@@ -853,7 +851,7 @@ end
 
 Validates and checks arguments for errors.
 """
-function fit!(dnnr::DateValMultiNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
+function fit!(dnnr::DateValMultiNNer,xx::T,y::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   x = deepcopy(xx)
   # validate it's multi-dimensional and first column is date
   multivalidateval(x)
@@ -870,7 +868,7 @@ end
 Replaces `missings` by nearest neighbor or linear interpolation by looping over the dataset 
 for each column until all missing values are gone.
 """
-function transform!(dnnr::DateValMultiNNer,xx::T) where {T<:DataFrame}
+function transform!(dnnr::DateValMultiNNer,xx::T) where {T<:Union{Vector,Matrix,DataFrame}}
   x = deepcopy(xx)
   # make sure data is valid
   multivalidateval(x)
@@ -979,7 +977,7 @@ function transform!(dnnr::DateValLinearImputer,xx::T) where {T<:DataFrame}
   valgator = DateValgator(dnnr.args)
   fit!(valgator,x)
   df=transform!(valgator,x)
-  df.Value = Impute.interp(df.Value) |> Impute.locf() |> Impute.nocb()
+  df.Value = interp(df.Value) |> locf() |> nocb()
   return df
 end
 

@@ -9,6 +9,9 @@ using Reexport
 @reexport using Statistics
 
 
+include("imputer/Imputers.jl")
+using .Imputers
+
 include("types.jl")
 using .TSMLTypes
 
@@ -59,5 +62,6 @@ using .ArgumentParsers
 
 include("ensemble.jl")
 using .EnsembleMethods
+
 
 end # module

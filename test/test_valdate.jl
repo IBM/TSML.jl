@@ -365,7 +365,6 @@ function test_datevalmultinner()
   res = transform!(dnnr,X)
   @test mysum.(eachcol(res[:,2:end]))  |> sum == 26368.053898361875
   dnnr = DateValMultiNNer()
-  @test_throws ErrorException fit!(dnnr,X[:,1:2])
   @test_throws ErrorException fit!(dnnr,DataFrame(Date=X.Date,Value1=X.Date,Value2=X.Temperature))
 end
 @testset "DateValMultiNNer: multicolumn imputation" begin
