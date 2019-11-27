@@ -46,7 +46,7 @@ mutable struct OneHotEncoder <: Transformer
   end
 end
 
-function fit!(ohe::OneHotEncoder, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
+function fit!(ohe::OneHotEncoder, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   instances=convert(Matrix,features)
   # Obtain nominal columns
   nominal_columns = ohe.args[:nominal_columns]
@@ -155,7 +155,7 @@ mutable struct Imputer <: Transformer
   end
 end
 
-function fit!(imp::Imputer, instances::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
+function fit!(imp::Imputer, instances::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   imp.model = imp.args
 end
 
