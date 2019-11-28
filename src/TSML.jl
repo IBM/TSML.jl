@@ -8,7 +8,6 @@ using Reexport
 @reexport using Random
 @reexport using Statistics
 
-
 include("imputer/Imputers.jl")
 using .Imputers
 
@@ -32,6 +31,9 @@ using .MLBaseWrapper
 
 include("decisiontree.jl")
 using .DecisionTreeLearners
+
+include("normalizer.jl")
+using .Normalizers
 
 include("statifier.jl")
 using .Statifiers
