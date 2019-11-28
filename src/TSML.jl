@@ -65,5 +65,7 @@ using .ArgumentParsers
 include("ensemble.jl")
 using .EnsembleMethods
 
+include("schema.jl")
+using .Schemalizers
 
 end # module
