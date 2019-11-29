@@ -1,9 +1,9 @@
 @reexport module TSMLTypes
 
 import AbstractTrees
-import AbstractTrees.children
-import AbstractTrees.printnode
-import AbstractTrees.print_tree
+#import AbstractTrees.children
+#import AbstractTrees.printnode
+using AbstractTrees: print_tree
 
 using DataFrames
 
@@ -46,14 +46,15 @@ function AbstractTrees.printnode(io::IO, p::Pair)
   print(io, str)
 end
 
-
 function showtree(p::Transformer)
-	if isnothing(p.model)
-		return
-	elseif :transformers in keys(p.model) # pipeline
-		print_tree(p.model[:transformers])
-	else
-    print_tree(p.model)
+  if isnothing(p.model)
+    return
+  elseif :transformers in keys(p.model) # pipeline
+    println(:pipeline)
+    print_tree(p.model[:transformers])
+  else
+    println(:transfomer)
+    print_tree(p.model) # any transformer except pipeline
   end
 end
 
