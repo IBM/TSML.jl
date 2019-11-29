@@ -4,6 +4,7 @@ authors = ["Paulito Palmes <ppalmes@gmail.com>"]
 version = "2.4.2"
 
 [deps]
+AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CodecBzip2 = "523fee87-0ab8-5b00-afb7-3ecf72e48cfd"
