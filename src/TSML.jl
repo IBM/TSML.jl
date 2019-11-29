@@ -2,11 +2,8 @@ module TSML
 using Reexport
 
 # reexport common functions to Main
-@reexport using CSV
-@reexport using Dates
-@reexport using DataFrames
-@reexport using Random
-@reexport using Statistics
+include("pkgdeps.jl")
+using .PkgDeps
 
 include("imputer/Imputers.jl")
 using .Imputers
@@ -65,5 +62,7 @@ using .ArgumentParsers
 include("ensemble.jl")
 using .EnsembleMethods
 
+include("schema.jl")
+using .Schemalizers
 
 end # module

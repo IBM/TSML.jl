@@ -14,7 +14,6 @@ import TSML.TSMLTypes.transform! # to overload
 
 export fit!,transform!
 export Normalizer
-export testnormalizer
 
 
 """
@@ -27,8 +26,30 @@ Transforms continuous features into normalized form such as zscore, unitrange, s
 with parameter: 
 
 - `:method` => `:zscore` or `:unitrange` or `:sqrt` or `:log` or `pca` or `ppca` or `fa`
+- :zscore => standard z-score with centering and scaling
+- :unitrange => unit range normalization with centering and scaling
+- :sqrt => square-root transform
+- :pca => principal component analysis transform
+- :ppca => probabilistic pca
+- :fa => factor analysis
+- :log => log transform
 
 Example:
+    
+    function generatedf()
+        Random.seed!(123)
+        gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
+        gval1 = rand(length(gdate))
+        gval2 = rand(length(gdate))
+        gval3 = rand(length(gdate))
+        X = DataFrame(Date=gdate,Value1=gval1,Value2=gval2,Value3=gval3)
+        X
+    end
+
+    X = generatedf()
+    norm = Normalizer(Dict(:method => :zscore))
+    fit!(norm,X)
+    res=transform!(norm,X)
 
 Implements: `fit!`, `transform!`
 """
@@ -47,12 +68,14 @@ end
 """
     fit!(st::Statifier, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
 
-Validate argument to make sure it's a 2-column format.
+Validate argument features other than dates are continuous.
 """
 function fit!(norm::Normalizer, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
   typeof(features) <: DataFrame || error("Normalizer.fit!: data should be a dataframe: Date,Val ")
   # check features are in correct format and no categorical values
-  (eltype(features[:,1]) <: DateTime && eltype(Matrix(features[:,2:end])) <: Real) || (eltype(Matrix(features)) <: Real) || error("Normalizer.fit: make sure features are purely float values or float values with Date on first column")
+  (eltype(features[:,1]) <: DateTime && eltype(Matrix(features[:,2:end])) <: Real) || 
+    (eltype(Matrix(features)) <: Real) || 
+    error("Normalizer.fit: make sure features are purely float values or float values with Date on first column")
   norm.model = norm.args
 end
 
@@ -84,12 +107,27 @@ function processnumeric(norm::Normalizer,features::Matrix)
     ppca(features)
   elseif norm.args[:method] == :fa
     fa(features)
+  elseif norm.args[:method] == :sqrt
+    sqrtf(features)
+  elseif norm.args[:method] == :log
+    logf(features)
   else
     error("arg's :method is mapped to unknown keyword")
   end
 end
 
-# apply square-root transform
+# apply sqrt transform
+function sqrtf(X)
+  sqrt.(X)
+end
+
+
+# apply log transform
+function logf(X)
+  log.(X)
+end
+
+# apply z-score transform
 function ztransform(X)
     fit(ZScoreTransform, X'; center=true, scale=true) |> dt -> StatsBase.transform(dt,X')' |> collect
 end
@@ -159,6 +197,14 @@ function testnormalizer()
   fit!(norm,X)
   res = transform!(norm,X)
   @assert isapprox(std(res[:,1]),0.00408,atol=1e-2)
+  norm = Normalizer(Dict(:method => :log))
+  fit!(norm,X)
+  res = transform!(norm,X)
+  @assert isapprox(std(res[:,1]),0.99941,atol=1e-2)
+  norm = Normalizer(Dict(:method => :sqrt))
+  fit!(norm,X)
+  res = transform!(norm,X)
+  @assert isapprox(std(res[:,1]),0.2355,atol=1e-2)
 end
 
 end
