@@ -1,8 +1,8 @@
 @reexport module TSMLTypes
 
 import AbstractTrees
-#import AbstractTrees.children
-#import AbstractTrees.printnode
+import AbstractTrees.children
+import AbstractTrees.printnode
 using AbstractTrees: print_tree
 
 using DataFrames
@@ -38,9 +38,12 @@ end
 
 # From  https://github.com/JuliaOpt/Convex.jl/blob/master/src/utilities/tree_print.jl
 # Plot it with: https://github.com/JuliaPlots/GraphRecipes.jl#abstracttrees-trees
-AbstractTrees.children(d::Dict) = [p for p in d]
-AbstractTrees.children(p::Pair) = AbstractTrees.children(p[2])
-function AbstractTrees.printnode(io::IO, p::Pair)
+
+# extennd abstract trees
+children(d::Dict) = [p for p in d]
+children(p::Pair) = AbstractTrees.children(p[2])
+
+function printnode(io::IO, p::Pair)
   v = AbstractTrees.children(p[2])
   str = isempty(v)  ? string(p[1], ": ", p[2]) : string(p[1], ": ")
   print(io, str)
@@ -57,7 +60,6 @@ function showtree(p::Transformer)
     print_tree(p.model) # any transformer except pipeline
   end
 end
-
 
 function test_print_tree()
   there = Dict(:ok=>:yes)
