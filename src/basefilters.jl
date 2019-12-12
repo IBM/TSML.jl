@@ -258,7 +258,7 @@ function transform!(pipe::Pipeline, features::T=[]) where {T<:Union{Vector,Matri
   current_instances = instances
   for t_index in 1:length(transformers)
     transformer = transformers[t_index]
-    current_instances = transform!(transformer, current_instances) |> collect
+    current_instances = transform!(transformer, current_instances) 
   end
 
   return current_instances

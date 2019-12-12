@@ -97,9 +97,8 @@ function timevalstat(features::DataFrame)
   dftime = DataFrame(tstart=timestart,tend=timeend,sfreq=sfreq)
 end
 
-function tsmlfullstat(dat::AbstractArray)
-  mdat = collect(dat)
-  data = skipmissing(mdat) |> collect
+function tsmlfullstat(dat::Vector)
+  data = skipmissing(dat) |> collect
   lcount = length(data)
   lmax = maximum(data)
   lmin = minimum(data)
