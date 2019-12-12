@@ -892,7 +892,7 @@ function knnimpute(dnnr::DateValMultiNNer,x::DataFrame)
     res=transform!(valnner,input)
     df = join(df,res,on=:Date,makeunique=true)
   end
-  names!(df,cnames)
+  rename!(df,cnames)
   return df
 end
 
@@ -909,7 +909,7 @@ function linearimpute(dnnr::DateValMultiNNer,x::DataFrame)
     res=transform!(linearputer,agg)
     df = join(df,res,on=:Date,makeunique=true)
   end
-  names!(df,cnames)
+  rename!(df,cnames)
   return df
 end
 
