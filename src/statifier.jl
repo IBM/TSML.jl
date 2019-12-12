@@ -97,7 +97,7 @@ function timevalstat(features::DataFrame)
   dftime = DataFrame(tstart=timestart,tend=timeend,sfreq=sfreq)
 end
 
-function tsmlfullstat(dat::Vector)
+function tsmlfullstat(dat::AbstractArray)
   data = skipmissing(dat) |> collect
   lcount = length(data)
   lmax = maximum(data)
