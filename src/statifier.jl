@@ -98,7 +98,8 @@ function timevalstat(features::DataFrame)
 end
 
 function tsmlfullstat(dat::AbstractArray)
-  data = skipmissing(dat) |> collect
+  mdat = collect(dat)
+  data = skipmissing(mdat) |> collect
   lcount = length(data)
   lmax = maximum(data)
   lmin = minimum(data)
