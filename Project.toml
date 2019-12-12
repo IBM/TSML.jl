@@ -1,7 +1,7 @@
 name = "TSML"
 uuid = "198dc43e-9e51-5cd7-9d40-d9794d335912"
 authors = ["Paulito Palmes <ppalmes@gmail.com>"]
-version = "2.4.5"
+version = "2.4.4"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
