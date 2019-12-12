@@ -381,7 +381,7 @@ function test_datevallinearimputer()
     X.Value[gndxmissing] .= missing
     dnnr = DateValLinearImputer()
     fit!(dnnr,X)
-    @assert transform!(dnnr,X) |> x-> sum(x.Value) == 8791.719321255328
+    @test transform!(dnnr,X) |> x-> sum(x.Value) == 8791.719321255328
 end
 @testset "DateValLinearImputer: linear imputation" begin
   test_datevallinearimputer()
