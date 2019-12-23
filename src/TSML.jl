@@ -65,4 +65,7 @@ using .EnsembleMethods
 include("schema.jl")
 using .Schemalizers
 
+include("crossvalidator.jl")
+using .CrossValidators
+
 end # module

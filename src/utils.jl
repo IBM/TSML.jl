@@ -56,7 +56,7 @@ function kfold(num_instances, num_partitions)
 end
 
 """
-    score(metric::Symbol, actual, predicted)
+    score(metric::Symbol, actual::Vector, predicted::Vector)
 
 Score learner predictions against ground truth values.
 
@@ -69,7 +69,7 @@ Available metrics:
 
 Returns: score of learner
 """
-function score(metric::Symbol, actual, predicted)
+function score(metric::Symbol, actual::Vector, predicted::Vector)
   if metric == :accuracy
     mean(actual .== predicted) * 100.0
   else
