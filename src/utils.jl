@@ -106,6 +106,28 @@ function infer_eltype(vector::Vector)
   return vec_eltype
 end
 
+function infer_eltype(df::DataFrame)
+  infer_eltype(Matrix(df))
+end
+
+function infer_eltype(mtrx::Matrix)
+  # Obtain element type of matrix
+  mat_eltype = eltype(mtrx)
+
+  # If element type of Matrix is Any and not empty,
+  # and all elements are of the same type,
+  # then return the matrix elements' type.
+  if mat_eltype == Any && !isempty(mtrx)
+    all_elements_same_type = all(x -> typeof(x) == typeof(first(mtrx)), mtrx)
+    if all_elements_same_type
+      mat_eltype = typeof(first(mtrx))
+    end
+  end
+
+  # Return inferred element type
+  return mat_eltype
+end
+
 """
     nested_dict_to_tuples(dict::Dict)
 

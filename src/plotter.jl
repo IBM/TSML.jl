@@ -2,7 +2,7 @@
 
 using Plots
 using GR
-using Interact
+#using Interact
 using DataFrames
 
 export fit!,transform!
@@ -98,19 +98,22 @@ function transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,Da
   df.Value[ndxmissing] .= NaN
   setupplot(pltr.args[:pdfoutput])
   if pltr.args[:interactive] == true && pltr.args[:pdfoutput] == false
-    interactiveplot(df)
+    # disable interactive plot due to Knockout.jl badly maintained (Interact.jl deps)
+    #interactiveplot(df)
+    pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
+    return pl
   else
     pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
     return pl
   end
 end
 
-function interactiveplot(df::Union{Vector,Matrix,DataFrame})
-  mlength = length(df.Value)
-  @manipulate for min in slider(1:mlength,label="min",value=1),max in slider(1:mlength,label="max",value=mlength)
-     Plots.plot(df.Date[min:max],df.Value[min:max],xlabel="Date",ylabel="Value",legend=false,show=false);
-  end
-end
+#function interactiveplot(df::Union{Vector,Matrix,DataFrame})
+#  mlength = length(df.Value)
+#  @manipulate for min in slider(1:mlength,label="min",value=1),max in slider(1:mlength,label="max",value=mlength)
+#     Plots.plot(df.Date[min:max],df.Value[min:max],xlabel="Date",ylabel="Value",legend=false,show=false);
+#  end
+#end
 
 
 end

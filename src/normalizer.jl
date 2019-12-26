@@ -71,11 +71,11 @@ end
 Validate argument features other than dates are continuous.
 """
 function fit!(norm::Normalizer, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  typeof(features) <: DataFrame || error("Normalizer.fit!: data should be a dataframe: Date,Val ")
+  typeof(features) <: Union{DataFrame,Matrix} || error("Normalizer.fit!: data should be a dataframe: Date,Val ")
   # check features are in correct format and no categorical values
-  (eltype(features[:,1]) <: DateTime && eltype(Matrix(features[:,2:end])) <: Real) || 
-    (eltype(Matrix(features)) <: Real) || 
-    error("Normalizer.fit: make sure features are purely float values or float values with Date on first column")
+  (infer_eltype(features[:,1]) <: DateTime && infer_eltype(Matrix(features[:,2:end])) <: Real) || 
+    (infer_eltype(Matrix(features)) <: Real) || 
+    error("Normalizer.fit!: make sure features are purely float values or float values with Date on first column")
   norm.model = norm.args
 end
 
@@ -84,16 +84,18 @@ end
 
 Compute statistics.
 """
-function transform!(norm::Normalizer, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
-  features != [] || return DataFrame()
+function transform!(norm::Normalizer, pfeatures::T) where {T<:Union{Vector,Matrix,DataFrame}}
+  pfeatures != [] || return DataFrame()
   res = Array{Float64,2}(undef,0,0)
-  if (eltype(features[:,1]) <: DateTime && eltype(Matrix(features[:,2:end])) <: Real)
-    res = processnumeric(norm,Matrix(features[:,2:end]))
-  elseif eltype(features) <: Real
-    res = processnumeric(norm,Matrix(features))
+  if (infer_eltype(pfeatures[:,1]) <: DateTime && infer_eltype(Matrix(pfeatures[:,2:end])) <: Real)
+    res = processnumeric(norm,Matrix{Float64}(pfeatures[:,2:end]))
+  elseif infer_eltype(Matrix(pfeatures)) <: Real
+    features = pfeatures |> Array{Float64}
+    res = processnumeric(norm,features)
   else
-    error("Normalizer.fit: make sure features are purely float values or float values with Date on first column")
+    error("Normalizer.transform!: make sure features are purely float values or float values with Date on first column")
   end
+  res
 end
 
 function processnumeric(norm::Normalizer,features::Matrix)
@@ -129,17 +131,19 @@ end
 
 # apply z-score transform
 function ztransform(X)
-    fit(ZScoreTransform, X'; center=true, scale=true) |> dt -> StatsBase.transform(dt,X')' |> collect
+  xp = X' |> collect |> Matrix{Float64}
+  fit(ZScoreTransform, xp; center=true, scale=true) |> dt -> StatsBase.transform(dt,xp)' |> collect
 end
 
 # unit-range
 function unitrtransform(X)
-    fit(UnitRangeTransform, X') |> dt -> StatsBase.transform(dt,X')' |> collect
+  xp = X' |> collect |> Matrix{Float64}
+  fit(UnitRangeTransform,xp) |> dt -> StatsBase.transform(dt,xp)' |> collect
 end
 
 # pca
 function pca(X)
-  xp = X'
+  xp = X' |> collect |> Matrix{Float64}
   m = fit(PCA,xp)
   transform(m,xp)' |> collect
 end
@@ -147,14 +151,14 @@ end
 
 # ppca
 function ppca(X)
-  xp = X'
+  xp = X' |> collect |> Matrix{Float64}
   m = fit(PPCA,xp)
   transform(m,xp)' |> collect
 end
 
 # fa
 function fa(X)
-  xp = X'
+  xp = X' |> collect |> Matrix{Float64}
   m = fit(FactorAnalysis,xp)
   transform(m,xp)' |> collect
 end
