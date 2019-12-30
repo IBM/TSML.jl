@@ -8,26 +8,36 @@ function test_crossvalidator()
   Random.seed!(123)
   acc(X,Y) = score(:accuracy,X,Y)
   data=getiris()
+  X=data[:,1:4] |> Matrix
+  Y=data[:,5] |> collect
+  rf = RandomForest()
+  @test CrossValidators.crossvalidate(rf,X,Y,acc).mean ≈ 94.0
+  Random.seed!(123)
   ppl1 = Pipeline(Dict(:transformers=>[RandomForest()]))
-  @test crossvalidate(ppl1,data,[1:4],[],5,acc).mean ≈ 94.0
+  @test CrossValidators.crossvalidate(ppl1,X,Y,acc).mean ≈ 94.0
+  Random.seed!(123)
   ohe = OneHotEncoder()
   stdsc= StandardScaler()
   ppl2 = Pipeline(Dict(:transformers=>[ohe,stdsc,RandomForest()]))
-  @test crossvalidate(ppl2,data,[1:4],[],5,acc).mean ≈ 94.0
+  @test CrossValidators.crossvalidate(ppl2,X,Y,acc).mean ≈ 94.66666667
+  Random.seed!(123)
   mpca = Normalizer(Dict(:method=>:pca))
   mppca = Normalizer(Dict(:method=>:ppca))
   mfa = Normalizer(Dict(:method=>:fa))
   mlog = Normalizer(Dict(:method=>:log))
   msqrt = Normalizer(Dict(:method=>:sqrt))
   ppl3 = Pipeline(Dict(:transformers=>[msqrt,mlog,mpca,mppca,RandomForest()]))
-  fit!(ppl3,data[:,1:4],collect(data[:,5]))
-  res=transform!(ppl3,data[:,1:4])
-  @test score(:accuracy,res,collect(data[:,5])) ≈ 99.333333
-  ppl3 = Pipeline(Dict(:transformers=>[msqrt,mlog,mppca,RandomForest()]))
-  @test crossvalidate(ppl3,data,[1:4],[],5,acc,5).mean ≈ 86.666666
+  @test_throws BoundsError CrossValidators.crossvalidate(ppl3,X,Y,acc)
+  Random.seed!(123)
+  fit!(ppl3,X,Y)
+  @test size(transform!(ppl3,X))[1] == length(Y)
+  Random.seed!(123)
+  ppl5 = Pipeline(Dict(:transformers=>[msqrt,mlog,mppca,RandomForest()]))
+  @test CrossValidators.crossvalidate(ppl5,X,Y,acc).mean ≈ 77.333333
 end
 @testset "CrossValidator" begin
   test_crossvalidator()
 end
+
 
 end
