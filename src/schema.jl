@@ -66,8 +66,7 @@ end
 
 Check validity of `features`: Date,Val data or just Vals Matrix
 """
-function fit!(sch::Schemalizer, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  typeof(features) <: DataFrame || error("Schemalizer.fit!: data should be a dataframe")
+function fit!(sch::Schemalizer, features::DataFrame, labels::Vector=[])
   isempty(features) && error("Schemalizer.fit: data format not recognized.")
   if isempty(sch.args[:schema]) 
     sch.args[:schema] = ML.schema(table(features))  
@@ -82,9 +81,8 @@ end
 
 Normalized continous features and hot-bit encode categorical features
 """
-function transform!(sch::Schemalizer, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
+function transform!(sch::Schemalizer, features::DataFrame) 
   isempty(features) && (return DataFrame())
-  typeof(features) <: DataFrame || error("Schemalizer.transform!: data should be a dataframe")
   ML.featuremat(sch.args[:schema],table(features))' |> DataFrame
 end
 

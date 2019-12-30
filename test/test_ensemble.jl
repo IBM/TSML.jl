@@ -3,11 +3,12 @@ module TestEnsembleMethods
 using Test
 using Random
 using TSML
+using DataFrames
 
 function getprediction(model::TSLearner,data::Dict)
   Random.seed!(126)
-  trfeatures = data[:trfeatures]
-  tstfeatures = data[:tstfeatures]
+  trfeatures = data[:trfeatures] |> DataFrame
+  tstfeatures = data[:tstfeatures] |> DataFrame
   troutput = data[:troutput]
   tstoutput = data[:tstoutput]
   fit!(model,trfeatures,troutput)
@@ -21,13 +22,13 @@ function test_ensembles()
   tstdirname = joinpath(dirname(pathof(TSML)),"../data/realdatatsclassification/testing")
 
   frange = 5:20
-  trdata = getstats(trdirname)
-  trfeatures = trdata[:,frange]
-  troutput = trdata[:,:dtype]
+  trdata = getstats(trdirname) |> DataFrame
+  trfeatures = trdata[:,frange] 
+  troutput = trdata[:,:dtype] |> Vector{String}
 
-  tstdata = getstats(tstdirname)
-  tstfeatures = tstdata[:,frange]
-  tstoutput = tstdata[:,:dtype]
+  tstdata = getstats(tstdirname) |> DataFrame
+  tstfeatures = tstdata[:,frange] 
+  tstoutput = tstdata[:,:dtype] |> Vector{String}
 
   models = [VoteEnsemble(),StackEnsemble(),BestLearner()]
 

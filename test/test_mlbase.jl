@@ -2,6 +2,7 @@ module TestMLBaseWrapper
 
 using Test
 using TSML
+using DataFrames
 
 @testset "MLBase transformers" begin
 
@@ -10,7 +11,7 @@ using TSML
       5 10;
       -5 0;
       0 5;
-    ]
+    ] |> DataFrame
     labels = [
       "x";
       "y";
@@ -20,11 +21,11 @@ using TSML
       1.0 1.0;
       -1.0 -1.0;
       0.0 0.0;
-    ]
+    ] |> DataFrame
     standard_scaler = StandardScaler()
     fit!(standard_scaler, features, labels)
     transformed = transform!(standard_scaler, features)
-    @test transformed == expected_transformed
+    @test (transformed .== expected_transformed) |> Matrix |> sum == 6
   end
 
 end

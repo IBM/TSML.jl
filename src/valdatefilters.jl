@@ -77,9 +77,8 @@ end
 
 Checks and validate inputs are in correct structure
 """
-function fit!(mtr::Matrifier,xx::T,y::Vector=Vector()) where {T<:Union{Matrix,Vector,DataFrame}}
-  typeof(xx) <: DataFrame || error("input is not a dataframe")
-  x = deepcopy(xx.Value)
+function fit!(mtr::Matrifier,xx::DataFrame,y::Vector=[]) 
+  x = deepcopy(xx.Value) |> collect
   x isa Vector || error("data should be a vector")
   mtr.model = mtr.args
 end
@@ -89,9 +88,8 @@ end
 
 Applies the parameters of sliding windows to create the corresponding matrix
 """
-function transform!(mtr::Matrifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
-  typeof(xx) <: DataFrame || error("input is not a dataframe")
-  x = deepcopy(xx.Value)
+function transform!(mtr::Matrifier,xx::DataFrame)
+  x = deepcopy(xx.Value) |> collect
   x isa Vector || error("data should be a vector")
   mtype = eltype(x)
   res=toMatrix(mtr,x)
@@ -164,8 +162,7 @@ end
 
 Computes range of dates to be used during transform.
 """
-function fit!(dtr::Dateifier,xx::T,y::Vector=[]) where {T<:Union{Matrix,Vector,DataFrame}}
-  typeof(xx) <: DataFrame || error("input not a dataframe")
+function fit!(dtr::Dateifier,xx::DataFrame,y::Vector=[])
   x = deepcopy(xx.Date)
   (eltype(x) <: DateTime || eltype(x) <: Date) || error("array element types are not dates")
   dtr.args[:lower] = minimum(x)
@@ -178,8 +175,7 @@ end
 
 Transforms to day of the month, day of the week, etc
 """
-function transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFrame}}
-  typeof(xx) <: DataFrame || error("input not a dataframe")
+function transform!(dtr::Dateifier,xx::DataFrame)
   x = deepcopy(xx.Date)
   x isa Vector || error("data should be a vector")
   @assert eltype(x) <: DateTime || eltype(x) <: Date
@@ -195,7 +191,6 @@ function transform!(dtr::Dateifier,xx::T) where {T<:Union{Matrix,Vector,DataFram
   dt.doq=Dates.dayofquarter.(endpoints)
   dt.qoy=Dates.quarterofyear.(endpoints)
   dtr.args[:header] = names(dt)
-  #convert(Matrix{Int64},dt)
   return dt
 end
 
@@ -241,7 +236,7 @@ mutable struct DateValgator <: Transformer
   end
 end
 
-function validdateval!(x::T) where {T<:DataFrame}
+function validdateval!(x::DataFrame)
   size(x)[2] == 2 || error("Date Val timeseries need two columns")
   (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
   eltype(x[:,2]) <: Union{Missing,Real} || error("array element types are not values")
@@ -254,7 +249,7 @@ end
 
 Checks and validates arguments.
 """
-function fit!(dvmr::DateValgator,xx::T,y::Vector=[]) where {T<:Union{Matrix,DataFrame}}
+function fit!(dvmr::DateValgator,xx::DataFrame,y::Vector=[])
   x = deepcopy(xx)
   validdateval!(x)
   aggr = dvmr.args[:aggregator] 
@@ -268,7 +263,7 @@ end
 Aggregates values grouped by date-time period using aggregate 
 function such as mean, median, maximum, minimum. Default is mean.
 """
-function transform!(dvmr::DateValgator,xx::T) where {T<:DataFrame}
+function transform!(dvmr::DateValgator,xx::DataFrame)
   x = deepcopy(xx)
   validdateval!(x)
   # make sure aggregator function exists
@@ -350,7 +345,7 @@ function getMedian(t::Type{T},xx::DataFrame) where {T<:Union{TimePeriod,DatePeri
   gpmeans
 end
 
-function fullaggregate!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
+function fullaggregate!(dvzr::DateValizer,xx::DataFrame)
   x = deepcopy(xx)
   grpby = typeof(dvzr.args[:dateinterval])
   sym = Symbol(grpby)
@@ -370,7 +365,7 @@ end
 
 Validates input and computes global medians grouped by time period.
 """
-function fit!(dvzr::DateValizer,xx::T,y::Vector=[]) where {T<:DataFrame}
+function fit!(dvzr::DateValizer,xx::DataFrame,y::Vector=[]) 
   x = deepcopy(xx)
   validdateval!(x)
   # get complete dates and aggregate
@@ -387,7 +382,7 @@ end
 
 Replaces `missing` with the corresponding global medians with respect to time period.
 """
-function transform!(dvzr::DateValizer,xx::T) where {T<:DataFrame}
+function transform!(dvzr::DateValizer,xx::DataFrame) 
   x = deepcopy(xx)
   validdateval!(x)
   # get complete dates, aggregate, and get medians
@@ -477,7 +472,7 @@ end
 
 Validates and checks arguments for errors.
 """
-function fit!(dnnr::DateValNNer,xx::T,y::Vector=[]) where {T<:DataFrame}
+function fit!(dnnr::DateValNNer,xx::DataFrame,y::Vector=[])
   x = deepcopy(xx)
   validdateval!(x)
   aggr = dnnr.args[:aggregator]
@@ -490,7 +485,7 @@ end
 
 Replaces `missings` by nearest neighbor looping over the dataset until all missing values are gone.
 """
-function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
+function transform!(dnnr::DateValNNer,xx::DataFrame)
   x = deepcopy(xx)
   validdateval!(x)
   # make sure aggregator function exists
@@ -525,7 +520,7 @@ function transform!(dnnr::DateValNNer,xx::T) where {T<:DataFrame}
   res
 end
 
-function transform_worker!(dnnr::DateValNNer,joinc::T) where {T<:DataFrame}
+function transform_worker!(dnnr::DateValNNer,joinc::DataFrame)
   joined = deepcopy(joinc)
   maxrow = size(joined)[1]
 
@@ -606,7 +601,7 @@ end
 
 Makes sure filename and dateformat are not empty strings.
 """
-function fit!(csvrdr::CSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+function fit!(csvrdr::CSVDateValReader,x::DataFrame=DataFrame(),y::Vector=[])
     fname = csvrdr.args[:filename]
     fmt = csvrdr.args[:dateformat]
     (fname != "" && fmt != "") || error("missing filename or date format")
@@ -618,7 +613,7 @@ end
 
 Uses CSV package to read the csv file and converts it to dataframe.
 """
-function transform!(csvrdr::CSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+function transform!(csvrdr::CSVDateValReader,x::DataFrame=DataFrame())
     fname = csvrdr.args[:filename]
     fmt = csvrdr.args[:dateformat]
     df = CSV.read(fname) |> DataFrame
@@ -679,7 +674,7 @@ end
 
 Makes sure filename and dateformat are not empty strings.
 """
-function fit!(csvwtr::CSVDateValWriter,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+function fit!(csvwtr::CSVDateValWriter,x::DataFrame=DataFrame(),y::Vector=[])
     fname = csvwtr.args[:filename]
     fmt = csvwtr.args[:dateformat]
     fname != ""  || error("missing filename")
@@ -691,7 +686,7 @@ end
 
 Uses CSV package to write the dataframe into a csv file.
 """
-function transform!(csvwtr::CSVDateValWriter,x::T) where {T<:Union{DataFrame,Vector,Matrix}}
+function transform!(csvwtr::CSVDateValWriter,x::DataFrame)
     fname = csvwtr.args[:filename]
     fmt = csvwtr.args[:dateformat]
     df = deepcopy(x) |> DataFrame
@@ -747,7 +742,7 @@ end
 
 Makes sure filename and dateformat are not empty strings.
 """
-function fit!(bzcsvrdr::BzCSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+function fit!(bzcsvrdr::BzCSVDateValReader,x::DataFrame=DataFrame(),y::Vector=[])
     fname = bzcsvrdr.args[:filename]
     fmt = bzcsvrdr.args[:dateformat]
     (fname != "" && fmt != "") || error("missing filename or date format")
@@ -759,7 +754,7 @@ end
 
 Uses CodecBzip2 package to read the csv file and converts it to dataframe.
 """
-function transform!(bzcsvrdr::BzCSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+function transform!(bzcsvrdr::BzCSVDateValReader,x::DataFrame=DataFrame())
     fname = bzcsvrdr.args[:filename]
     fmt = bzcsvrdr.args[:dateformat]
     stream = Bzip2DecompressorStream(open(fname))
@@ -851,7 +846,7 @@ end
 
 Validates and checks arguments for errors.
 """
-function fit!(dnnr::DateValMultiNNer,xx::T,y::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+function fit!(dnnr::DateValMultiNNer,xx::DataFrame,y::Vector=[])
   x = deepcopy(xx)
   # validate it's multi-dimensional and first column is date
   multivalidateval(x)
@@ -868,7 +863,7 @@ end
 Replaces `missings` by nearest neighbor or linear interpolation by looping over the dataset 
 for each column until all missing values are gone.
 """
-function transform!(dnnr::DateValMultiNNer,xx::T) where {T<:Union{Vector,Matrix,DataFrame}}
+function transform!(dnnr::DateValMultiNNer,xx::DataFrame)
   x = deepcopy(xx)
   # make sure data is valid
   multivalidateval(x)
@@ -960,7 +955,7 @@ end
 
 Validates and checks arguments for errors.
 """
-function fit!(dnnr::DateValLinearImputer,xx::T,y::Vector=[]) where {T<:DataFrame}
+function fit!(dnnr::DateValLinearImputer,xx::DataFrame,y::Vector=[])
   x = deepcopy(xx)
   validdateval!(x)
   dnnr.model=dnnr.args
@@ -971,7 +966,7 @@ end
 
 Replaces `missings` by linear interpolation.
 """
-function transform!(dnnr::DateValLinearImputer,xx::T) where {T<:DataFrame}
+function transform!(dnnr::DateValLinearImputer,xx::DataFrame)
   x = deepcopy(xx)
   validdateval!(x)
   valgator = DateValgator(dnnr.args)

@@ -70,8 +70,7 @@ end
 
 Validate argument features other than dates are continuous.
 """
-function fit!(norm::Normalizer, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  typeof(features) <: Union{DataFrame,Matrix} || error("Normalizer.fit!: data should be a dataframe: Date,Val ")
+function fit!(norm::Normalizer, features::DataFrame, labels::Vector=[]) 
   # check features are in correct format and no categorical values
   (infer_eltype(features[:,1]) <: DateTime && infer_eltype(Matrix(features[:,2:end])) <: Real) || 
     (infer_eltype(Matrix(features)) <: Real) || 
@@ -84,14 +83,14 @@ end
 
 Compute statistics.
 """
-function transform!(norm::Normalizer, pfeatures::T) where {T<:Union{Vector,Matrix,DataFrame}}
-  pfeatures != [] || return DataFrame()
+function transform!(norm::Normalizer, pfeatures::DataFrame)
+  pfeatures != DataFrame() || return DataFrame()
   res = Array{Float64,2}(undef,0,0)
   if (infer_eltype(pfeatures[:,1]) <: DateTime && infer_eltype(Matrix(pfeatures[:,2:end])) <: Real)
-    res = processnumeric(norm,Matrix{Float64}(pfeatures[:,2:end]))
+    res = processnumeric(norm,Matrix{Float64}(pfeatures[:,2:end])) |> DataFrame
   elseif infer_eltype(Matrix(pfeatures)) <: Real
     features = pfeatures |> Array{Float64}
-    res = processnumeric(norm,features)
+    res = processnumeric(norm,features) |> DataFrame
   else
     error("Normalizer.transform!: make sure features are purely float values or float values with Date on first column")
   end

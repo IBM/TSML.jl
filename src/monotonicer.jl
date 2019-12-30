@@ -59,8 +59,7 @@ end
 
 A function that checks if `features` are two-column data of  Dates and Values
 """
-function fit!(st::Monotonicer, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  typeof(features) <: DataFrame || error("Monotonicer.fit!: data should be a dataframe: Date,Val ")
+function fit!(st::Monotonicer, features::DataFrame, labels::Vector=[]) 
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   st.model = st.args
 end
@@ -71,9 +70,8 @@ end
 
 Normalize monotonic or daily monotonic data by taking the diffs and counting the flips.
 """
-function transform!(st::Monotonicer, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
-  features != [] || return DataFrame()
-  typeof(features) <: DataFrame || error("Monotonicer.fit!: data should be a dataframe: Date,Val ")
+function transform!(st::Monotonicer, features::DataFrame)
+  features != DataFrame() || return DataFrame()
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
   mfeatures=features
@@ -114,7 +112,7 @@ function antimonotonizedaily(dat::DataFrame)
   return df
 end
 
-function antimonotonize(data::Union{Vector,DataFrame,Matrix})
+function antimonotonize(data::DataFrame)
   dat = deepcopy(data)
   typeof(dat) <: DataFrame || error("input must be a dataframe")
   ncol(dat) == 2 || error("input must have two columns")
@@ -136,7 +134,7 @@ function dailyflips(dat::DataFrame)
   avg::Float64 = nflips/ndays.value
 end
 
-function ismonotonic(dat::Vector{T}) where T
+function ismonotonic(dat::Vector)
   #check if monotonic increasing
   cdata=dat |> skipmissing |> collect
   maxflips = minimum([10;div(length(cdata),2)]) # flip cutoff to identify monotonic

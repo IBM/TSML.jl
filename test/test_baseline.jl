@@ -6,8 +6,8 @@ using TSML
 function test_baseline()
     Random.seed!(123)
     iris=getiris()
-    instances=iris[:,1:4] |> Matrix
-    labels=iris[:,5] |> Vector
+    instances=iris[:,1:4] 
+    labels=iris[:,5] |> collect
     bl = Baseline()
     fit!(bl,instances,labels)
     @test bl.model == "setosa"
@@ -15,7 +15,7 @@ function test_baseline()
     idy = Identity()
     fit!(idy,instances,labels)
     @test idy.model == nothing
-    @test sum(transform!(idy,instances) .== instances) == (*(size(instances)...))
+    @test (transform!(idy,instances) .== instances) |> Matrix |> sum == 150*4
     @test idy.args == Dict()
 end
 @testset "Baseline Tests" begin

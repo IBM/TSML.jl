@@ -74,8 +74,7 @@ end
 
 Check validity of `features`: 2-column Date,Val data
 """
-function fit!(pltr::Plotter, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  typeof(features) <: DataFrame || error("Outliernicer.fit!: data should be a dataframe: Date,Val ")
+function fit!(pltr::Plotter, features::DataFrame, labels::Vector=[]) 
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   pltr.model = pltr.args
 end
@@ -85,9 +84,8 @@ end
 
 Convert `missing` into `NaN` to allow plotting of discontinuities.
 """
-function transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
-  features != [] || return DataFrame()
-  typeof(features) <: DataFrame || error("Outliernicer.fit!: data should be a dataframe: Date,Val ")
+function transform!(pltr::Plotter, features::DataFrame)
+  features != DataFrame() || return DataFrame()
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
   # covert missing to NaN

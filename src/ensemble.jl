@@ -58,7 +58,7 @@ end
 
 Training phase of the ensemble.
 """
-function fit!(ve::VoteEnsemble, instances::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
+function fit!(ve::VoteEnsemble, instances::DataFrame, labels::Vector)
   # Train all learners
   learners = ve.args[:learners]
   for learner in learners
@@ -72,7 +72,7 @@ end
 
 Prediction phase of the ensemble.
 """
-function transform!(ve::VoteEnsemble, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
+function transform!(ve::VoteEnsemble, instances::DataFrame)::Vector{<:Any}
   # Make learners vote
   learners = ve.args[:learners]
   predictions = map(learner -> transform!(learner, instances), learners)
@@ -133,7 +133,7 @@ Training phase of the stack of learners.
 - train stacker on learners' outputs
 - build final model from the trained learners
 """
-function fit!(se::StackEnsemble, instances::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
+function fit!(se::StackEnsemble, instances::DataFrame, labels::Vector)
   learners = se.args[:learners]
   num_learners = size(learners, 1)
   num_instances = size(instances, 1)
@@ -160,9 +160,8 @@ function fit!(se::StackEnsemble, instances::T, labels::Vector) where {T<:Union{V
   label_map = MLBase.labelmap(labels)
   stacker = se.args[:stacker]
   keep_original_features = se.args[:keep_original_features]
-  stacker_instances = build_stacker_instances(
-    learners, stack_instances, label_map, keep_original_features
-  )
+  stacker_instances = build_stacker_instances(learners, stack_instances, 
+                      label_map, keep_original_features) |> DataFrame
   fit!(stacker, stacker_instances, stack_labels)
   
   # Build model
@@ -179,15 +178,14 @@ end
 
 Build stacker instances and predict
 """
-function transform!(se::StackEnsemble, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
+function transform!(se::StackEnsemble, instances::DataFrame)::Vector{<:Any}
   # Build stacker instances
   learners = se.model[:learners]
   stacker = se.model[:stacker]
   label_map = se.model[:label_map]
   keep_original_features = se.model[:keep_original_features]
-  stacker_instances = build_stacker_instances(
-    learners, instances, label_map, keep_original_features
-  )
+  stacker_instances = build_stacker_instances(learners, instances, 
+                      label_map, keep_original_features) |> DataFrame
 
   # Predict
   return transform!(stacker, stacker_instances)
@@ -289,7 +287,7 @@ Training phase:
 - generate partitions
 - train each learner on each partition and obtain validation output
 """
-function fit!(bls::BestLearner, instances::T, labels::Vector) where {T<:Union{Matrix,DataFrame}}
+function fit!(bls::BestLearner, instances::DataFrame, labels::Vector)
   # Obtain learners as is if no options grid present 
   if bls.args[:learner_options_grid] == nothing
     learners = bls.args[:learners]
@@ -374,7 +372,7 @@ end
 
 Choose the best learner based on cross-validation results and use it for prediction.
 """
-function transform!(bls::BestLearner, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
+function transform!(bls::BestLearner, instances::DataFrame)::Vector{<:Any}
   transform!(bls.model[:best_learner], instances)
 end
 

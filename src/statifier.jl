@@ -61,7 +61,7 @@ end
 
 Validate argument to make sure it's a 2-column format.
 """
-function fit!(st::Statifier, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+function fit!(st::Statifier, features::DataFrame=DataFrame(), labels::Vector=[])
   typeof(features) <: DataFrame || error("Statifier.fit!: data should be a dataframe: Date,Val ")
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   st.model = st.args
@@ -72,7 +72,7 @@ end
 
 Compute statistics.
 """
-function transform!(st::Statifier, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+function transform!(st::Statifier, features::DataFrame=DataFrame())
   features != [] || return DataFrame()
   typeof(features) <: DataFrame || error("Statifier.fit!: data should be a dataframe: Date,Val ")
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")

@@ -2,6 +2,7 @@
 
 using TSML.TSMLTypes
 using TSML.Utils
+using DataFrames
 
 import TSML.TSMLTypes.fit!
 import TSML.TSMLTypes.transform!
@@ -42,7 +43,7 @@ end
 
 Get the mode of the training data.
 """
-function fit!(bsl::Baseline,x::Matrix,y::Vector)
+function fit!(bsl::Baseline,x::DataFrame,y::Vector=[])
     bsl.model = bsl.args[:strat](y)
 end
 
@@ -51,7 +52,7 @@ end
 
 Return the mode in classification.
 """
-function transform!(bsl::Baseline,x::Matrix)
+function transform!(bsl::Baseline,x::DataFrame)::Vector{<:Any}
     fill(bsl.model,size(x,1))
 end
 
@@ -75,7 +76,7 @@ end
     
 Does nothing.
 """
-function fit!(idy::Identity,x::Matrix,y::Vector)
+function fit!(idy::Identity,x::DataFrame,y::Vector=[])
     nothing
 end
 
@@ -84,7 +85,7 @@ end
 
 Return the input as output.
 """
-function transform!(idy::Identity,x::Matrix)
+function transform!(idy::Identity,x::DataFrame)::DataFrame
     return x
 end
 

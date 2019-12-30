@@ -46,8 +46,7 @@ mutable struct OneHotEncoder <: Transformer
   end
 end
 
-function fit!(ohe::OneHotEncoder, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  instances=convert(Matrix,features)
+function fit!(ohe::OneHotEncoder, instances::DataFrame, labels::Vector=[]) 
   # Obtain nominal columns
   nominal_columns = ohe.args[:nominal_columns]
   if nominal_columns == nothing
@@ -70,8 +69,7 @@ function fit!(ohe::OneHotEncoder, features::T, labels::Vector=[]) where {T<:Unio
   )
 end
 
-function transform!(ohe::OneHotEncoder, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
-  instances=convert(Matrix,features)
+function transform!(ohe::OneHotEncoder, instances::DataFrame) 
   nominal_columns = ohe.model[:nominal_columns]
   nominal_column_values_map = ohe.model[:nominal_column_values_map]
 
@@ -107,7 +105,7 @@ function transform!(ohe::OneHotEncoder, features::T) where {T<:Union{Vector,Matr
     end
   end
 
-  return transformed_instances
+  return transformed_instances |> DataFrame
 end
 
 """
@@ -118,8 +116,7 @@ Finds all nominal columns.
 Nominal columns are those that do not have Real type nor
 do all their elements correspond to Real.
 """
-function find_nominal_columns(features::T) where {T<:Union{Vector,Matrix,DataFrame}}
-  instances=convert(Matrix,features)
+function find_nominal_columns(instances::DataFrame)
   nominal_columns = Int[]
   for column in 1:size(instances, 2)
     col_eltype = infer_eltype(instances[:, column])
@@ -155,13 +152,12 @@ mutable struct Imputer <: Transformer
   end
 end
 
-function fit!(imp::Imputer, instances::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+function fit!(imp::Imputer, instances::DataFrame, labels::Vector=[]) 
   imp.model = imp.args
 end
 
-function transform!(imp::Imputer, features::T)  where {T<:Union{Vector,Matrix,DataFrame}}
-  instances=convert(Matrix,features)
-  new_instances = copy(instances)
+function transform!(imp::Imputer, instances::DataFrame) 
+  new_instances = deepcopy(instances)
   strategy = imp.model[:strategy]
 
   for column in 1:size(instances, 2)
@@ -177,7 +173,7 @@ function transform!(imp::Imputer, features::T)  where {T<:Union{Vector,Matrix,Da
     end
   end
 
-  return new_instances
+  return new_instances |> DataFrame
 end
 
 """
@@ -222,9 +218,8 @@ mutable struct Pipeline <: Transformer
   end
 end
 
-function fit!(pipe::Pipeline, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  #instances=convert(Matrix,features)
-  instances=copy(features)
+function fit!(pipe::Pipeline, features::DataFrame=DataFrame(), labels::Vector=[]) 
+  instances=deepcopy(features)
   transformers = pipe.args[:transformers]
   transformer_args = pipe.args[:transformer_args]
 
@@ -250,18 +245,16 @@ function fit!(pipe::Pipeline, features::T=[], labels::Vector=[]) where {T<:Union
   )
 end
 
-function transform!(pipe::Pipeline, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  #instances = convert(Matrix,features)
-  instances = copy(features)
+function transform!(pipe::Pipeline, instances::DataFrame=DataFrame())
   transformers = pipe.model[:transformers]
 
-  current_instances = instances
+  current_instances = deepcopy(instances)
   for t_index in 1:length(transformers)
     transformer = transformers[t_index]
     current_instances = transform!(transformer, current_instances) 
   end
 
-  return current_instances
+  return current_instances 
 end
 
 """
@@ -291,8 +284,7 @@ mutable struct Wrapper <: Transformer
   end
 end
 
-function fit!(wrapper::Wrapper, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
-  instances=convert(Matrix,features)
+function fit!(wrapper::Wrapper, instances::DataFrame, labels::Vector) 
   transformer_args = wrapper.args[:transformer_args]
   transformer = createtransformer(
     wrapper.args[:transformer],
@@ -310,9 +302,9 @@ function fit!(wrapper::Wrapper, features::T, labels::Vector) where {T<:Union{Vec
   )
 end
 
-function transform!(wrapper::Wrapper, instances::T) where {T<:Union{Vector,Matrix,DataFrame}}
+function transform!(wrapper::Wrapper, instances::DataFrame)
   transformer = wrapper.model[:transformer]
-  return transform!(transformer, instances)
+  return transform!(transformer, instances) 
 end
 
 """

@@ -64,8 +64,7 @@ end
 
 Check that `features` are two-colum data.
 """
-function fit!(st::Outliernicer, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  typeof(features) <: DataFrame || error("Outliernicer.fit!: data should be a dataframe: Date,Val ")
+function fit!(st::Outliernicer, features::DataFrame, labels::Vector=[]) 
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   st.model = st.args
 end
@@ -75,9 +74,8 @@ end
 
 Locate outliers based on IQR factor and calls DateValNNer to replace them with nearest neighbors.
 """
-function transform!(st::Outliernicer, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
-  features != [] || return DataFrame()
-  typeof(features) <: DataFrame || error("Outliernicer.fit!: data should be a dataframe: Date,Val ")
+function transform!(st::Outliernicer, features::DataFrame)
+  features != DataFrame() || return DataFrame()
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
   sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
   mfeatures=deepcopy(features)

@@ -77,8 +77,8 @@ function test_statifier()
   @test res2[(!isnan).(res2)] |> sum |> x->round(x,digits=5) == -227824.85354
 
 end
-#@testset "Statifier: readcsv |> valgator |> valnner |> stfier" begin
-#  test_statifier()
-#end
+@testset "Statifier: readcsv |> valgator |> valnner |> stfier" begin
+  test_statifier()
+end
 
 end

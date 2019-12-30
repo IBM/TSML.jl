@@ -93,7 +93,7 @@ end
     
 Get the stats of each file, collect as dataframe, and train.
 """
-function fit!(tsc::TSClassifier, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+function fit!(tsc::TSClassifier, features::DataFrame=DataFrame(), labels::Vector=[])
   ispathnotempty(tsc.args) || error("empty training/testing/modeling directory")
   ldirname = tsc.args[:trdirectory]
   mdirname = tsc.args[:modeldirectory]
@@ -121,7 +121,7 @@ end
     
 Apply the learned parameters to the new data.
 """
-function transform!(tsc::TSClassifier, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+function transform!(tsc::TSClassifier, features::DataFrame=DataFrame())
   ldirname = tsc.args[:tstdirectory]
   mdirname = tsc.args[:modeldirectory]
   modelfname=tsc.args[:juliarfmodelname]

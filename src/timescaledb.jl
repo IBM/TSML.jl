@@ -32,15 +32,15 @@ mutable struct TimescaleDB <: Transformer
   end
 end
 
-function fit!(tdb::TimescaleDB, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  (features == [] && labels == [])  || error("features and labels should be empty because data are from http request")
+function fit!(tdb::TimescaleDB, features::DataFrame=DataFrame(), labels::Vector=[]) 
+  (features == DataFrame() && labels == [])  || error("features and labels should be empty because data are from http request")
   uri = tdb.args[:uri]; db = tdb.args[:db]; query = tdb.args[:query] 
   (uri != "" && query != "" && db != "") || error("missing uri/query/db")
   tdb.model = tdb.args
 end
 
-function transform!(tdb::TimescaleDB, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
-  features == []  || error("features should be empty because data are from http request")
+function transform!(tdb::TimescaleDB, features::DataFrame=DataFrame())
+  features == DataFrame()  || error("features should be empty because data are from http request")
   uri = tdb.args[:uri]; db = tdb.args[:db]; query = tdb.args[:query] 
   (uri != "" && query != "" && db != "") || error("missing uri/query/db")
   payload = uri*"/"*db*"?"*query

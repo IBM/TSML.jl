@@ -7,13 +7,13 @@ using DataFrames
 
 export crossvalidate
 
-function crossvalidate(pl::Transformer,X::Union{DataFrame,Matrix},Y::Vector,
+function crossvalidate(pl::Transformer,X::DataFrame,Y::Vector,
 		       pfunc::Function,nfolds=10) 
   ## flatten arrays
   @assert size(X)[1] == length(Y)
   ppl = deepcopy(pl)
-  input = X |> Matrix
-  output = Y
+  input = X 
+  output = Y |> Vector{String}
   rowsize = size(input)[1]
   folds = kfold(rowsize,nfolds)
   pacc = Float64[]

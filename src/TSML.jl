@@ -14,14 +14,17 @@ using .TSMLTypes
 include("utils.jl")
 using .Utils
 
+include("baseline.jl")
+using .BaselineAlgos
+
 include("basefilters.jl")
 using .BaseFilters
 
 include("valdatefilters.jl")
 using .ValDateFilters
 
-include("baseline.jl")
-using .BaselineAlgos
+include("statifier.jl")
+using .Statifiers
 
 include("mlbase.jl")
 using .MLBaseWrapper
@@ -32,8 +35,6 @@ using .DecisionTreeLearners
 include("normalizer.jl")
 using .Normalizers
 
-include("statifier.jl")
-using .Statifiers
 
 include("monotonicer.jl")
 using .Monotonicers

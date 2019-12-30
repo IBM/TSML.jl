@@ -8,8 +8,8 @@ function test_crossvalidator()
   Random.seed!(123)
   acc(X,Y) = score(:accuracy,X,Y)
   data=getiris()
-  X=data[:,1:4] |> Matrix
-  Y=data[:,5] |> collect
+  X=data[:,1:4] 
+  Y=data[:,5] |> Vector{String}
   rf = RandomForest()
   @test CrossValidators.crossvalidate(rf,X,Y,acc).mean ≈ 94.0
   Random.seed!(123)

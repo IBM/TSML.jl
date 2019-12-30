@@ -72,11 +72,8 @@ end
 
 Optimize the hyperparameters of `PrunedTree` instance.
 """
-function fit!(tree::PrunedTree, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
-  instances = features
-  if typeof(features) <: DataFrame
-    instances=convert(Matrix,features)
-  end
+function fit!(tree::PrunedTree, features::DataFrame, labels::Vector) 
+  instances=convert(Matrix,features)
   impl_args = tree.args[:impl_args]
   tree.model = DT.build_tree(
     labels,
@@ -95,11 +92,8 @@ end
 
 Predict using the optimized hyperparameters of the trained `PrunedTree` instance.
 """
-function transform!(tree::PrunedTree, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
-  instances = features
-  if typeof(features) <: DataFrame
-    instances=convert(Matrix,features)
-  end
+function transform!(tree::PrunedTree, features::DataFrame)::Vector{<:Any}
+  instances=convert(Matrix,features)
   return DT.apply_tree(tree.model, instances)
 end
 
@@ -161,11 +155,8 @@ end
 
 Optimize the parameters of the `RandomForest` instance.
 """
-function fit!(forest::RandomForest, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
-  instances = features
-  if typeof(features) <: DataFrame
-    instances=convert(Matrix,features)
-  end
+function fit!(forest::RandomForest, features::DataFrame, labels::Vector) 
+  instances=convert(Matrix,features)
   # Set training-dependent options
   impl_args = forest.args[:impl_args]
   # Build model
@@ -186,11 +177,9 @@ end
 
 Predict using the optimized hyperparameters of the trained `RandomForest` instance.
 """
-function transform!(forest::RandomForest, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
+function transform!(forest::RandomForest, features::DataFrame)::Vector{<:Any}
   instances = features
-  if typeof(features) <: DataFrame
-    instances=convert(Matrix,features)
-  end
+  instances=convert(Matrix,features)
   return DT.apply_forest(forest.model, instances)
 end
 
@@ -237,11 +226,8 @@ end
 
 Optimize the hyperparameters of `Adaboost` instance.
 """
-function fit!(adaboost::Adaboost, features::T, labels::Vector) where {T<:Union{Vector,Matrix,DataFrame}}
-  instances = features
-  if typeof(features) <: DataFrame
-    instances = convert(Matrix,features)
-  end
+function fit!(adaboost::Adaboost, features::DataFrame, labels::Vector) 
+  instances = convert(Matrix,features)
   # NOTE(svs14): Variable 'model' renamed to 'ensemble'.
   #              This differs to DecisionTree
   #              official documentation to avoid confusion in variable
@@ -260,11 +246,8 @@ end
 
 Predict using the optimized hyperparameters of the trained `Adaboost` instance.
 """
-function transform!(adaboost::Adaboost, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
-  instances = features
-  if typeof(features) <: DataFrame
-    instances = convert(Matrix,features)
-  end
+function transform!(adaboost::Adaboost, features::DataFrame)::Vector{<:Any}
+  instances = convert(Matrix,features)
   return DT.apply_adaboost_stumps(
     adaboost.model[:ensemble], adaboost.model[:coefficients], instances
   )
