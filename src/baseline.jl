@@ -1,4 +1,4 @@
-@reexport module BaselineAlgos
+module BaselineAlgos
 
 using TSML.TSMLTypes
 using TSML.Utils
@@ -10,7 +10,6 @@ import TSML.TSMLTypes.transform!
 export Baseline,Identity
        fit!,
        transform!
-
 
 using StatsBase: mode
 

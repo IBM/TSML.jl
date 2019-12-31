@@ -1,4 +1,4 @@
-@reexport module TSMLDemo
+module TSMLDemo
 
 using Dates
 using DataFrames

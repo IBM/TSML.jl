@@ -1,18 +1,16 @@
-@reexport module TimescaleDBs
+module TimescaleDBs
 
 using HTTP, JSON2
-
 using Dates
 using DataFrames
-
-export fit!,transform!
-export TimescaleDB
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
 using TSML.Utils
 
+export fit!,transform!
+export TimescaleDB
 
 # Transforms instances with nominal features into one-hot form
 # and coerces the instance matrix to be of element type Float64.

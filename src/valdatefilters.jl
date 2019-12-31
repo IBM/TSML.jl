@@ -1,4 +1,4 @@
-@reexport module ValDateFilters
+module ValDateFilters
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload

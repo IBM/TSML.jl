@@ -1,4 +1,4 @@
-@reexport module Statifiers
+module Statifiers
 
 using StatsBase: std, skewness, kurtosis, variation, sem, mad
 using StatsBase: entropy, summarystats, autocor, pacf, rle, quantile
@@ -7,9 +7,8 @@ using DataFrames
 using Statistics
 
 export fit!,transform!
-export Statifier
 
-export tsmlfullstat
+export Statifier,tsmlfullstat
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload

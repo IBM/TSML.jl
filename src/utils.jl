@@ -1,19 +1,4 @@
-@reexport module Utils
-
-using Random: randperm
-export mergedict, getiris 
-export skipmean,skipmedian,skipstd
-export aggregatorclskipmissing
-
-export holdout,
-       kfold,
-       score,
-       infer_eltype,
-       nested_dict_to_tuples,
-       nested_dict_set!,
-       nested_dict_merge,
-       create_transformer
-
+module Utils
 
 using TSML: Transformer
 using Statistics
@@ -21,6 +6,17 @@ using DataFrames
 using CSV
 
 import MLBase: Kfold
+
+using Random: randperm
+
+
+export holdout, kfold, score, infer_eltype, nested_dict_to_tuples,
+       nested_dict_set!, nested_dict_merge, create_transformer,
+       mergedict, getiris,
+       skipmean,skipmedian,skipstd,
+       aggregatorclskipmissing
+
+
 
 """
     holdout(n, right_prop)

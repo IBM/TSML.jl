@@ -1,19 +1,19 @@
-@reexport module Outliernicers
+module Outliernicers
 
 using Dates
 using DataFrames
 using Statistics
 using StatsBase: iqr, quantile, sample
+using TSML.ValDateFilters
+
+using TSML.TSMLTypes
+import TSML.TSMLTypes.fit! # to overload
+import TSML.TSMLTypes.transform! # to overload
+using TSML.Utils
 
 export fit!,transform!
 export Outliernicer
 
-import TSML.TSMLTypes.fit! # to overload
-import TSML.TSMLTypes.transform! # to overload
-
-using TSML.TSMLTypes
-using TSML.ValDateFilters
-using TSML.Utils
 
 """
     Outliernicer(Dict(

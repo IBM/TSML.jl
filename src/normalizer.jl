@@ -1,4 +1,4 @@
-@reexport module Normalizers
+module Normalizers
 
 using StatsBase
 using Dates

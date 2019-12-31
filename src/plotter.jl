@@ -1,19 +1,18 @@
-@reexport module Plotters
+module Plotters
 
 using Plots
 using GR
 #using Interact
 using DataFrames
+using TSML.ValDateFilters
+
+using TSML.TSMLTypes
+import TSML.TSMLTypes.fit! # to overload
+import TSML.TSMLTypes.transform! # to overload
+using TSML.Utils
 
 export fit!,transform!
 export Plotter
-
-import TSML.TSMLTypes.fit! # to overload
-import TSML.TSMLTypes.transform! # to overload
-
-using TSML.TSMLTypes
-using TSML.ValDateFilters
-using TSML.Utils
 
 # setup plotting for publication
 function setupplot(pdfoutput::Bool)
@@ -30,12 +29,12 @@ function setupplot(pdfoutput::Bool)
 end
 
 """
-    Plotter(
-       Dict(
-           :interactive => false,
-           :pdfoutput => false
-       )
-    )
+Plotter(
+Dict(
+:interactive => false,
+:pdfoutput => false
+)
+)
 
 Plots a TS by default but performs interactive plotting if specified during instance creation.
 - `:interactive` => boolean to indicate whether to use interactive plotting with `false` as default
@@ -43,15 +42,15 @@ Plots a TS by default but performs interactive plotting if specified during inst
 
 Example:
 
-    csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
-    pltr = Plotter(Dict(:interactive => false))
+csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
+pltr = Plotter(Dict(:interactive => false))
 
-    mpipeline = Pipeline(Dict(
-         :transformers => [csvfilter,pltr]
-       )
-    )
-    fit!(mpipeline)
-    myplot = transform!(mpipeline)
+mpipeline = Pipeline(Dict(
+:transformers => [csvfilter,pltr]
+)
+)
+fit!(mpipeline)
+myplot = transform!(mpipeline)
 
 Implements: `fit!`, `transform!`
 """
@@ -60,9 +59,9 @@ mutable struct Plotter <: Transformer
   args
   function Plotter(args=Dict())
     default_args = Dict(
-        :interactive => false,
-        :pdfoutput => false
-    )
+                        :interactive => false,
+                        :pdfoutput => false
+                       )
     margs=mergedict(default_args, args)
     setupplot(margs[:pdfoutput])
     new(nothing,margs)
@@ -70,7 +69,7 @@ mutable struct Plotter <: Transformer
 end
 
 """
-    fit!(pltr::Plotter, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+fit!(pltr::Plotter, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
 
 Check validity of `features`: 2-column Date,Val data
 """
@@ -80,7 +79,7 @@ function fit!(pltr::Plotter, features::DataFrame, labels::Vector=[])
 end
 
 """
-    transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
+transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
 
 Convert `missing` into `NaN` to allow plotting of discontinuities.
 """

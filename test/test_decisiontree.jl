@@ -3,7 +3,6 @@ module TestDecisionTree
 using Test
 using TSML
 
-
 function generateXY()
     Random.seed!(123)
     iris = getiris()

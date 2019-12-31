@@ -1,4 +1,4 @@
-@reexport module CrossValidators
+module CrossValidators
 
 using TSML.TSMLTypes
 using TSML.Utils
