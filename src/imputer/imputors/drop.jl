@@ -76,7 +76,7 @@ removes them from the input data.
 
 # Examples
 ```jldoctest
-julia> using Impute: DropVars, Context, impute
+julia> using TSML.Imputers: DropVars, Context, impute
 
 julia> M = [1.0 2.0 missing missing 5.0; 1.1 2.2 3.3 missing 5.5]
 2×5 Array{Union{Missing, Float64},2}:

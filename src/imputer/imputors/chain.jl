@@ -23,7 +23,7 @@ Compose new `Imputor` chains with the composition operator
 # Example
 
 ```jldoctest
-julia> using Impute: impute, Interpolate, NOCB, LOCF, Context
+julia> using TSML.Imputers: impute, Interpolate, NOCB, LOCF, Context
 
 julia> ctx = Context(; limit=1.0)
 Context(0, 0, 1.0, ismissing, Impute.complete)
