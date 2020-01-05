@@ -8,19 +8,6 @@ Removes missing observations from the `AbstractArray` or `Tables.table` provided
   summary information
 
 # Example
-```jldoctest
-julia> using Impute: DropObs, Context, impute
-
-julia> M = [1.0 2.0 missing missing 5.0; 1.1 2.2 3.3 missing 5.5]
-2×5 Array{Union{Missing, Float64},2}:
- 1.0  2.0   missing  missing  5.0
- 1.1  2.2  3.3       missing  5.5
-
-julia> impute(M, DropObs(; context=Context(; limit=1.0)); dims=2)
-2×3 Array{Union{Missing, Float64},2}:
- 1.0  2.0  5.0
- 1.1  2.2  5.5
-```
 """
 struct DropObs <: Imputor
     context::AbstractContext
@@ -75,18 +62,6 @@ removes them from the input data.
   summary information
 
 # Examples
-```jldoctest
-julia> using TSML.Imputers: DropVars, Context, impute
-
-julia> M = [1.0 2.0 missing missing 5.0; 1.1 2.2 3.3 missing 5.5]
-2×5 Array{Union{Missing, Float64},2}:
- 1.0  2.0   missing  missing  5.0
- 1.1  2.2  3.3       missing  5.5
-
-julia> impute(M, DropVars(; context=Context(; limit=0.2)); dims=2)
-1×5 Array{Union{Missing, Float64},2}:
- 1.1  2.2  3.3  missing  5.5
-```
 """
 struct DropVars <: Imputor
     context::AbstractContext
