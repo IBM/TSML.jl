@@ -1,17 +1,16 @@
-@reexport module Monotonicers
+module Monotonicers
 
 using Dates
 using DataFrames
 using Statistics
-
-export fit!,transform!,ismonotonic,dailyflips
-export Monotonicer
 
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload
 import TSML.TSMLTypes.transform! # to overload
 using TSML.Utils
 
+export fit!,transform!
+export Monotonicer,ismonotonic,dailyflips
 
 # Transforms instances with nominal features into one-hot form
 # and coerces the instance matrix to be of element type Float64.

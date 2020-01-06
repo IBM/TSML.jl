@@ -1,5 +1,5 @@
 # Decision trees as found in DecisionTree Julia package.
-@reexport module DecisionTreeLearners
+module DecisionTreeLearners
 
 using DataFrames
 using TSML.TSMLTypes
@@ -7,14 +7,12 @@ import TSML.TSMLTypes.fit!
 import TSML.TSMLTypes.transform!
 using TSML.Utils
 
+export fit!,transform!
+
 import DecisionTree
 DT = DecisionTree
 
-export PrunedTree, 
-       RandomForest,
-       Adaboost,
-       fit!, 
-       transform!
+export PrunedTree, RandomForest, Adaboost
 
 # Pruned CART decision tree.
 

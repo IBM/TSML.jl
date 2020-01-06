@@ -1,11 +1,4 @@
-@reexport module TSClassifiers
-
-export TSClassifier, fit!, transform!, getstats
-
-using TSML.TSMLTypes
-import TSML.TSMLTypes.fit!
-import TSML.TSMLTypes.transform!
-using TSML.Utils
+module TSClassifiers
 
 using TSML.DecisionTreeLearners: RandomForest
 using TSML.Statifiers
@@ -16,6 +9,15 @@ using DataFrames
 using Dates
 using Serialization
 using TSML
+
+using TSML.TSMLTypes
+import TSML.TSMLTypes.fit!
+import TSML.TSMLTypes.transform!
+using TSML.Utils
+
+export fit!, transform!
+export TSClassifier, getstats
+
 
 """
     TSClassifier(

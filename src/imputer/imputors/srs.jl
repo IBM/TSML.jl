@@ -24,20 +24,8 @@ for both categorical and continuous data.
   summary information
 
 # Example
-```jldoctest
-julia> using Random; using Impute: SRS, Context, impute
-
-julia> M = [1.0 2.0 missing missing 5.0; 1.1 2.2 3.3 missing 5.5]
-2×5 Array{Union{Missing, Float64},2}:
- 1.0  2.0   missing  missing  5.0
- 1.1  2.2  3.3       missing  5.5
-
-julia> impute(M, SRS(; rng=MersenneTwister(1234), context=Context(; limit=1.0)); dims=2)
-2×5 Array{Union{Missing, Float64},2}:
- 1.0  2.0  1.0  5.0  5.0
- 1.1  2.2  3.3  3.3  5.5
-```
 """
+
 SRS(; rng=Random.GLOBAL_RNG, context=Context()) = SRS(rng, context)
 
 function impute!(data::AbstractVector, imp::SRS)

@@ -1,18 +1,18 @@
-@reexport module Schemalizers
+module Schemalizers
 
 using Random
 using Dates
 using DataFrames
 using JuliaDB: ML, table
 
+using TSML.TSMLTypes
+import TSML.TSMLTypes.fit! # to overload
+import TSML.TSMLTypes.transform! # to overload
+using TSML.Utils
+
 export fit!,transform!
 export Schemalizer, ML, table
 
-import TSML.TSMLTypes.fit! # to overload
-import TSML.TSMLTypes.transform! # to overload
-
-using TSML.TSMLTypes
-using TSML.Utils
 
 """
     Schemalizer(

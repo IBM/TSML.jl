@@ -1,5 +1,5 @@
 # Ensemble learning methods.
-@reexport module EnsembleMethods
+module EnsembleMethods
 
 using DataFrames
 using Statistics
@@ -16,11 +16,8 @@ import MLBase
 
 using TSML.DecisionTreeLearners
 
-export VoteEnsemble, 
-       StackEnsemble,
-       BestLearner, 
-       fit!, 
-       transform!
+export fit!, transform!
+export VoteEnsemble, StackEnsemble, BestLearner
 
 """
     VoteEnsemble(

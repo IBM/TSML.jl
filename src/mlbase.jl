@@ -1,6 +1,5 @@
 # MLBase transformers.
-@reexport module MLBaseWrapper
-using Reexport
+module MLBaseWrapper
 using DataFrames
 using LinearAlgebra
 
@@ -9,13 +8,10 @@ import TSML.TSMLTypes.fit!
 import TSML.TSMLTypes.transform!
 using TSML.Utils
 
+export fit!,transform!
+
 export Standardize
-export standardize, standardize!, transform, estimate, transform
-
-export StandardScaler,
-       fit!,
-       transform!
-
+export standardize, standardize!, estimate, transform,StandardScaler
 
 """
     StandardScaler(

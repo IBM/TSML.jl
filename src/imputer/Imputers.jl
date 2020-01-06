@@ -120,31 +120,6 @@ Finds variables with too many missing values in a `AbstractMatrix` or `Tables.ta
 removes them from the input data. See [DropVars](@ref) for details.
 
 # Example
-```jldoctest
-julia> using DataFrames; using Impute: Impute, Context
-
-julia> df = DataFrame(:a => [1.0, 2.0, missing, missing, 5.0], :b => [1.1, 2.2, 3.3, missing, 5.5])
-5×2 DataFrames.DataFrame
-│ Row │ a        │ b        │
-│     │ Float64⍰ │ Float64⍰ │
-├─────┼──────────┼──────────┤
-│ 1   │ 1.0      │ 1.1      │
-│ 2   │ 2.0      │ 2.2      │
-│ 3   │ missing  │ 3.3      │
-│ 4   │ missing  │ missing  │
-│ 5   │ 5.0      │ 5.5      │
-
-julia> Impute.dropvars(df; context=Context(; limit=0.2))
-5×1 DataFrames.DataFrame
-│ Row │ b        │
-│     │ Float64⍰ │
-├─────┼──────────┤
-│ 1   │ 1.1      │
-│ 2   │ 2.2      │
-│ 3   │ 3.3      │
-│ 4   │ missing  │
-│ 5   │ 5.5      │
-```
 """ dropvars
 
 @doc """
@@ -154,31 +129,6 @@ Performs linear interpolation between the nearest values in an vector.
 See [Interpolate](@ref) for details.
 
 # Example
-```jldoctest
-julia> using DataFrames; using Impute: Impute, Context
-
-julia> df = DataFrame(:a => [1.0, 2.0, missing, missing, 5.0], :b => [1.1, 2.2, 3.3, missing, 5.5])
-5×2 DataFrames.DataFrame
-│ Row │ a        │ b        │
-│     │ Float64⍰ │ Float64⍰ │
-├─────┼──────────┼──────────┤
-│ 1   │ 1.0      │ 1.1      │
-│ 2   │ 2.0      │ 2.2      │
-│ 3   │ missing  │ 3.3      │
-│ 4   │ missing  │ missing  │
-│ 5   │ 5.0      │ 5.5      │
-
-julia> Impute.interp(df; context=Context(; limit=1.0))
-5×2 DataFrames.DataFrame
-│ Row │ a        │ b        │
-│     │ Float64⍰ │ Float64⍰ │
-├─────┼──────────┼──────────┤
-│ 1   │ 1.0      │ 1.1      │
-│ 2   │ 2.0      │ 2.2      │
-│ 3   │ 3.0      │ 3.3      │
-│ 4   │ 4.0      │ 4.4      │
-│ 5   │ 5.0      │ 5.5      │
-```
 """ interp
 
 @doc """
@@ -187,31 +137,6 @@ julia> Impute.interp(df; context=Context(; limit=1.0))
 Fills in the missing data with a specific value. See [Fill](@ref) for details.
 
 # Example
-```jldoctest
-julia> using DataFrames; using Impute: Impute, Context
-
-julia> df = DataFrame(:a => [1.0, 2.0, missing, missing, 5.0], :b => [1.1, 2.2, 3.3, missing, 5.5])
-5×2 DataFrames.DataFrame
-│ Row │ a        │ b        │
-│     │ Float64⍰ │ Float64⍰ │
-├─────┼──────────┼──────────┤
-│ 1   │ 1.0      │ 1.1      │
-│ 2   │ 2.0      │ 2.2      │
-│ 3   │ missing  │ 3.3      │
-│ 4   │ missing  │ missing  │
-│ 5   │ 5.0      │ 5.5      │
-
-julia> Impute.fill(df; value=-1.0, context=Context(; limit=1.0))
-5×2 DataFrames.DataFrame
-│ Row │ a        │ b        │
-│     │ Float64⍰ │ Float64⍰ │
-├─────┼──────────┼──────────┤
-│ 1   │ 1.0      │ 1.1      │
-│ 2   │ 2.0      │ 2.2      │
-│ 3   │ -1.0     │ 3.3      │
-│ 4   │ -1.0     │ -1.0     │
-│ 5   │ 5.0      │ 5.5      │
-```
 """ fill
 
 @doc """
@@ -221,31 +146,6 @@ Iterates forwards through the `data` and fills missing data with the last existi
 observation. See [LOCF](@ref) for details.
 
 # Example
-```jldoctest
-julia> using DataFrames; using Impute: Impute, Context
-
-julia> df = DataFrame(:a => [1.0, 2.0, missing, missing, 5.0], :b => [1.1, 2.2, 3.3, missing, 5.5])
-5×2 DataFrames.DataFrame
-│ Row │ a        │ b        │
-│     │ Float64⍰ │ Float64⍰ │
-├─────┼──────────┼──────────┤
-│ 1   │ 1.0      │ 1.1      │
-│ 2   │ 2.0      │ 2.2      │
-│ 3   │ missing  │ 3.3      │
-│ 4   │ missing  │ missing  │
-│ 5   │ 5.0      │ 5.5      │
-
-julia> Impute.locf(df; context=Context(; limit=1.0))
-5×2 DataFrames.DataFrame
-│ Row │ a        │ b        │
-│     │ Float64⍰ │ Float64⍰ │
-├─────┼──────────┼──────────┤
-│ 1   │ 1.0      │ 1.1      │
-│ 2   │ 2.0      │ 2.2      │
-│ 3   │ 2.0      │ 3.3      │
-│ 4   │ 2.0      │ 3.3      │
-│ 5   │ 5.0      │ 5.5      │
-```
 """ locf
 
 @doc """
@@ -255,31 +155,6 @@ Iterates backwards through the `data` and fills missing data with the next exist
 observation. See [LOCF](@ref) for details.
 
 # Example
-```jldoctest
-julia> using DataFrames; using Impute: Impute, Context
-
-julia> df = DataFrame(:a => [1.0, 2.0, missing, missing, 5.0], :b => [1.1, 2.2, 3.3, missing, 5.5])
-5×2 DataFrames.DataFrame
-│ Row │ a        │ b        │
-│     │ Float64⍰ │ Float64⍰ │
-├─────┼──────────┼──────────┤
-│ 1   │ 1.0      │ 1.1      │
-│ 2   │ 2.0      │ 2.2      │
-│ 3   │ missing  │ 3.3      │
-│ 4   │ missing  │ missing  │
-│ 5   │ 5.0      │ 5.5      │
-
-julia> Impute.nocb(df; context=Context(; limit=1.0))
-5×2 DataFrames.DataFrame
-│ Row │ a        │ b        │
-│     │ Float64⍰ │ Float64⍰ │
-├─────┼──────────┼──────────┤
-│ 1   │ 1.0      │ 1.1      │
-│ 2   │ 2.0      │ 2.2      │
-│ 3   │ 5.0      │ 3.3      │
-│ 4   │ 5.0      │ 5.5      │
-│ 5   │ 5.0      │ 5.5      │
-```
 """ nocb
 
 @doc """
@@ -290,31 +165,6 @@ categorical variables. Furthermore, it completes imputation while preserving the
 distributional properties of the variables (e.g., mean, standard deviation).
 
 # Example
-```jldoctest
-julia> using DataFrames; using Random; using Impute: Impute, Context
-
-julia> df = DataFrame(:a => [1.0, 2.0, missing, missing, 5.0], :b => [1.1, 2.2, 3.3, missing, 5.5])
-5×2 DataFrames.DataFrame
-│ Row │ a        │ b        │
-│     │ Float64⍰ │ Float64⍰ │
-├─────┼──────────┼──────────┤
-│ 1   │ 1.0      │ 1.1      │
-│ 2   │ 2.0      │ 2.2      │
-│ 3   │ missing  │ 3.3      │
-│ 4   │ missing  │ missing  │
-│ 5   │ 5.0      │ 5.5      │
-
-julia> Impute.srs(df; rng=MersenneTwister(1234), context=Context(; limit=1.0))
-5×2 DataFrame
-│ Row │ a        │ b        │
-│     │ Float64⍰ │ Float64⍰ │
-├─────┼──────────┼──────────┤
-│ 1   │ 1.0      │ 1.1      │
-│ 2   │ 2.0      │ 2.2      │
-│ 3   │ 1.0      │ 3.3      │
-│ 4   │ 5.0      │ 3.3      │
-│ 5   │ 5.0      │ 5.5      │
-```
 """ srs
 
 end  # module
