@@ -131,13 +131,13 @@ end
 # apply z-score transform
 function ztransform(X)
   xp = X' |> collect |> Matrix{Float64}
-  fit(ZScoreTransform, xp; center=true, scale=true) |> dt -> StatsBase.transform(dt,xp)' |> collect
+  fit(ZScoreTransform, xp,dims=2; center=true, scale=true) |> dt -> StatsBase.transform(dt,xp)' |> collect
 end
 
 # unit-range
 function unitrtransform(X)
   xp = X' |> collect |> Matrix{Float64}
-  fit(UnitRangeTransform,xp) |> dt -> StatsBase.transform(dt,xp)' |> collect
+  fit(UnitRangeTransform,xp,dims=2) |> dt -> StatsBase.transform(dt,xp)' |> collect
 end
 
 # pca
