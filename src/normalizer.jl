@@ -65,6 +65,10 @@ mutable struct Normalizer <: Transformer
   end
 end
 
+function Normalizer(st::Symbol)
+  Normalizer(Dict(:method=>st))
+end
+
 """
     fit!(st::Statifier, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
 
@@ -106,6 +110,8 @@ function processnumeric(norm::Normalizer,features::Matrix)
     pca(features)
   elseif norm.args[:method] == :ppca
     ppca(features)
+  elseif norm.args[:method] == :ica
+    ica(features)
   elseif norm.args[:method] == :fa
     fa(features)
   elseif norm.args[:method] == :sqrt
@@ -144,6 +150,17 @@ end
 function pca(X)
   xp = X' |> collect |> Matrix{Float64}
   m = fit(PCA,xp)
+  transform(m,xp)' |> collect
+end
+
+
+function ica(X,kk::Int=0)
+  k = kk
+  if k == 0
+    k = size(X)[2]
+  end
+  xp = X' |> collect |> Matrix{Float64}
+  m = fit(ICA,xp,k)
   transform(m,xp)' |> collect
 end
 

@@ -7,7 +7,7 @@ using Statistics
 using Plots
 
 using TSML: Statifier
-using TSML.BaseFilters: Pipeline
+using TSML.Pipelines: Pipeline
 using TSML.ValDateFilters: DateValgator, DateValNNer
 using TSML.TSMLTypes
 import TSML.TSMLTypes.fit! # to overload
