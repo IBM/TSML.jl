@@ -21,13 +21,13 @@ function find_catnum_columns(instances::DataFrame, maxuniqcat::Int=0)
   nominal_columns = Int[]
   real_columns = Int[]
   for column in 1:size(instances, 2)
-    vdat = instances[:, column]
+    vdat = instances[:, column:column] # returns a 1-column dataframe
     col_eltype = infer_eltype(vdat)
     # nominal if column type is not real or only small number of unique instances
     # otherwise, real
     if !<:(col_eltype, Real)
       push!(nominal_columns, column)
-    elseif length(unique(vdat)) <= maxuniqcat
+    elseif nrow(unique(vdat)) <= maxuniqcat
       push!(nominal_columns, column)
     else
       push!(real_columns, column)
@@ -227,14 +227,14 @@ Create transformer
 
 Returns: new transformer
 """
-function create_transformer(prototype::Transformer, options=nothing)
-  new_options = copy(prototype.options)
-  if options != nothing
-    new_options = nested_dict_merge(new_options, options)
+function create_transformer(prototype::Transformer, args=nothing)
+  new_args = copy(prototype.args)
+  if args != nothing
+    new_args = nested_dict_merge(new_args, args)
   end
 
   prototype_type = typeof(prototype)
-  return prototype_type(new_options)
+  return prototype_type(new_args)
 end
 
 """
