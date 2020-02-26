@@ -14,7 +14,27 @@ export holdout, kfold, score, infer_eltype, nested_dict_to_tuples,
        nested_dict_set!, nested_dict_merge, create_transformer,
        mergedict, getiris,
        skipmean,skipmedian,skipstd,
-       aggregatorclskipmissing
+       aggregatorclskipmissing, find_catnum_columns
+
+
+function find_catnum_columns(instances::DataFrame, maxuniqcat::Int=0)
+  nominal_columns = Int[]
+  real_columns = Int[]
+  for column in 1:size(instances, 2)
+    vdat = instances[:, column]
+    col_eltype = infer_eltype(vdat)
+    # nominal if column type is not real or only small number of unique instances
+    # otherwise, real
+    if !<:(col_eltype, Real)
+      push!(nominal_columns, column)
+    elseif length(unique(vdat)) <= maxuniqcat
+      push!(nominal_columns, column)
+    else
+      push!(real_columns, column)
+    end
+  end
+  return (nominal_columns,real_columns)
+end
 
 
 

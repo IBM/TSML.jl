@@ -2,7 +2,7 @@ module TSMLTypes
 
 using DataFrames
 
-export 	fit!,transform!
+export 	fit!,transform!,fit_transform!
 export 	Transformer,TSLearner
 
 abstract type Transformer end
@@ -27,5 +27,10 @@ function transform!(tr::Transformer, instances::DataFrame)
 	error(typeof(tr)," not implemented yet: transform!")
 end
 
+# dynamic dispatch based Machine subtypes
+function fit_transform!(tf::Transformer, input::DataFrame, output::Vector=Vector())
+	fit!(tf,input,output)
+	transform!(tf,input)
+end
 
 end

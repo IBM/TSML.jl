@@ -222,37 +222,6 @@ end
     test_matrifier()
 end
 
-function test_pipeline()
-  dtvalgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-  dtvalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:strict=>true,:nnsize=>1,:missdirection=>:symmetric))
-  dtr = Dateifier(Dict())
-  mtr = Matrifier(Dict())
-  fit!(mtr,XX,YY)
-  ## try pipeline 
-  mydatepipeline = Pipeline(Dict(
-    :transformers => [
-	dtvalgator,
-	dtvalnner,
-	dtr
-    ]
-  ))
-  fit!(mydatepipeline,XX,YY)
-  date=transform!(mydatepipeline,XX)
-  myvalpipeline = Pipeline(Dict(
-    :transformers => [
-	dtvalgator,
-	dtvalnner,
-	mtr
-    ]
-  ))
-  fit!(myvalpipeline,XX,YY)
-  val=transform!(myvalpipeline,XX)
-  @test sum(size(val) .== size(date)) == 2
-end
-@testset "Pipeline: check " begin
-  test_pipeline()
-end
-
 function test_csvreaderwriter()
   inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
   outputfile = joinpath(dirname(pathof(TSML)),"../data/testdata_output.csv")

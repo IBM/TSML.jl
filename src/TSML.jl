@@ -1,6 +1,6 @@
 module TSML
 
-export fit!, transform!
+export fit!, transform!,fit_transform!
 
 # reexport common functions to Main
 include("pkgdeps.jl")
@@ -27,7 +27,7 @@ export Baseline,Identity
 
 include("basefilters.jl")
 using .BaseFilters
-export Imputer,Pipeline,OneHotEncoder,Wrapper
+export Imputer,OneHotEncoder,Wrapper
 
 include("valdatefilters.jl")
 using .ValDateFilters
@@ -77,13 +77,20 @@ include("timescaledb.jl")
 using .TimescaleDBs
 export TimescaleDB
 
-include("demo.jl")
-using .TSMLDemo
-export tsml_demo
 
 include("ensemble.jl")
 using .EnsembleMethods
 export VoteEnsemble, StackEnsemble, BestLearner
+
+include("featureselector.jl")
+using .FeatureSelectors
+export FeatureSelector, CatFeatureSelector, NumFeatureSelector, CatNumDiscriminator
+
+include("pipeline.jl")
+using .Pipelines
+export @pipeline @pipelinex
+export Pipeline, ComboPipeline
+
 
 include("schema.jl")
 using .Schemalizers
@@ -97,4 +104,7 @@ include("argparse.jl")
 using .ArgumentParsers
 export tsmlmain
 
+include("demo.jl")
+using .TSMLDemo
+export tsml_demo
 end # module

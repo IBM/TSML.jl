@@ -29,7 +29,7 @@ const DATEINTERVAL = Dict(
 function parse_commandline()
     s = ArgParseSettings()
 
-    @add_arg_table s begin
+    @add_arg_table! s begin
         "--aggregate"
             help = "aggregate interval such as: minutely, hourly, weekly, monthly, Dates.Minute(30),Dates.Hour(2)"
             arg_type = String
