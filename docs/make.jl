@@ -32,5 +32,5 @@ makedocs(
 )
 
 deploydocs(
-    repo   = "github.com/IBM/AutoMLPipeline.jl.git",
+    repo   = "github.com/IBM/TSML.jl.git",
 )
