@@ -9,10 +9,6 @@ julia:
   - nightly
 env:
   - JULIA_NUM_THREADS=8
-matrix:
-  #fast_finish: true
-  allow_failures:
-    - julia: nightly
 
 notifications:
   email: false
@@ -24,6 +20,8 @@ after_success:
     fi
 
 jobs:
+  allow_failures:
+    - julia: nightly
   include:
     - stage: "Documentation"
       script:
