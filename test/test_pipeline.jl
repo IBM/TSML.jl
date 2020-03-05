@@ -73,8 +73,8 @@ function test_pipeline_macro()
   fit!(combo2,X)
   res3=transform!(combo2,X)
   res4=fit_transform!(combo2,X)
-  @test (res3 .== res3) |> Matrix |> sum == 2100
-  pcombo1 = @pipeline ohe1 * ohe1
+  @test (res3 .== res4) |> Matrix |> sum == 2100
+  pcombo1 = @pipeline ohe1 + ohe1
   pres1 = fit_transform!(pcombo1,X)
   @test (pres1 .== res1) |> Matrix |> sum == 2100
   features = data[:,1:4]
@@ -82,15 +82,15 @@ function test_pipeline_macro()
   fa = Normalizer(:fa)
   ica = Normalizer(:ica)
   sq = Normalizer(:sqrt)
-  pcombo2 = @pipeline (pca + fa)*fa*pca
-  @test fit_transform!(pcombo2,features) |> Matrix |> size |> collect |> sum == 158
-  pcombo2 = @pipeline sq+pca+fa
+  pcombo2 = @pipeline (pca |> fa) + (fa |> pca)
+  @test fit_transform!(pcombo2,features) |> Matrix |> size |> collect |> sum == 155
+  pcombo2 = @pipeline sq |> pca |> fa
   @test fit_transform!(pcombo2,features) |> Matrix |> size |> collect |> sum == 152
   disc = CatNumDiscriminator()
   catf = CatFeatureSelector()
   numf = NumFeatureSelector()
   rf = RandomForest()
-  pcombo3 = @pipeline disc + ((catf*numf) * (numf+pca) * (numf+fa) * (catf+ohe)) + rf
+  pcombo3 = @pipeline disc |> ((catf |> numf) + (numf |> pca) + (numf |> fa) + (catf |> ohe)) |> rf
   (fit_transform!(pcombo3,X,Y)  .== Y) |> sum == 150
 end
 @testset "Pipeline Macro" begin
