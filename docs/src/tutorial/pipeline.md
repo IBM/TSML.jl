@@ -39,16 +39,9 @@ using TSML
 dtvalgator = DateValgator(Dict(:dateinterval => Dates.Hour(1)))
 dtvalnner = DateValNNer(Dict(:dateinterval => Dates.Hour(1)))
 
-mypipeline = Pipeline(
-  Dict( :transformers => [
-            dtvalgator,
-            dtvalnner
-         ]
-  )
-)
+mypipeline = @pipeline dtvalgator |> dtvalnner
 
-fit!(mypipeline,X)
-results = transform!(mypipeline,X)
+results = fit_transform!(mypipeline,X)
 nothing #hide
 ```
 
@@ -84,20 +77,20 @@ mutable struct CSVReader <: Transformer
     end
 end
 
-function fit!(csvrdr::CSVReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+function fit!(csvrdr::CSVReader,x::DataFrame=DataFrame(),y::Vector=[]) 
     fname = csvrdr.args[:filename]
     fmt = csvrdr.args[:dateformat]
     (fname != "" && fmt != "") || error("missing filename or date format")
     model = csvrdr.args
 end
 
-function transform!(csvrdr::CSVReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
-    fname = csvrdr.args[:filename]
-    fmt = csvrdr.args[:dateformat]
+function transform!(csvrdr::CSVReader,x::DataFrame=DataFrame())
+    fname = csvrdr.model[:filename]
+    fmt = csvrdr.model[:dateformat]
     df = CSV.read(fname)
     ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
     rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
-    df[:Date] = DateTime.(df[:Date],fmt)
+    df.Date = DateTime.(df.Date,fmt)
     df
 end
 nothing #hide
@@ -126,17 +119,9 @@ and process it by aggregation and imputation.
 
 
 ```@example pipeline
-mypipeline = Pipeline(
-  Dict( :transformers => [
-            csvreader,
-            dtvalgator,
-            dtvalnner
-         ]
-  )
-)
+mypipeline = @pipeline csvreader |> dtvalgator |> dtvalnner
 
-fit!(mypipeline)
-results = transform!(mypipeline)
+results = fit_transform!(mypipeline)
 nothing #hide
 ```
 
