@@ -156,7 +156,7 @@ args = Dict(:ahead=>24,:size=>24,:stride=>5)
 dtfier = Dateifier(args)
 mtfier = Matrifier(args)
 
-# setup pipeline joining matrified dates with matrified values
+# setup pipeline concatenating matrified dates with matrified values
 ppl = @pipeline dtfier + mtfier
 
 dateval = fit_transform!(ppl,ts)
