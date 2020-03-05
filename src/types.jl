@@ -28,7 +28,7 @@ function transform!(tr::Transformer, instances::DataFrame)
 end
 
 # dynamic dispatch based Machine subtypes
-function fit_transform!(tf::Transformer, input::DataFrame, output::Vector=Vector())
+function fit_transform!(tf::Transformer, input::DataFrame=DataFrame(), output::Vector=Vector())
 	fit!(tf,input,output)
 	transform!(tf,input)
 end

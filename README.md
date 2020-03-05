@@ -113,26 +113,19 @@ plotter = Plotter() # visualize output
 - #### Setup pipeline to load csv data, aggregate, and get statistics
 ```julia
 # Setup pipeline without imputation and run
-mpipeline1 = Pipeline(Dict(
-  :transformers => [csvreader,valgator,stfier]
- )
-)
-fit!(mpipeline1)
-stats1 = transform!(mpipeline1)
+mpipeline1 = @pipeline csvreader |> valgator |> stfier
+stats1=fit_transform!(mpipeline1)
 
 # Show statistics including blocks of missing data stats
 show(stats1, allcols=true)
 ```
+Note: fit_transform! is equivalent to calling `fit!` and `transform!` functions.
 
  - #### Load csv data, aggregate, impute, and get statistics
 ```julia
 # Add imputation in the pipeline and rerun
-mpipeline2 = Pipeline(Dict(
-  :transformers => [csvreader,valgator,valnner,stfier]
- )
-)
-fit!(mpipeline2)
-stats2 = transform!(mpipeline2)
+mpipeline2 = @pipeline csvreader |> valgator |> valnner |> stfier
+stats2 = fit_transform!(mpipeline2)
 
 # Show statistics including blocks of missing data stats
 show(stats2, allcols=true)
@@ -141,13 +134,12 @@ show(stats2, allcols=true)
 - #### Load csv data, aggregate, impute, normalize monotonic data, and plot
 ```julia
 # Add imputation in the pipeline, and plot 
-mpipeline2 = Pipeline(Dict(
-  :transformers => [csvreader,valgator,valnner,mono,plotter]
- )
-)
-fit!(mpipeline2)
-transform!(mpipeline2)
+mpipeline2 = @pipeline csvreader |> valgator |> valnner |> mono |> plotter
+fit_transform!(mpipeline2)
 ```
+Note: It may take some time for the graph to render because just-in-time
+compilation kicks-in and plot package takes a bit of time to be pre-compiled.
+Suceeding plots will be much faster because Julia uses the pre-compiled image.
 
 ## Feature Requests and Contributions
 
