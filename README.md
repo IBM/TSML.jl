@@ -114,6 +114,7 @@ plotter = Plotter() # visualize output
 ```julia
 # Setup pipeline without imputation and run
 mpipeline1 = @pipeline csvreader |> valgator |> stfier
+
 stats1=fit_transform!(mpipeline1)
 
 # Show statistics including blocks of missing data stats
@@ -125,6 +126,7 @@ Note: fit_transform! is equivalent to calling `fit!` and `transform!` functions.
 ```julia
 # Add imputation in the pipeline and rerun
 mpipeline2 = @pipeline csvreader |> valgator |> valnner |> stfier
+
 stats2 = fit_transform!(mpipeline2)
 
 # Show statistics including blocks of missing data stats
@@ -135,11 +137,53 @@ show(stats2, allcols=true)
 ```julia
 # Add imputation in the pipeline, and plot 
 mpipeline2 = @pipeline csvreader |> valgator |> valnner |> mono |> plotter
+
 fit_transform!(mpipeline2)
 ```
 Note: It may take some time for the graph to render because just-in-time
 compilation kicks-in and plot package takes a bit of time to be pre-compiled.
 Suceeding plots will be much faster because Julia uses the pre-compiled image.
+
+- #### Extracting TimeSeries Date,Values into Matrix Form for ML Modeling
+```julia
+# let's setup date,value dataframe as input
+datn = DateTime(2018,1,1):Dates.Day(1):DateTime(2019,1,31) |> collect
+valn = rand(1:100,length(datn))
+ts = DataFrame(Date=datn,Value=valn)
+@show first(ts,5);
+
+args = Dict(:ahead=>24,:size=>24,:stride=>5)
+dtfier = Dateifier(args)
+mtfier = Matrifier(args)
+
+# setup pipeline joining matrified dates with matrified values
+ppl = @pipeline dtfier + mtfier
+
+dateval = fit_transform!(ppl,ts)
+@show first(dateval,5);
+```
+We can use the matrified dateval as input features for prediction/classication.
+Let's create a dummy response consisting of `yes` or `no` and use Random Forest
+to learn the mapping.
+```julia
+target = rand(["yes","no"],nrow(dateval)) 
+
+rf = RandomForest()
+accuracy(x,y) = score(:accuracy,x,y)
+crossvalidate(rf,dateval,target,accuracy)
+# sample output:
+fold: 1, 14.285714285714285
+fold: 2, 57.14285714285714
+fold: 3, 71.42857142857143
+fold: 4, 85.71428571428571
+fold: 5, 57.14285714285714
+fold: 6, 57.14285714285714
+fold: 7, 57.14285714285714
+fold: 8, 71.42857142857143
+fold: 9, 42.857142857142854
+fold: 10, 71.42857142857143
+(mean = 58.57142857142857, std = 19.57600456294711, folds = 10)
+```
 
 ## Feature Requests and Contributions
 
