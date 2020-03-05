@@ -17,6 +17,7 @@ and the [JuliaCon 2019 Proceedings Paper](https://github.com/IBM/TSML.jl/blob/ma
 
 ## Package Features
 
+- Support for symbolic pipeline composition of transformers and learners
 - TS data type clustering/classification for automatic data discovery
 - TS aggregation based on date/time interval
 - TS imputation based on `symmetric` Nearest Neighbors
