@@ -150,6 +150,7 @@ Suceeding plots will be much faster because Julia uses the pre-compiled image.
 datn = DateTime(2018,1,1):Dates.Day(1):DateTime(2019,1,31) |> collect
 valn = rand(1:100,length(datn))
 ts = DataFrame(Date=datn,Value=valn)
+
 @show first(ts,5);
 
 args = Dict(:ahead=>24,:size=>24,:stride=>5)
@@ -169,7 +170,9 @@ to learn the mapping.
 target = rand(["yes","no"],nrow(dateval)) 
 
 rf = RandomForest()
+
 accuracy(x,y) = score(:accuracy,x,y)
+
 crossvalidate(rf,dateval,target,accuracy)
 # sample output:
 fold: 1, 14.285714285714285
