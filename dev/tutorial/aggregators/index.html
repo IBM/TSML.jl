@@ -33,8 +33,7 @@ julia&gt; first(X,15)
 │ 15  │ 2014-01-01T03:30:00 │ missing   │</code></pre><h2 id="DateValgator-1"><a class="docs-heading-anchor" href="#DateValgator-1">DateValgator</a><a class="docs-heading-anchor-permalink" href="#DateValgator-1" title="Permalink"></a></h2><p>You&#39;ll notice several blocks of missing in the table above with reading frequency of every 15 minutes.  To minimize noise and lessen the occurrence of missing values, let&#39;s aggregate our dataset by taking the hourly median using the <code>DateValgator</code> transformer.</p><pre><code class="language-julia">using TSML
 
 dtvlgator = DateValgator(Dict(:dateinterval=&gt;Dates.Hour(1)))
-fit!(dtvlgator,X)
-results = transform!(dtvlgator,X)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
+results = fit_transform!(dtvlgator,X)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
 10×2 DataFrame
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64⍰ │
@@ -52,8 +51,7 @@ results = transform!(dtvlgator,X)</code></pre><pre><code class="language-julia-r
 DateValgator(nothing, Dict{Symbol,Any}(:dateinterval=&gt;30 minutes,:aggregator=&gt;:median))</code></pre><p><code>DateValgator</code> is one of the several TSML transformers to preprocess and clean the  time series data. In order to create additional transformers to extend TSML,  each transformer must overload the two <code>Transformer</code> functions:<code>fit!</code> and <code>transform!</code>.  <code>DateValgator</code> <code>fit!</code> performs initial setups of necessary parameters and validation of arguments while its <code>transform!</code> function contains the algorithm  for aggregation. </p><p>For machine learning prediction and classification transformer,  <code>fit!</code> function is equivalent to ML training or parameter optimization,  while the <code>transform!</code> function is for doing the actual prediction. The later part of the tutorial will provide an example how to add a <code>Transformer</code> to extend the functionality of TSML.</p><h2 id="DateValNNer-1"><a class="docs-heading-anchor" href="#DateValNNer-1">DateValNNer</a><a class="docs-heading-anchor-permalink" href="#DateValNNer-1" title="Permalink"></a></h2><p>Let&#39;s perform further processing to replace the remaining missing values with their nearest neighbors.  We will use <code>DateValNNer</code> which is a TSML transformer to process the output of <code>DateValgator</code>. <code>DateValNNer</code> can also process non-aggregated data by first running similar workflow of <code>DateValgator</code> before performing its imputation routine.</p><pre><code class="language-julia">using TSML
 
 datevalnner = DateValNNer(Dict(:dateinterval=&gt;Dates.Hour(1)))
-fit!(datevalnner, X)
-results = transform!(datevalnner,X)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
+results = fit_transform!(datevalnner,X)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
 10×2 DataFrame
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64⍰ │
@@ -70,8 +68,7 @@ results = transform!(datevalnner,X)</code></pre><pre><code class="language-julia
 │ 10  │ 2014-01-01T09:00:00 │ 0.92049  │</code></pre><p>After running the <code>DateValNNer</code>, it&#39;s guaranteed that there will be no more missing data unless the input are all missing data.</p><h2 id="DateValizer-1"><a class="docs-heading-anchor" href="#DateValizer-1">DateValizer</a><a class="docs-heading-anchor-permalink" href="#DateValizer-1" title="Permalink"></a></h2><p>One more imputer to replace missing data is <code>DateValizer</code>. It computes the hourly median over 24 hours and use the <code>hour =&gt; median</code> hashmap learned to replace missing data using <code>hour</code> as the key. In this implementation, <code>fit!</code> function is doing the training of parameters by computing the medians and save it for the <code>transform!</code> function to use for imputation. It is possible that the hashmap can contain missing values in cases where the pooled hourly median in a particular hour have all missing data. Below is a sample workflow to replace missing data in X with the hourly medians.</p><pre><code class="language-julia">using TSML
 
 datevalizer = DateValizer(Dict(:dateinterval=&gt;Dates.Hour(1)))
-fit!(datevalizer, X)
-results = transform!(datevalizer,X)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
+results = fit_transform!(datevalizer,X)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
 10×2 DataFrame
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64⍰ │
@@ -85,4 +82,4 @@ results = transform!(datevalizer,X)</code></pre><pre><code class="language-julia
 │ 7   │ 2014-01-01T06:00:00 │ 0.918165 │
 │ 8   │ 2014-01-01T07:00:00 │ 0.614255 │
 │ 9   │ 2014-01-01T08:00:00 │ 0.690462 │
-│ 10  │ 2014-01-01T09:00:00 │ 0.92049  │</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« HOME</a><a class="docs-footer-nextpage" href="../pipeline/">Pipeline »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 3 March 2020 17:16">Tuesday 3 March 2020</span>. Using Julia version 1.0.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+│ 10  │ 2014-01-01T09:00:00 │ 0.92049  │</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« HOME</a><a class="docs-footer-nextpage" href="../pipeline/">Pipeline »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 5 March 2020 17:12">Thursday 5 March 2020</span>. Using Julia version 1.0.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
