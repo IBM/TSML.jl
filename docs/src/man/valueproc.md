@@ -39,8 +39,7 @@ stride, and steps ahead to predict:
 
 ```@example matrify
 mtr = Matrifier(Dict(:ahead=>6,:size=>6,:stride=>3))
-fit!(mtr,x)
-res = transform!(mtr,x)
+res = fit_transform!(mtr,x)
 nothing #hide
 ```
 
@@ -59,8 +58,7 @@ Let us try to make a matrix with the size of 6 hours, steps ahead of
 
 ```@example matrify
 mtr = Matrifier(Dict(:ahead=>2,:size=>6,:stride=>3))
-fit!(mtr,x)
-res = transform!(mtr,x)
+res = fit_transform!(mtr,x)
 nothing #hide
 ```
 

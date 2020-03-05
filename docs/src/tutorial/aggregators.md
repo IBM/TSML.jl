@@ -44,8 +44,7 @@ let's aggregate our dataset by taking the hourly median using the `DateValgator`
 using TSML
 
 dtvlgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-fit!(dtvlgator,X)
-results = transform!(dtvlgator,X)
+results = fit_transform!(dtvlgator,X)
 nothing #hide
 ```
 
@@ -85,8 +84,7 @@ of `DateValgator` before performing its imputation routine.
 using TSML
 
 datevalnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
-fit!(datevalnner, X)
-results = transform!(datevalnner,X)
+results = fit_transform!(datevalnner,X)
 nothing #hide
 ```
 
@@ -112,8 +110,7 @@ Below is a sample workflow to replace missing data in X with the hourly medians.
 using TSML
 
 datevalizer = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
-fit!(datevalizer, X)
-results = transform!(datevalizer,X)
+results = fit_transform!(datevalizer,X)
 nothing #hide
 ```
 

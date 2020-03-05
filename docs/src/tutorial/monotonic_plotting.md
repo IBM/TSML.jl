@@ -21,8 +21,7 @@ pltr = Plotter(Dict(:interactive => false,:pdfoutput => false))
 mdates = DateTime(2017,12,1,1):Dates.Hour(1):DateTime(2017,12,31,10) |> collect
 mvals = rand(length(mdates)) |> cumsum
 df =  DataFrame(Date=mdates ,Value = mvals)
-fit!(pltr,df)
-transform!(pltr,df)
+fit_transform!(pltr,df)
 ```
 
 Now that we have a monotonic data, let's use the `Monotonicer` to normalize and plot the result:
@@ -31,14 +30,10 @@ Now that we have a monotonic data, let's use the `Monotonicer` to normalize and 
 using TSML
 
 mono = Monotonicer(Dict())
-pipeline = Pipeline(Dict(
-   :transformers => [mono,pltr]
-   )
-)
 
-fit!(pipeline,df)
-res=transform!(pipeline,df)
+pipeline = @pipeline mono |> pltr
 
+res=fit_transform!(pipeline,df)
 ```
 
 ## Real Data Example
@@ -80,22 +75,16 @@ Let's test by feeding the regular time series type to the pipeline. We expect th
 
 - Pipeline with `Monotonicer`: regular time series
 ```@example mono
-pipeline = Pipeline(Dict(
-    :transformers => [regularfilecsv,valgator,valnner,mono,pltr]
-   )
-)
-fit!(pipeline)
-transform!(pipeline)
+pipeline = @pipeline regularfilecsv |> valgator |> valnner |> mono |> pltr
+
+fit_transform!(pipeline)
 ```
 
 - Pipeline without `Monotonicer`: regular time series
 ```@example mono
-pipeline = Pipeline(Dict(
-    :transformers => [regularfilecsv,valgator,valnner,pltr]
-   )
-)
-fit!(pipeline)
-transform!(pipeline)
+pipeline = @pipeline regularfilecsv |> valgator |> valnner |> pltr
+
+fit_transform!(pipeline)
 ```
 
 Notice that the plots are the same with or without the `Monotonicer` instance.
@@ -105,22 +94,16 @@ Let's now feed the same pipeline with a monotonic csv data.
 
 - Pipeline without `Monotonicer`: monotonic time series
 ```@example mono
-pipeline = Pipeline(Dict(
-    :transformers => [monofilecsv,valgator,valnner,pltr]
-   )
-)
-fit!(pipeline)
-transform!(pipeline)
+pipeline = @pipeline monofilecsv |> valgator |> valnner |> pltr
+
+fit_transform!(pipeline)
 ```
 
 - Pipeline with `Monotonicer`: monotonic time series
 ```@example mono
-pipeline = Pipeline(Dict(
-    :transformers => [monofilecsv,valgator,valnner,mono,pltr]
-   )
-)
-fit!(pipeline)
-transform!(pipeline)
+pipeline = @pipeline monofilecsv |> valgator |> valnner |> mono |> pltr
+
+fit_transform!(pipeline)
 ```
 
 Notice that without the `Monotonicer` instance, the data is monotonic. Applying
@@ -135,12 +118,8 @@ We can use the `Outliernicer` filter to remove outliers. Let's apply this filter
 using TSML: Outliernicer
 outliernicer = Outliernicer(Dict(:dateinterval=>Dates.Hour(1)));
 
-pipeline = Pipeline(Dict(
-    :transformers => [monofilecsv,valgator,valnner,mono, outliernicer,pltr]
-   )
-)
-fit!(pipeline)
-transform!(pipeline)
+pipeline = @pipeline monofilecsv |> valgator |> valnner |> mono |>  outliernicer |> pltr
+fit_transform!(pipeline)
 ```
 
 ## Daily Monotonic TS Processing
@@ -148,12 +127,8 @@ Lastly, let's feed the daily monotonic data using similar pipeline and examine i
 
 - Pipeline without `Monotonicer`: daily monotonic time series
 ```@example mono
-pipeline = Pipeline(Dict(
-    :transformers => [dailymonofilecsv,valgator,valnner,pltr]
-   )
-)
-fit!(pipeline)
-transform!(pipeline)
+pipeline = @pipeline dailymonofilecsv |> valgator |> valnner |> pltr
+fit_transform!(pipeline)
 ```
 
 This plot is characterized by monotonically increasing trend but resets to certain baseline value 
@@ -163,12 +138,8 @@ the correct normalization.
 
 - Pipeline with `Monotonicer`: daily monotonic time series
 ```@example mono
-pipeline = Pipeline(Dict(
-    :transformers => [dailymonofilecsv,valgator,valnner,mono,pltr]
-   )
-)
-fit!(pipeline)
-transform!(pipeline)
+pipeline = @pipeline dailymonofilecsv |> valgator |> valnner |> mono |> pltr
+fit_transform!(pipeline)
 ```
 
 While the `Monotonicer` filter is able to transform the data into a regular time series,
@@ -178,12 +149,8 @@ Let's remove the outliers by applying the `Outliernicer` filter and examine the 
 
 - Pipeline with `Monotonicer` and `Outliernicer`: daily monotonic time series
 ```@example mono
-pipeline = Pipeline(Dict(
-    :transformers => [dailymonofilecsv,valgator,valnner,mono,outliernicer,pltr]
-   )
-)
-fit!(pipeline)
-transform!(pipeline)
+pipeline = @pipeline dailymonofilecsv |> valgator |> valnner |> mono |> outliernicer |> pltr
+fit_transform!(pipeline)
 ```
 
 The `Outliernicer` filter effectively removed the outliers as shown in the plot.

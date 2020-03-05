@@ -40,14 +40,11 @@ hourlyagg = DateValgator(Dict(:dateinterval => Dates.Hour(1)))
 halfhourlyagg = DateValgator(Dict(:dateinterval => Dates.Minute(30)))
 dailyagg = DateValgator(Dict(:dateinterval => Dates.Day(1)))
 
-fit!(halfhourlyagg,df)
-halfhourlyres = transform!(halfhourlyagg,df)
+halfhourlyres = fit_transform!(halfhourlyagg,df)
 
-fit!(hourlyagg,df)
-hourlyres = transform!(hourlyagg,df)
+hourlyres = fit_transform!(hourlyagg,df)
 
-fit!(dailyagg,df)
-dailyres = transform!(dailyagg,df)
+dailyres = fit_transform!(dailyagg,df)
 nothing #hide
 ```
 

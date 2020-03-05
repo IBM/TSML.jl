@@ -36,8 +36,7 @@ stride, and steps ahead to predict:
 
 ```@example dateifier
 mtr = Dateifier(Dict(:ahead=>24,:size=>24,:stride=>5))
-fit!(mtr,x)
-res = transform!(mtr,x)
+res = fit_transform!(mtr,x)
 nothing #hide
 ```
 
@@ -67,14 +66,23 @@ dat=lower:Dates.Day(1):upper |> collect
 vals = rand(length(dat))
 X = DataFrame(Date=dat,Value=vals)
 
-fit!(mtr,X)
-valuematrix = transform!(mtr,X)
-fit!(dtr,X)
-datematrix = transform!(dtr,X)
+valuematrix = fit_transform!(mtr,X)
+datematrix = fit_transform!(dtr,X)
 mlfeatures = hcat(datematrix,valuematrix)
 nothing #hide
 ```
-
 ```@repl dateifier
 first(mlfeatures,5)
+```
+
+Another way is to use the symbolic pipeline to
+describe the transformation and concatenation in
+just one line of expression.
+```@example dateifier
+ppl = @pipeline dtr + mtr
+features = fit_transform!(ppl,X)
+nothing #hide
+```
+```@repl dateifier
+first(features,5)
 ```

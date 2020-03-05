@@ -50,8 +50,7 @@ Let's try the following setup grouping daily with `forward` imputation and 10 ne
 dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(2),
              :nnsize=>10,:missdirection => :forward,
              :strict=>false))
-fit!(dnnr,X)
-forwardres=transform!(dnnr,X)
+forwardres=fit_transform!(dnnr,X)
 nothing #hide
 ```
 
@@ -64,8 +63,7 @@ Same parameters as above but uses `reverse` instead of `forward` direction:
 dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(2),
              :nnsize=>10,:missdirection => :reverse,
              :strict=>false))
-fit!(dnnr,X)
-reverseres=transform!(dnnr,X)
+reverseres=fit_transform!(dnnr,X)
 nothing #hide
 ```
 
@@ -79,8 +77,7 @@ Using `symmetric` imputation:
 dnnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(2),
              :nnsize=>10,:missdirection => :symmetric,
              :strict=>false))
-fit!(dnnr,X)
-symmetricres=transform!(dnnr,X)
+symmetricres=fit_transform!(dnnr,X)
 nothing #hide
 ```
 
@@ -124,12 +121,9 @@ hourlyzer = DateValizer(Dict(:dateinterval => Dates.Hour(1)));
 monthlyzer = DateValizer(Dict(:dateinterval => Dates.Month(1)));
 dailyzer = DateValizer(Dict(:dateinterval => Dates.Day(1)));
 
-fit!(hourlyzer,X)
-hourlyres = transform!(hourlyzer,X)
+hourlyres = fit_transform!(hourlyzer,X)
 
-fit!(dailyzer,X)
-dailyres = transform!(dailyzer,X)
+dailyres = fit_transform!(dailyzer,X)
 
-fit!(monthlyzer,X)
-monthlyres = transform!(monthlyzer,X)
+monthlyres = fit_transform!(monthlyzer,X)
 ```
