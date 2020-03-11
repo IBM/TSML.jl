@@ -114,10 +114,8 @@ function createrunpipeline(args::Dict)
         transformers = [transformers;csvwriter]
     end
 
-    pipeline = Pipeline()
-    pipeline.args[:transformers]=transformers
-    fit!(pipeline)
-    transform!(pipeline)
+    pipeline = Pipeline(transformers)
+    fit_transform!(pipeline)
 end
 
 
@@ -135,12 +133,8 @@ function rawstat(inputname::AbstractString,outputname::AbstractString="",datefmt
     isfile(inputname) || error("input file name does not exist")
     csvreader = CSVDateValReader(Dict(:filename=>inputname,:dateformat=>datefmt))
     stfier = Statifier()
-    lpipe = Pipeline(Dict(
-        :transformers => [csvreader,stfier]
-      )
-    )
-    fit!(lpipe)
-    res=transform!(lpipe)
+    lpipe = @pipeline csvreader |> stfier
+    res=fit_transform!(lpipe)
     if outputname != ""
         res |> CSV.write(outputname)
     end
@@ -152,12 +146,8 @@ function aggregatedstat(inputname::AbstractString,outputname::AbstractString="",
     csvreader = CSVDateValReader(Dict(:filename=>inputname,:dateformat=>datefmt))
     valgator = DateValgator(COMMONARG)
     stfier = Statifier()
-    lpipe = Pipeline(Dict(
-        :transformers => [csvreader,valgator,stfier]
-      )
-    )
-    fit!(lpipe)
-    res=transform!(lpipe)
+    lpipe = @pipeline csvreader |> valgator |> stfier
+    res=fit_transform!(lpipe)
     if outputname != ""
         res |> CSV.write(outputname)
     end
@@ -168,12 +158,8 @@ function aggregatedoutput(inputname::AbstractString,outputname::AbstractString="
     isfile(inputname) || error("input file name does not exist")
     csvreader = CSVDateValReader(Dict(:filename=>inputname,:dateformat=>datefmt))
     valgator = DateValgator(COMMONARG)
-    lpipe = Pipeline(Dict(
-        :transformers => [csvreader,valgator]
-      )
-    )
-    fit!(lpipe)
-    res=transform!(lpipe)
+    lpipe = @pipeline csvreader |> valgator
+    res=fit_transform!(lpipe)
     if outputname != ""
         res |> CSV.write(outputname)
     end
@@ -187,12 +173,8 @@ function imputedstat(inputname::AbstractString,outputname::AbstractString="",dat
     valnner = DateValNNer(COMMONARG)
     mononicer = Monotonicer()
     stfier = Statifier()
-    lpipe = Pipeline(Dict(
-        :transformers => [csvreader,valgator,valnner,mononicer,stfier]
-      )
-    )
-    fit!(lpipe)
-    res=transform!(lpipe)
+    lpipe = @pipeline csvreader |> valgator |> valnner |> mononicer |> stfier
+    res=fit_transform!(lpipe)
     if outputname != ""
         res |> CSV.write(outputname)
     end
@@ -206,12 +188,8 @@ function imputedoutput(inputname::AbstractString,outputname::AbstractString="",d
     valnner = DateValNNer(COMMONARG)
     mononicer = Monotonicer()
     stfier = Statifier()
-    lpipe = Pipeline(Dict(
-        :transformers => [csvreader,valgator,valnner,mononicer]
-      )
-    )
-    fit!(lpipe)
-    res=transform!(lpipe)
+    lpipe = @pipeline csvreader |> valgator |> valnner |> mononicer
+    res=fit_transform!(lpipe)
     if outputname != ""
         res |> CSV.write(outputname)
     end

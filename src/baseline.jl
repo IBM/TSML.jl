@@ -1,11 +1,11 @@
 module BaselineAlgos
 
-using TSML.TSMLTypes
-using TSML.Utils
+using AutoMLPipeline.AbsTypes
+using AutoMLPipeline.Utils
+
 using DataFrames
 
-import TSML.TSMLTypes.fit!
-import TSML.TSMLTypes.transform!
+import AutoMLPipeline.AbsTypes: fit!, transform!
 
 export Baseline,Identity
        fit!,
@@ -24,7 +24,7 @@ using StatsBase: mode
 
 Baseline model that returns the mode during classification.
 """
-mutable struct Baseline <: TSLearner
+mutable struct Baseline <: Learner
     model
     args
 

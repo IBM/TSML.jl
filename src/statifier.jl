@@ -10,10 +10,9 @@ export fit!,transform!
 
 export Statifier,tsmlfullstat
 
-using TSML.TSMLTypes
-import TSML.TSMLTypes.fit! # to overload
-import TSML.TSMLTypes.transform! # to overload
-using TSML.Utils
+using AutoMLPipeline.AbsTypes
+using AutoMLPipeline.Utils
+import AutoMLPipeline.AbsTypes: fit!, transform!
 
 
 # Transforms instances with nominal features into one-hot form

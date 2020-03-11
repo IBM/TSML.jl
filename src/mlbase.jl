@@ -3,10 +3,9 @@ module MLBaseWrapper
 using DataFrames
 using LinearAlgebra
 
-using TSML.TSMLTypes
-import TSML.TSMLTypes.fit!
-import TSML.TSMLTypes.transform!
-using TSML.Utils
+using AutoMLPipeline.AbsTypes
+using AutoMLPipeline.Utils
+import AutoMLPipeline.AbsTypes: fit!, transform!
 
 export fit!,transform!
 

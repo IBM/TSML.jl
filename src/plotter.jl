@@ -6,10 +6,9 @@ using GR
 using DataFrames
 using TSML.ValDateFilters
 
-using TSML.TSMLTypes
-import TSML.TSMLTypes.fit! # to overload
-import TSML.TSMLTypes.transform! # to overload
-using TSML.Utils
+using AutoMLPipeline.AbsTypes
+using AutoMLPipeline.Utils
+import AutoMLPipeline.AbsTypes: fit!, transform!
 
 export fit!,transform!
 export Plotter
@@ -45,12 +44,8 @@ Example:
 csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
 pltr = Plotter(Dict(:interactive => false))
 
-mpipeline = Pipeline(Dict(
-:transformers => [csvfilter,pltr]
-)
-)
-fit!(mpipeline)
-myplot = transform!(mpipeline)
+mpipeline = @pipeline csvfilter |> pltr
+myplot = fit_transform!(mpipeline)
 
 Implements: `fit!`, `transform!`
 """

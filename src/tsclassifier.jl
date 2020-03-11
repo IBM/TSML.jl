@@ -1,5 +1,6 @@
 module TSClassifiers
 
+using AutoMLPipeline.Pipelines
 using TSML.DecisionTreeLearners: RandomForest
 using TSML.Statifiers
 using TSML: CSVDateValReader
@@ -10,10 +11,9 @@ using Dates
 using Serialization
 using TSML
 
-using TSML.TSMLTypes
-import TSML.TSMLTypes.fit!
-import TSML.TSMLTypes.transform!
-using TSML.Utils
+using AutoMLPipeline.AbsTypes
+using AutoMLPipeline.Utils
+import AutoMLPipeline.AbsTypes: fit!, transform!
 
 export fit!, transform!
 export TSClassifier, getstats
@@ -57,7 +57,7 @@ where ? is an integer. Loop over each file in a directory, get stat and
 record in a dictionary/dataframe, train/test. Default to using RandomForest 
 for classification of data types.
 """
-mutable struct TSClassifier <: TSLearner
+mutable struct TSClassifier <: Learner
   model
   args
   function TSClassifier(args=Dict())
@@ -173,12 +173,8 @@ function getfilestat(ldirname::AbstractString,lfname::AbstractString)
   valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
   valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
   stfier = Statifier(Dict(:processmissing=>false))
-  mpipeline = Pipeline(Dict(
-      :transformers => [csvfilter,valgator,valnner,stfier]
-     )
-  )
-  fit!(mpipeline)
-  df = transform!(mpipeline)
+  mpipeline = @pipeline csvfilter |> valgator |> valnner |> stfier
+  df = fit_transform!(mpipeline)
   df[!,:dtype] .= dtype
   df[!,:fname] .= lfname
   return (df)

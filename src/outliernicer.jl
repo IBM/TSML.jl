@@ -6,10 +6,9 @@ using Statistics
 using StatsBase: iqr, quantile, sample
 using TSML.ValDateFilters
 
-using TSML.TSMLTypes
-import TSML.TSMLTypes.fit! # to overload
-import TSML.TSMLTypes.transform! # to overload
-using TSML.Utils
+using AutoMLPipeline.AbsTypes
+using AutoMLPipeline.Utils
+import AutoMLPipeline.AbsTypes: fit!, transform!
 
 export fit!,transform!
 export Outliernicer
@@ -35,12 +34,8 @@ Example:
     mono = Monotonicer(Dict())
     outliernicer = Outliernicer(Dict(:dateinterval=>Dates.Hour(1)))
 
-    mpipeline = Pipeline(Dict(
-         :transformers => [csvfilter,valgator,mono,valnner,outliernicer,stfier]
-       )
-    )
-    fit!(mpipeline)
-    results = transform!(mpipeline)
+    mpipeline = @pipeline csvfilter |> valgator |> mono |> valnner |> outliernicer |> stfier
+    results = fit_transform!(mpipeline)
 
 
 Implements: `fit!`, `transform!`

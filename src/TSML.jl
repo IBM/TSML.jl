@@ -1,5 +1,19 @@
 module TSML
 
+using AutoMLPipeline
+using AutoMLPipeline.BaseFilters
+import AutoMLPipeline.AbsTypes: fit!, transform!
+
+using AutoMLPipeline.AbsTypes
+export Machine, Learner, Transformer, Workflow, Computer
+
+using AutoMLPipeline.Utils
+export holdout, kfold, score, infer_eltype, nested_dict_to_tuples, 
+       nested_dict_set!, nested_dict_merge, create_transformer,
+       mergedict, getiris,
+       skipmean,skipmedian,skipstd,
+       aggregatorclskipmissing
+
 export fit!, transform!,fit_transform!
 
 # reexport common functions to Main
@@ -9,24 +23,11 @@ using .PkgDeps
 include("imputer/Imputers.jl")
 using .Imputers
 
-include("types.jl")
-using .TSMLTypes
-export  Transformer,TSLearner
-
-include("utils.jl")
-using .Utils
-export holdout, kfold, score, infer_eltype, nested_dict_to_tuples, 
-       nested_dict_set!, nested_dict_merge, create_transformer,
-       mergedict, getiris,
-       skipmean,skipmedian,skipstd,
-       aggregatorclskipmissing
-
 include("baseline.jl")
 using .BaselineAlgos
 export Baseline,Identity
 
-include("basefilters.jl")
-using .BaseFilters
+using AutoMLPipeline.BaseFilters: Imputer, OneHotEncoder, Wrapper
 export Imputer,OneHotEncoder,Wrapper
 
 include("valdatefilters.jl")
@@ -45,8 +46,7 @@ using .MLBaseWrapper
 export Standardize,standardize, standardize!, 
        transform, estimate, transform,StandardScaler
 
-include("decisiontree.jl")
-using .DecisionTreeLearners
+using AutoMLPipeline.DecisionTreeLearners
 export PrunedTree,RandomForest,Adaboost
 
 include("normalizer.jl")
@@ -77,27 +77,21 @@ include("timescaledb.jl")
 using .TimescaleDBs
 export TimescaleDB
 
-
-include("ensemble.jl")
-using .EnsembleMethods
+using AutoMLPipeline.EnsembleMethods
 export VoteEnsemble, StackEnsemble, BestLearner
 
-include("featureselector.jl")
-using .FeatureSelectors
+using AutoMLPipeline.FeatureSelectors
 export FeatureSelector, CatFeatureSelector, NumFeatureSelector, CatNumDiscriminator
 
-include("pipeline.jl")
-using .Pipelines
+using AutoMLPipeline.Pipelines
 export @pipeline @pipelinex
 export Pipeline, ComboPipeline
-
 
 include("schema.jl")
 using .Schemalizers
 export Schemalizer, ML, table
 
-include("crossvalidator.jl")
-using .CrossValidators
+using AutoMLPipeline.CrossValidators
 export crossvalidate
 
 include("argparse.jl")
