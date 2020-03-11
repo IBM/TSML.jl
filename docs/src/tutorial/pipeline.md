@@ -62,8 +62,8 @@ TSML by adding `CSVReader` transformer and added in the pipeline to process CSV 
 
 ```@example pipeline
 using TSML
-import TSML.TSMLTypes.fit!
-import TSML.TSMLTypes.transform!
+import AutoMLPipeline.AbsTypes.fit!
+import AutoMLPipeline.AbsTypes.transform!
 
 mutable struct CSVReader <: Transformer
     model

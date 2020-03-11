@@ -1,5 +1,5 @@
 export Random, CSV, Dates, DataFrames, Statistics
-export read, write
+#export read, write
 export DateTime, Date,Dates, Day,Year, Month, Week, Minute, Hour, year, day, month, hour, minute, week, dayofweek, dayofquarter
 export DataFrame, DataFrameRow, DataFrameRows, DataFrameColumns, nrow, ncol, eachcol
 export seed!
