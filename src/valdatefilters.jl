@@ -9,7 +9,7 @@ using Dates
 using DataFrames
 using Statistics
 using CSV
-using CodecBzip2
+#using CodecBzip2
 
 using MLDataUtils: slidingwindow
 
@@ -693,68 +693,68 @@ function transform!(csvwtr::CSVDateValWriter,x::DataFrame)
     return df
 end
 
-"""
-    BzCSVDateValReader(
-       Dict(
-          :filename => "",
-          :dateformat => ""
-       )
-    )
-
-Reads Bzipped csv file and parse date using the given format.
-- `:filename` => complete path including filename of csv file
-- `:dateformat` => date format to parse
-
-Example:
-
-    inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv.bz2")
-    csvreader = BzCSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
-    filter1 = DateValgator()
-    filter2 = DateValNNer(Dict(:nnsize=>1))
-    mypipeline = @pipeline csvreader |> filter1 |> filter2
-    res=fit_transform!(mypipeline)
-
-Implements: `fit!`, `transform!`
-"""
-mutable struct BzCSVDateValReader <: Transformer
-    model
-    args
-    function BzCSVDateValReader(args=Dict())
-        default_args = Dict(
-            :filename => "",
-            :dateformat => ""
-        )
-        new(nothing,mergedict(default_args,args))
-    end
-end
-
-"""
-    fit!(bzcsvrdr::BzCSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
-
-Makes sure filename and dateformat are not empty strings.
-"""
-function fit!(bzcsvrdr::BzCSVDateValReader,x::DataFrame=DataFrame(),y::Vector=[])
-    fname = bzcsvrdr.args[:filename]
-    fmt = bzcsvrdr.args[:dateformat]
-    (fname != "" && fmt != "") || error("missing filename or date format")
-    bzcsvrdr.model = bzcsvrdr.args
-end
-
-"""
-    transform!(bzcsvrdr::BzCSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
-
-Uses CodecBzip2 package to read the csv file and converts it to dataframe.
-"""
-function transform!(bzcsvrdr::BzCSVDateValReader,x::DataFrame=DataFrame())
-    fname = bzcsvrdr.args[:filename]
-    fmt = bzcsvrdr.args[:dateformat]
-    stream = Bzip2DecompressorStream(open(fname))
-    df = CSV.read(stream) |> DataFrame
-    ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
-    rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
-    df.Date = DateTime.(df.Date,fmt)
-    df
-end
+#"""
+#    BzCSVDateValReader(
+#       Dict(
+#          :filename => "",
+#          :dateformat => ""
+#       )
+#    )
+#
+#Reads Bzipped csv file and parse date using the given format.
+#- `:filename` => complete path including filename of csv file
+#- `:dateformat` => date format to parse
+#
+#Example:
+#
+#    inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv.bz2")
+#    csvreader = BzCSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
+#    filter1 = DateValgator()
+#    filter2 = DateValNNer(Dict(:nnsize=>1))
+#    mypipeline = @pipeline csvreader |> filter1 |> filter2
+#    res=fit_transform!(mypipeline)
+#
+#Implements: `fit!`, `transform!`
+#"""
+#mutable struct BzCSVDateValReader <: Transformer
+#    model
+#    args
+#    function BzCSVDateValReader(args=Dict())
+#        default_args = Dict(
+#            :filename => "",
+#            :dateformat => ""
+#        )
+#        new(nothing,mergedict(default_args,args))
+#    end
+#end
+#
+#"""
+#    fit!(bzcsvrdr::BzCSVDateValReader,x::T=[],y::Vector=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+#
+#Makes sure filename and dateformat are not empty strings.
+#"""
+#function fit!(bzcsvrdr::BzCSVDateValReader,x::DataFrame=DataFrame(),y::Vector=[])
+#    fname = bzcsvrdr.args[:filename]
+#    fmt = bzcsvrdr.args[:dateformat]
+#    (fname != "" && fmt != "") || error("missing filename or date format")
+#    bzcsvrdr.model = bzcsvrdr.args
+#end
+#
+#"""
+#    transform!(bzcsvrdr::BzCSVDateValReader,x::T=[]) where {T<:Union{DataFrame,Vector,Matrix}}
+#
+#Uses CodecBzip2 package to read the csv file and converts it to dataframe.
+#"""
+#function transform!(bzcsvrdr::BzCSVDateValReader,x::DataFrame=DataFrame())
+#    fname = bzcsvrdr.args[:filename]
+#    fmt = bzcsvrdr.args[:dateformat]
+#    stream = Bzip2DecompressorStream(open(fname))
+#    df = CSV.read(stream) |> DataFrame
+#    ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
+#    rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
+#    df.Date = DateTime.(df.Date,fmt)
+#    df
+#end
 
 
 """

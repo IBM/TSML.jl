@@ -31,8 +31,8 @@ include("valdatefilters.jl")
 using .ValDateFilters
 export Matrifier,Dateifier,
        DateValizer,DateValgator,DateValNNer,DateValMultiNNer,
-       CSVDateValReader, CSVDateValWriter, DateValLinearImputer,
-       BzCSVDateValReader
+       CSVDateValReader, CSVDateValWriter, DateValLinearImputer
+       #BzCSVDateValReader
 
 include("statifier.jl")
 using .Statifiers

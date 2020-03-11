@@ -254,19 +254,19 @@ end
   test_csvreaderwriter()
 end
 
-function test_bzcsvreaderwriter()
-  inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv.bz2")
-  csvreader = BzCSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
-  filter1 = DateValgator()
-  filter2 = DateValNNer(Dict(:nnsize=>1))
-  mypipeline = @pipeline csvreader |> filter1 |> filter2
-  res=fit_transform!(mypipeline)
-  @test nrow(res) == 8761
-  @test ncol(res) == 2
-end
-@testset "BzCSVDateValReader: reading bzipped csv with Date,Value columns" begin
-  test_bzcsvreaderwriter()
-end
+#function test_bzcsvreaderwriter()
+#  inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv.bz2")
+#  csvreader = BzCSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
+#  filter1 = DateValgator()
+#  filter2 = DateValNNer(Dict(:nnsize=>1))
+#  mypipeline = @pipeline csvreader |> filter1 |> filter2
+#  res=fit_transform!(mypipeline)
+#  @test nrow(res) == 8761
+#  @test ncol(res) == 2
+#end
+#@testset "BzCSVDateValReader: reading bzipped csv with Date,Value columns" begin
+#  test_bzcsvreaderwriter()
+#end
 
 function test_statoutputwriter()
   inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv")

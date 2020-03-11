@@ -12,6 +12,7 @@ include("test_schemalizer.jl")
 include("test_ensemble.jl")
 include("test_cliwrapper.jl")
 include("test_tsclassifier.jl")
-include("test_timescaledb.jl")
+
+#include("test_timescaledb.jl")
 
 end
