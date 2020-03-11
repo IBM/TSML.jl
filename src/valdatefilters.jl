@@ -4,8 +4,6 @@ using AutoMLPipeline.AbsTypes
 using AutoMLPipeline.Utils
 import AutoMLPipeline.AbsTypes: fit!, transform!
 
-include("imputer/Imputers.jl")
-using .Imputers
 
 using Dates
 using DataFrames
@@ -21,6 +19,9 @@ export Matrifier,Dateifier
 export DateValizer,DateValgator,DateValNNer,DateValMultiNNer
 export CSVDateValReader, CSVDateValWriter, DateValLinearImputer
 export BzCSVDateValReader
+
+include("Imputers.jl")
+using .Imputers
 
 const gAggDict = Dict(
     :median => Statistics.median,

@@ -25,8 +25,9 @@ end
 
 Base.showerror(io::IO, err::ImputeError) = println(io, "ImputeError: $(err.msg)")
 
-include("context.jl")
-include("imputors.jl")
+include("imputer/context.jl")
+include("imputer/imputors.jl")
+include("imputer/deprecated.jl")
 
 #=
 These default methods are required because @auto_hash_equals doesn't
@@ -54,6 +55,7 @@ function Base.:(==)(a::T, b::T) where T <: Union{Imputor, AbstractContext}
 
     return result
 end
+
 
 const global imputation_methods = (
     drop = DropObs,
