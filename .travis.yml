@@ -14,8 +14,7 @@ addons:
       - python3-numpy
       - python3-scipy
 env:
-  - JULIA_NUM_THREADS=8
-  - PYTHON=Conda
+  - JULIA_NUM_THREADS=8 PYTHON=Conda
 notifications:
   email: false
 
