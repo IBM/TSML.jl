@@ -125,10 +125,6 @@ Depth = 3
 ## ML Library
 ```@contents
 Pages = [
-  "lib/decisiontree.md",
   "lib/functions.md"
 ]
-```
-
-```@index
 ```

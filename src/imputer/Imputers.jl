@@ -67,7 +67,7 @@ const global imputation_methods = (
     srs = SRS,
 )
 
-include("deprecated.jl")
+#include("deprecated.jl")
 
 for (f, v) in pairs(imputation_methods)
     typename = nameof(v)

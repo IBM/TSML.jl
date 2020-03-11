@@ -20,9 +20,6 @@ export fit!, transform!,fit_transform!
 include("pkgdeps.jl")
 using .PkgDeps
 
-include("imputer/Imputers.jl")
-using .Imputers
-
 include("baseline.jl")
 using .BaselineAlgos
 export Baseline,Identity
