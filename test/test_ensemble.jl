@@ -5,7 +5,7 @@ using Random
 using TSML
 using DataFrames
 
-function getprediction(model::TSLearner,data::Dict)
+function getprediction(model::Learner,data::Dict)
   Random.seed!(126)
   trfeatures = data[:trfeatures] |> DataFrame
   tstfeatures = data[:tstfeatures] |> DataFrame

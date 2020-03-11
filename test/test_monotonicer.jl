@@ -26,31 +26,16 @@ function test_basicmonotonicer()
   stfier = Statifier(Dict(:processmissing=>true))
   mono = Monotonicer(Dict())
 
-  mpipeline1 = Pipeline(Dict(
-      :transformers => [csvfilter,valgator,mono,stfier]
-     )
-  )
-  fit!(mpipeline1)
-  respipe1 = transform!(mpipeline1)
+  mpipeline1 = @pipeline csvfilter |> valgator |> mono |> stfier
+  respipe1 = fit_transform!(mpipeline1)
 
-  mpipeline2 = Pipeline(Dict(
-      :transformers => [csvfilter,valgator,stfier]
-     )
-  )
-  fit!(mpipeline2)
-  respipe2 = transform!(mpipeline2)
+  mpipeline2 = @pipeline csvfilter |> valgator |> stfier
+  respipe2 = fit_transform!(mpipeline2)
   @test (respipe1[1:1,:] .== respipe2[1:1,:]) |> Matrix |> sum  == ncol(respipe1)
 
-  mpipeline3 = Pipeline(Dict(
-      :transformers => [csvfilter,valgator,valnner,mono,stfier]
-     )
-  )
-  fit!(mpipeline3)
-  respipe3 = transform!(mpipeline3)
-  mpipeline5 = Pipeline(Dict(
-      :transformers => [csvfilter,valgator,valnner,stfier]
-     )
-  )
+  mpipeline3 = @pipeline csvfilter |> valgator |> valnner |> mono |> stfier
+  respipe3 = fit_transform!(mpipeline3)
+  mpipeline5 = @pipeline csvfilter |> valgator |> valnner |> stfier
   fit!(mpipeline5)
   respipe5 = transform!(mpipeline5)
   val1 = respipe3[1,3:end] |> Vector
@@ -77,26 +62,14 @@ function test_typesmonotonicer()
   stfier = Statifier(Dict(:processmissing=>true))
   mono = Monotonicer(Dict())
 
-  regpipeline = Pipeline(Dict(
-      :transformers => [regularfilecsv,valgator,valnner,mono]
-     )
-  )
-  fit!(regpipeline)
-  regulardf=transform!(regpipeline)
+  regpipeline = @pipeline regularfilecsv |> valgator |> valnner |> mono
+  regulardf=fit_transform!(regpipeline)
 
-  monopipeline = Pipeline(Dict(
-      :transformers => [monofilecsv,valgator,valnner,mono]
-     )
-  )
-  fit!(monopipeline)
-  monodf=transform!(monopipeline)
+  monopipeline = @pipeline monofilecsv |> valgator |> valnner |> mono
+  monodf=fit_transform!(monopipeline)
 
-  dailymonopipeline = Pipeline(Dict(
-      :transformers => [dailymonofilecsv,valgator,valnner,mono]
-     )
-  )
-  fit!(dailymonopipeline)
-  dailymonodf=transform!(dailymonopipeline)
+  dailymonopipeline = @pipeline dailymonofilecsv |> valgator |> valnner |> mono
+  dailymonodf=fit_transform!(dailymonopipeline)
 
   @test round(dailyflips(regulardf),digits=2) == 11.98
   @test round(dailyflips(monodf),digits=2) == 10.28

@@ -73,7 +73,6 @@ end
 end
 
 function test_datevalnner()
-
     dnnr = DateValNNer(Dict(
 	  :dateinterval=>Dates.Hour(1),
 	  :nnsize=>10,
@@ -229,38 +228,25 @@ function test_csvreaderwriter()
   csvwtr = CSVDateValWriter(Dict(:filename=>outputfile,:dateformat=>"d/m/y H:M"))
   filter1 = DateValgator()
   filter2 = DateValNNer(Dict(:nnsize=>1))
-  mypipeline = Pipeline(Dict(
-	:transformers => [csvreader,filter1,filter2]
-    )
-  )
-  fit!(mypipeline)
-  res=transform!(mypipeline)
+  mypipeline = @pipeline csvreader |> filter1 |> filter2
+  res=fit_transform!(mypipeline)
   @test nrow(res) == 8761
   @test ncol(res) == 2
   @test sum(ismissing.(res.Value)) == 0
   @test floor(sum(res.Value)) == 97564.0
-  fit!(csvreader)
-  dat = transform!(csvreader)
-  fit!(filter1,dat,[])
-  res1=transform!(filter1,dat)
-  fit!(filter2,res1,[])
-  res2=transform!(filter2,res1)
+  dat = fit_transform!(csvreader)
+  res1=fit_transform!(filter1,dat)
+  res2=fit_transform!(filter2,res1)
   @test nrow(res2) == 8761
   @test ncol(res2) == 2
   @test sum(ismissing.(res2.Value)) == 0
   @test floor(sum(res2.Value)) == 97564.0
-  @test mypipeline.args[:transformers][3].args[:missingcount] == filter2.args[:missingcount]
-  mypipeline = Pipeline(Dict(
-	:transformers => [csvreader,filter1,filter2,csvwtr]
-    )
-  )
-  fit!(mypipeline)
-  res=transform!(mypipeline)
+  mypipeline = @pipeline csvreader |> filter1 |> filter2 |> csvwtr
+  res=fit_transform!(mypipeline)
   @test nrow(res2) == 8761
   @test ncol(res2) == 2
   @test sum(ismissing.(res2.Value)) == 0
   @test floor(sum(res2.Value)) == 97564.0
-  @test mypipeline.args[:transformers][3].args[:missingcount] == filter2.args[:missingcount]
   @test filesize(csvwtr.args[:filename]) > 209220
   rm(outputfile,force=true)
 end
@@ -273,12 +259,8 @@ function test_bzcsvreaderwriter()
   csvreader = BzCSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
   filter1 = DateValgator()
   filter2 = DateValNNer(Dict(:nnsize=>1))
-  mypipeline = Pipeline(Dict(
-	:transformers => [csvreader,filter1,filter2]
-    )
-  )
-  fit!(mypipeline)
-  res=transform!(mypipeline)
+  mypipeline = @pipeline csvreader |> filter1 |> filter2
+  res=fit_transform!(mypipeline)
   @test nrow(res) == 8761
   @test ncol(res) == 2
 end
@@ -295,12 +277,8 @@ function test_statoutputwriter()
   filter1 = DateValgator()
   filter2 = DateValNNer(Dict(:nnsize=>1))
 
-  mypipeline = Pipeline(Dict(
-  	:transformers => [csvreader,filter1,filter2,statfier,csvstatwtr]
-    )
-  )
-  fit!(mypipeline)
-  res=transform!(mypipeline)
+  mypipeline = @pipeline csvreader |> filter1 |> filter2 |> statfier |> csvstatwtr
+  res=fit_transform!(mypipeline)
   @test nrow(res) == 1
   @test ncol(res) == 26
   @test filesize(csvstatwtr.args[:filename]) > 400

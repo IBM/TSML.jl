@@ -31,18 +31,10 @@ function test_artificialdataplotter()
   fit!(pltr,df)
   myplot=transform!(pltr,df);
   @test isa(myplot,Plots.Plot) == true;
-  #fname=joinpath(tempdir(),"myplot.png")
-  #png(myplot,fname);
-  #@test stat(fname).size > 10000
-  #rm(fname,force=true)
   df = generatedf()
   fit!(pltr,df)
   myplot1=transform!(pltr,df);
   @test isa(myplot1,Plots.Plot) == true;
-  #fname1=joinpath(tempdir(),"myplot1.png")
-  #png(myplot1,fname1);
-  #@test stat(fname1).size > 10000
-  #rm(fname1,force=true)
 end
 @testset "Plotter: using artificial data" begin
   test_artificialdataplotter()
@@ -53,17 +45,9 @@ function test_realdataplotter()
   fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
   csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
   pltr = Plotter(Dict(:interactive => false))
-  mpipeline1 = Pipeline(Dict(
-       :transformers => [csvfilter,pltr]
-     )
-  )
-  fit!(mpipeline1)
-  myplot = transform!(mpipeline1);
+  mpipeline1 = @pipeline csvfilter |> pltr
+  myplot = fit_transform!(mpipeline1);
   @test isa(myplot,Plots.Plot) == true;
-  #fname=joinpath(tempdir(),"myplot.png")
-  #png(myplot,fname);
-  #@test stat(fname).size > 10000
-  #rm(fname,force=true)
 end
 @testset "Plotter: readcsv |> plotter" begin
   test_realdataplotter()

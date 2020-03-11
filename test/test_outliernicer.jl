@@ -33,28 +33,16 @@ function test_basicoutlier()
   mono = Monotonicer(Dict())
   outliernicer = Outliernicer(Dict(:dateinterval=>Dates.Hour(1)))
 
-  mpipeline1 = Pipeline(Dict(
-       :transformers => [csvfilter,valgator,mono,valnner,outliernicer,stfier]
-     )
-  )
-  fit!(mpipeline1)
-  respipe1 = transform!(mpipeline1)
+  mpipeline1 = @pipeline csvfilter |> valgator |> mono |> valnner |> outliernicer |> stfier
+  respipe1 = fit_transform!(mpipeline1)
   @test round(sum(respipe1[1,3:20])) == -213862.0 
 
-  mpipeline2 = Pipeline(Dict(
-       :transformers => [csvfilter,valgator,mono,outliernicer,stfier]
-     )
-  )
-  fit!(mpipeline2)
-  respipe2 = transform!(mpipeline2)
+  mpipeline2 = @pipeline csvfilter |> valgator |> mono |> outliernicer |> stfier
+  respipe2 = fit_transform!(mpipeline2)
   @test round(sum(respipe2[1,3:20])) == -219595.0 
 
-  mpipeline3 = Pipeline(Dict(
-      :transformers => [csvfilter,valgator,valnner,mono,outliernicer,stfier]
-     )
-  )
-  fit!(mpipeline3)
-  respipe3 = transform!(mpipeline3)
+  mpipeline3 = @pipeline csvfilter |> valgator |> valnner |> mono |> outliernicer |> stfier
+  respipe3 = fit_transform!(mpipeline3)
   @test round(sum(respipe3[1,3:20])) == -213862.0  
 end
 @testset "Outliernicer: readcsv |> valgator |> valnner |> mono |> outliernicer |> stfier" begin
@@ -75,26 +63,17 @@ function test_typesoutliernicer()
   mono = Monotonicer(Dict())
   outliernicer = Outliernicer(Dict(:dateinterval=>Dates.Hour(1)))
 
-  regpipeline = Pipeline(Dict(
-      :transformers => [regularfilecsv,valgator,valnner,mono,outliernicer,stfier]
-     )
-  )
+  regpipeline = @pipeline regularfilecsv |> valgator |> valnner |> mono |> outliernicer |> stfier
   fit!(regpipeline)
   regulardf=transform!(regpipeline)
   @test round(sum(regulardf[1,3:20])) == -61184.0
 
-  monopipeline = Pipeline(Dict(
-      :transformers => [monofilecsv,valgator,valnner,mono,outliernicer,stfier]
-     )
-  )
+  monopipeline = @pipeline monofilecsv |> valgator |> valnner |> mono |> outliernicer |> stfier
   fit!(monopipeline)
   monodf=transform!(monopipeline)
   @test round(sum(monodf[1,3:20])) == -890049.0 
 
-  dailymonopipeline = Pipeline(Dict(
-      :transformers => [dailymonofilecsv,valgator,valnner,mono,outliernicer,stfier]
-     )
-  )
+  dailymonopipeline = @pipeline dailymonofilecsv |> valgator |> valnner |> mono |> outliernicer |> stfier
   fit!(dailymonopipeline)
   dailymonodf=transform!(dailymonopipeline)
 

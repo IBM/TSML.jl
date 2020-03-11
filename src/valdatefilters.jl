@@ -1,10 +1,11 @@
 module ValDateFilters
 
-using TSML.TSMLTypes
-import TSML.TSMLTypes.fit! # to overload
-import TSML.TSMLTypes.transform! # to overload
-using TSML.Utils
-using TSML.Imputers
+using AutoMLPipeline.AbsTypes
+using AutoMLPipeline.Utils
+import AutoMLPipeline.AbsTypes: fit!, transform!
+
+include("imputer/Imputers.jl")
+using .Imputers
 
 using Dates
 using DataFrames
@@ -574,10 +575,7 @@ Example:
     # using pipeline workflow
     filter1 = DateValgator()
     filter2 = DateValNNer(Dict(:nnsize=>1))
-    mypipeline = Pipeline(Dict(
-          :transformers => [csvreader,filter1,filter2]
-      )
-    )
+    mypipeline = @pipeline csvreader |> filter1 |> filter2
     fit!(mypipeline)
     res=transform!(mypipeline)
 
@@ -643,12 +641,8 @@ Example:
     csvwtr = CSVDateValWriter(Dict(:filename=>outputfile,:dateformat=>"d/m/y H:M"))
     filter1 = DateValgator()
     filter2 = DateValNNer(Dict(:nnsize=>1))
-    mypipeline = Pipeline(Dict(
-          :transformers => [csvreader,filter1,filter2,csvwtr]
-      )
-    )
-    fit!(mypipeline)
-    res=transform!(mypipeline)
+    mypipeline = @pipeline csvreader |> filter1 |> filter2 |> csvwtr
+    res=fit_transform!(mypipeline)
 
     # read back what was written to validate
     csvreader = CSVDateValReader(Dict(:filename=>outputfile,:dateformat=>"y-m-d HH:MM:SS"))
@@ -716,12 +710,8 @@ Example:
     csvreader = BzCSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
     filter1 = DateValgator()
     filter2 = DateValNNer(Dict(:nnsize=>1))
-    mypipeline = Pipeline(Dict(
-          :transformers => [csvreader,filter1,filter2]
-      )
-    )
-    fit!(mypipeline)
-    res=transform!(mypipeline)
+    mypipeline = @pipeline csvreader |> filter1 |> filter2
+    res=fit_transform!(mypipeline)
 
 Implements: `fit!`, `transform!`
 """

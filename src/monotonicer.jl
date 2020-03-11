@@ -4,10 +4,9 @@ using Dates
 using DataFrames
 using Statistics
 
-using TSML.TSMLTypes
-import TSML.TSMLTypes.fit! # to overload
-import TSML.TSMLTypes.transform! # to overload
-using TSML.Utils
+using AutoMLPipeline.AbsTypes
+using AutoMLPipeline.Utils
+import AutoMLPipeline.AbsTypes: fit!, transform!
 
 export fit!,transform!
 export Monotonicer,ismonotonic,dailyflips
@@ -31,12 +30,8 @@ Example:
     stfier = Statifier(Dict(:processmissing=>true))
     mono = Monotonicer(Dict())
     
-    mypipeline = Pipeline(Dict(
-        :transformers => [csvfilter,valgator,mono,stfier]
-       )
-    )
-    fit!(mypipeline)
-    result = transform!(mypipeline)
+    mypipeline = @pipeline csvfilter |> valgator |> mono |> stfier
+    result = fit_transform!(mypipeline)
 
 
 Implements: `fit!`, `transform!`

@@ -7,10 +7,9 @@ using Statistics
 using MultivariateStats
 using Random
 
-using TSML.Utils
-using TSML.TSMLTypes
-import TSML.TSMLTypes.fit! # to overload
-import TSML.TSMLTypes.transform! # to overload
+using AutoMLPipeline.AbsTypes
+using AutoMLPipeline.Utils
+import AutoMLPipeline.AbsTypes: fit!, transform!
 
 export fit!,transform!
 export Normalizer
