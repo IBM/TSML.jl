@@ -1,0 +1,14 @@
+```@meta
+Author = "Paulito Palmes"
+```
+
+# [SKLearners](@id lib_sklearners)
+Creates an API wrapper for Scikit Learners for pipeline workflow.
+
+```@index
+Modules = [SKLearners]
+```
+
+```@autodocs
+Modules = [SKLearners]
+```
