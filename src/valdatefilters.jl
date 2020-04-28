@@ -22,6 +22,7 @@ export BzCSVDateValReader
 
 include("Imputers.jl")
 using .Imputers
+export impute, impute!, chain, chain!, drop, drop!, interp, interp!, ImputeError, locf, nocb
 
 const gAggDict = Dict(
     :median => Statistics.median,
