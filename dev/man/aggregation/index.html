@@ -5,19 +5,19 @@ gdate = DateTime(2014,1,1):Dates.Minute(5):DateTime(2014,5,1)
 gval = rand(length(gdate))
 df = DataFrame(Date=gdate,Value=gval)</code></pre><pre><code class="language-julia-repl">julia&gt; first(df,10)
 10×2 DataFrame
-│ Row │ Date                │ Value     │
-│     │ DateTime            │ Float64   │
-├─────┼─────────────────────┼───────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.685179  │
-│ 2   │ 2014-01-01T00:05:00 │ 0.866773  │
-│ 3   │ 2014-01-01T00:10:00 │ 0.728295  │
-│ 4   │ 2014-01-01T00:15:00 │ 0.0664921 │
-│ 5   │ 2014-01-01T00:20:00 │ 0.380839  │
-│ 6   │ 2014-01-01T00:25:00 │ 0.151105  │
-│ 7   │ 2014-01-01T00:30:00 │ 0.605734  │
-│ 8   │ 2014-01-01T00:35:00 │ 0.916636  │
-│ 9   │ 2014-01-01T00:40:00 │ 0.746059  │
-│ 10  │ 2014-01-01T00:45:00 │ 0.437342  │</code></pre><h2 id="DateValgator-1"><a class="docs-heading-anchor" href="#DateValgator-1">DateValgator</a><a class="docs-heading-anchor-permalink" href="#DateValgator-1" title="Permalink"></a></h2><p>Let&#39;s apply the aggregator and try diffent groupings: hourly vs half hourly vs daily aggregates of the data.</p><pre><code class="language-julia">using TSML
+│ Row │ Date                │ Value    │
+│     │ DateTime            │ Float64  │
+├─────┼─────────────────────┼──────────┤
+│ 1   │ 2014-01-01T00:00:00 │ 0.934687 │
+│ 2   │ 2014-01-01T00:05:00 │ 0.679939 │
+│ 3   │ 2014-01-01T00:10:00 │ 0.830451 │
+│ 4   │ 2014-01-01T00:15:00 │ 0.456765 │
+│ 5   │ 2014-01-01T00:20:00 │ 0.290691 │
+│ 6   │ 2014-01-01T00:25:00 │ 0.792234 │
+│ 7   │ 2014-01-01T00:30:00 │ 0.215823 │
+│ 8   │ 2014-01-01T00:35:00 │ 0.660633 │
+│ 9   │ 2014-01-01T00:40:00 │ 0.71266  │
+│ 10  │ 2014-01-01T00:45:00 │ 0.22854  │</code></pre><h2 id="DateValgator-1"><a class="docs-heading-anchor" href="#DateValgator-1">DateValgator</a><a class="docs-heading-anchor-permalink" href="#DateValgator-1" title="Permalink"></a></h2><p>Let&#39;s apply the aggregator and try diffent groupings: hourly vs half hourly vs daily aggregates of the data.</p><pre><code class="language-julia">using TSML
 
 hourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Hour(1)))
 halfhourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Minute(30)))
@@ -32,30 +32,30 @@ dailyres = fit_transform!(dailyagg,df)</code></pre><p>The first 5 rows of half-h
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.685179 │
-│ 2   │ 2014-01-01T00:30:00 │ 0.605734 │
-│ 3   │ 2014-01-01T01:00:00 │ 0.683498 │
-│ 4   │ 2014-01-01T01:30:00 │ 0.926756 │
-│ 5   │ 2014-01-01T02:00:00 │ 0.293184 │
+│ 1   │ 2014-01-01T00:00:00 │ 0.934687 │
+│ 2   │ 2014-01-01T00:30:00 │ 0.215823 │
+│ 3   │ 2014-01-01T01:00:00 │ 0.387356 │
+│ 4   │ 2014-01-01T01:30:00 │ 0.56136  │
+│ 5   │ 2014-01-01T02:00:00 │ 0.179001 │
 
 julia&gt; first(hourlyres,5)
 5×2 DataFrame
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.533009 │
-│ 2   │ 2014-01-01T01:00:00 │ 0.599242 │
-│ 3   │ 2014-01-01T02:00:00 │ 0.614209 │
-│ 4   │ 2014-01-01T03:00:00 │ 0.460766 │
-│ 5   │ 2014-01-01T04:00:00 │ 0.500271 │
+│ 1   │ 2014-01-01T00:00:00 │ 0.736086 │
+│ 2   │ 2014-01-01T01:00:00 │ 0.386271 │
+│ 3   │ 2014-01-01T02:00:00 │ 0.434528 │
+│ 4   │ 2014-01-01T03:00:00 │ 0.480275 │
+│ 5   │ 2014-01-01T04:00:00 │ 0.48336  │
 
 julia&gt; first(dailyres,5)
 5×2 DataFrame
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64⍰ │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.572583 │
-│ 2   │ 2014-01-02T00:00:00 │ 0.45534  │
-│ 3   │ 2014-01-03T00:00:00 │ 0.496448 │
-│ 4   │ 2014-01-04T00:00:00 │ 0.525221 │
-│ 5   │ 2014-01-05T00:00:00 │ 0.510317 │</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../dateproc/">« Date PreProcessing</a><a class="docs-footer-nextpage" href="../imputation/">Imputation »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 29 April 2020 00:37">Wednesday 29 April 2020</span>. Using Julia version 1.4.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+│ 1   │ 2014-01-01T00:00:00 │ 0.492059 │
+│ 2   │ 2014-01-02T00:00:00 │ 0.436998 │
+│ 3   │ 2014-01-03T00:00:00 │ 0.521922 │
+│ 4   │ 2014-01-04T00:00:00 │ 0.527645 │
+│ 5   │ 2014-01-05T00:00:00 │ 0.507769 │</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../dateproc/">« Date PreProcessing</a><a class="docs-footer-nextpage" href="../imputation/">Imputation »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 29 April 2020 09:36">Wednesday 29 April 2020</span>. Using Julia version 1.4.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
