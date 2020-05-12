@@ -54,18 +54,18 @@ loading model from file: /home/travis/build/IBM/TSML.jl/src/../data/realdatatscl
 
 julia&gt; first(dfresults,5)
 5×2 DataFrame
-│ Row │ fname           │ predtype  │
-│     │ String          │ SubStrin… │
-├─────┼─────────────────┼───────────┤
-│ 1   │ AirOffTemp4.csv │ Pressure  │
-│ 2   │ AirOffTemp5.csv │ Pressure  │
-│ 3   │ Energy5.csv     │ Energy    │
-│ 4   │ Pressure5.csv   │ Pressure  │
-│ 5   │ RetTemp31.csv   │ Energy    │</code></pre><p>The table above shows the prediction corresponding to each filename which is the groundtruth. We can compute the accuracy by extracting from the filename the TS type and compare it with the corresponding prediction. Below computes the prediction accuracy:</p><pre><code class="language-julia">prediction = dfresults.predtype
+│ Row │ fname           │ predtype   │
+│     │ String          │ SubStrin…  │
+├─────┼─────────────────┼────────────┤
+│ 1   │ AirOffTemp4.csv │ AirOffTemp │
+│ 2   │ AirOffTemp5.csv │ AirOffTemp │
+│ 3   │ Energy5.csv     │ Energy     │
+│ 4   │ Pressure5.csv   │ Pressure   │
+│ 5   │ RetTemp31.csv   │ Energy     │</code></pre><p>The table above shows the prediction corresponding to each filename which is the groundtruth. We can compute the accuracy by extracting from the filename the TS type and compare it with the corresponding prediction. Below computes the prediction accuracy:</p><pre><code class="language-julia">prediction = dfresults.predtype
 fnames = dfresults.fname
 myregex = r&quot;(?&lt;dtype&gt;[A-Z _ - a-z]+)(?&lt;number&gt;\d*).(?&lt;ext&gt;\w+)&quot;
 groundtruth=map(fnames) do fname
   mymatch=match(myregex,fname)
   mymatch[:dtype]
 end</code></pre><pre><code class="language-julia-repl">julia&gt; sum(groundtruth .== prediction) / length(groundtruth) * 100
-40.0</code></pre><p>Of course we need more data to split between training and testing to improve accuracy and get a more stable measurement of performance.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../monotonic_plotting/">« Monotonic Detection and Plotting</a><a class="docs-footer-nextpage" href="../../man/valueproc/">Value PreProcessing »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 29 April 2020 11:59">Wednesday 29 April 2020</span>. Using Julia version 1.4.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+80.0</code></pre><p>Of course we need more data to split between training and testing to improve accuracy and get a more stable measurement of performance.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../monotonic_plotting/">« Monotonic Detection and Plotting</a><a class="docs-footer-nextpage" href="../../man/valueproc/">Value PreProcessing »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 12 May 2020 11:14">Tuesday 12 May 2020</span>. Using Julia version 1.4.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
