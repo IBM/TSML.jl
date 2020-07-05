@@ -175,8 +175,8 @@ function getfilestat(ldirname::AbstractString,lfname::AbstractString)
   stfier = Statifier(Dict(:processmissing=>false))
   mpipeline = @pipeline csvfilter |> valgator |> valnner |> stfier
   df = fit_transform!(mpipeline)
-  df[!,:dtype] .= dtype
-  df[!,:fname] .= lfname
+  df.dtype = repeat([dtype],nrow(df))
+  df.fname = repeat([lfname],nrow(df))
   return (df)
 end
 
@@ -220,10 +220,11 @@ function getstats(ldirname::AbstractString)
   ldirname != "" || error("directory name empty")
   mfiles = readdir(ldirname) |> x->filter(y->match(r".csv",y) != nothing,x)
   mfiles != [] || error("empty csv directory")
+  #df = serialloop(ldirname,mfiles)
   # get julia version and run threads if julia 1.3
   jversion = string(Base.VERSION)
   df = DataFrame()
-  if match(r"^1.3",jversion) === nothing
+  if match(r"^1.5",jversion) === nothing
     df = serialloop(ldirname,mfiles)
   else
     df = threadloop(ldirname,mfiles)
