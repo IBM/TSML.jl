@@ -1,5 +1,6 @@
 module TSML
 
+using Requires
 using AutoMLPipeline
 using AutoMLPipeline.BaseFilters
 import AutoMLPipeline.AbsTypes: fit!, transform!
@@ -68,9 +69,6 @@ include("outliernicer.jl")
 using .Outliernicers
 export Outliernicer
 
-include("plotter.jl")
-using .Plotters
-export Plotter
 
 include("timescaledb.jl")
 using .TimescaleDBs
@@ -97,7 +95,15 @@ include("argparse.jl")
 using .ArgumentParsers
 export tsmlmain
 
-include("demo.jl")
-using .TSMLDemo
-export tsml_demo
+function __init__()
+  @require Plots="91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
+    include("plotter.jl") 
+    using .Plotters
+    export Plotter
+    include("demo.jl")
+    using .TSMLDemo
+    export tsml_demo
+  end
+end
+
 end # module
