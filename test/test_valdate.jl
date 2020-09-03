@@ -2,6 +2,7 @@ module TestDateVal
 
 using Test
 using TSML
+using DataFrames
 
 function generateXY()
     Random.seed!(123)
@@ -22,9 +23,7 @@ function test_datevalizer()
     dvzr1 = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
     dvzr2 = DateValizer(dvzr1.args)
     @test dvzr1.args == dvzr2.args
-    fit!(dvzr2,XX,YY)
-    @test size(dvzr2.args[:medians]) == (24,2)
-    res = transform!(dvzr2,XX)
+    res = fit_transform!(dvzr2,XX)
     @test sum(ismissing.(res.Value)) == 0
     @test sum(X1.Value .!== XX.Value) == 0
     @test sum(Y1 .!== YY) == 0
@@ -37,8 +36,7 @@ end
 
 function test_datevalgator()
     dtvl = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-    fit!(dtvl,XX,YY)
-    res = transform!(dtvl,XX)
+    res = fit_transform!(dtvl,XX)
     @test sum(ismissing.(res.Value)) == 4466
     @test round(sum(skipmissing(res.Value)),digits=2) == 6556.17
     @test sum(X1.Value .!== XX.Value) == 0
@@ -47,24 +45,21 @@ function test_datevalgator()
     dtvlmean = DateValgator(Dict(
 	  :dateinterval=>Dates.Hour(1),
 	  :aggregator => :mean))
-    fit!(dtvlmean,XX,YY)
-    res = transform!(dtvlmean,XX)
+    res = fit_transform!(dtvlmean,XX)
     @test sum(ismissing.(res.Value)) == 4466
     @test round(sum(skipmissing(res.Value)),digits=2) == 6557.97
 
     dtvlmax = DateValgator(Dict(
 	  :dateinterval=>Dates.Hour(1),
 	  :aggregator => :maximum))
-    fit!(dtvlmax,XX,YY)
-    res = transform!(dtvlmax,XX)
+    res = fit_transform!(dtvlmax,XX)
     @test sum(ismissing.(res.Value)) == 4466
     @test round(sum(skipmissing(res.Value)),digits=2) == 7599.95
 
     dtvlmin = DateValgator(Dict(
 	  :dateinterval=>Dates.Hour(1),
 	  :aggregator => :minimum))
-    fit!(dtvlmin,XX,YY)
-    res = transform!(dtvlmin,XX)
+    res = fit_transform!(dtvlmin,XX)
     @test sum(ismissing.(res.Value)) == 4466
     @test round(sum(skipmissing(res.Value)),digits=2) == 5516.92
 end
@@ -79,8 +74,7 @@ function test_datevalnner()
 	  :missdirection => :symmetric,
 	  :strict=>true,
 	  :aggregator => :mean))
-    fit!(dnnr,XX,YY)
-    res=transform!(dnnr,XX)
+    res=fit_transform!(dnnr,XX)
     @test sum(size(res) .== (17521,2)) == 2
     @test round(sum(res.Value),digits=2) == 8807.28
 
@@ -90,8 +84,7 @@ function test_datevalnner()
 	  :missdirection => :symmetric,
 	  :strict=>true,
 	  :aggregator => :maximum))
-    fit!(dnnr,XX,YY)
-    res=transform!(dnnr,XX)
+    res=fit_transform!(dnnr,XX)
     @test sum(size(res) .== (17521,2)) == 2
     @test round(sum(res.Value),digits=2) == 10339.47
     dnnr = DateValNNer(Dict(
@@ -100,8 +93,7 @@ function test_datevalnner()
 	  :missdirection => :symmetric,
 	  :strict=>true,
 	  :aggregator => :minimum))
-    fit!(dnnr,XX,YY)
-    res=transform!(dnnr,XX)
+    res=fit_transform!(dnnr,XX)
     @test sum(size(res) .== (17521,2)) == 2
     @test round(sum(res.Value),digits=2) == 7290.01
 
@@ -110,21 +102,20 @@ function test_datevalnner()
 	  :nnsize=>10,
 	  :missdirection => :forward,
 	  :strict=>true))
-    fit!(dnnr,XX,YY)
-    res=transform!(dnnr,XX)
+    res=fit_transform!(dnnr,XX)
     @test sum(size(res) .== (701,2)) == 2
     @test round(sum(res.Value),digits=2) == 350.57
 
     dnnr.args[:missdirection] = :reverse
-    res=transform!(dnnr,XX)
+    res=TSML.transform!(dnnr,XX)
     @test sum(size(res) .== (701,2)) == 2
     @test round(sum(res.Value),digits=2) == 350.17
     dnnr.args[:dateinterval]=Dates.Hour(1)
-    @test_throws ErrorException res=transform!(dnnr,XX) 
+    @test_throws ErrorException res=TSML.transform!(dnnr,XX) 
     dnnr.args[:missdirection] = :reverse
-    @test_throws ErrorException res=transform!(dnnr,XX) 
+    @test_throws ErrorException res=TSML.transform!(dnnr,XX) 
     dnnr.args[:missdirection] = :symmetric
-    @test sum(size(transform!(dnnr,XX)) .== (17521,2)) == 2
+    @test sum(size(TSML.transform!(dnnr,XX)) .== (17521,2)) == 2
 
     # testing boundaries
     Random.seed!(123)
@@ -138,19 +129,19 @@ function test_datevalnner()
     x=DataFrame(Date=v1,Value=val)
     x[45:end-1,:Value] .= missing
     fit!(dlnr,x,[])
-    @test_throws ErrorException transform!(dlnr,x)
+    @test_throws ErrorException TSML.transform!(dlnr,x)
     dlnr.args[:missdirection] = :reverse
-    res = transform!(dlnr,x)
+    res = TSML.transform!(dlnr,x)
     @test sum((size(res)) .== (49,2)) == 2
     @test round(sum(res.Value),digits=2) == 27.85
     dlnr.args[:missdirection] = :forward
     dlnr.args[:strict] = false
-    @test sum(ismissing.(transform!(dlnr,x)[!,:Value])) == 2
+    @test sum(ismissing.(TSML.transform!(dlnr,x)[!,:Value])) == 2
     dlnr.args[:missdirection] = :symmetric
-    @test sum(ismissing.(transform!(dlnr,x)[!,:Value])) == 0
+    @test sum(ismissing.(TSML.transform!(dlnr,x)[!,:Value])) == 0
     defdnr=DateValNNer(Dict(:strict=>false))
     fit!(defdnr,XX,YY)
-    @test sum((size(transform!(defdnr,XX))) .== (17521,2)) == 2
+    @test sum((size(TSML.transform!(defdnr,XX))) .== (17521,2)) == 2
 
     # test with controlled locations of missings
     dlnr = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),
@@ -163,12 +154,12 @@ function test_datevalnner()
     x[1:10,:Value] .= missing
     x[20:30,:Value] .= missing
     fit!(dlnr,x,[])
-    res = transform!(dlnr,x)
-    @test sum(ismissing.(transform!(dlnr,x)[!,:Value])) == 6
+    res = TSML.transform!(dlnr,x)
+    @test sum(ismissing.(TSML.transform!(dlnr,x)[!,:Value])) == 6
     dlnr.args[:missdirection] = :reverse
-    @test sum(ismissing.(transform!(dlnr,x)[!,:Value])) == 5 
+    @test sum(ismissing.(TSML.transform!(dlnr,x)[!,:Value])) == 5 
     dlnr.args[:missdirection] = :symmetric
-    @test sum(ismissing.(transform!(dlnr,x)[!,:Value])) == 0
+    @test sum(ismissing.(TSML.transform!(dlnr,x)[!,:Value])) == 0
 end
 @testset "DateValNNer: replace missings with nearest neighbors" begin
     test_datevalnner()
@@ -182,10 +173,10 @@ function test_dateifier()
   vals = rand(length(dat))
   x=DataFrame(Date=dat,Value=vals)
   fit!(dtr,x)
-  res = transform!(dtr,x)
+  res = TSML.transform!(dtr,x)
   @test sum(size(res) .== (389,8)) == 2
   dtr.args[:stride]=2
-  res = transform!(dtr,x)
+  res = TSML.transform!(dtr,x)
   @test sum(size(res) .== (194,8)) == 2
 end
 @testset "Dateifier: extract sliding windows date features" begin
@@ -200,22 +191,21 @@ function test_matrifier()
   dat=lower:Dates.Hour(1):upper |> collect 
   vals = 1:length(dat)
   x = DataFrame(Date=dat,Value=vals)
-  fit!(mtr,x)
-  res = transform!(mtr,x)
+  res = fit_transform!(mtr,x)
   @test sum(size(res) .== (10,25)) == 2
   mtr.args = Dict(:ahead=>24,:size=>24,:stride=>1)
-  res = transform!(mtr,x)
+  res = TSML.transform!(mtr,x)
   @test sum(size(res) .== (50,25)) == 2
   mtr.args = Dict(:ahead=>1,:size=>24,:stride=>12)
-  res = transform!(mtr,x)
+  res = TSML.transform!(mtr,x)
   @test sum(size(res) .== (6,25)) == 2
   dtr = Matrifier()
   fit!(dtr,x)
-  res = transform!(dtr,x)
+  res = TSML.transform!(dtr,x)
   res
   @test sum(size(res) .== (90,8)) == 2
   dtr.args = Dict(:ahead=>-1,:size=>24,:stride=>12)
-  @test_throws AssertionError transform!(dtr,x)
+  @test_throws AssertionError TSML.transform!(dtr,x)
 end
 @testset "Dateifier: extract sliding windows date features" begin
     test_matrifier()
@@ -269,20 +259,23 @@ end
 #end
 
 function test_statoutputwriter()
+
   inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
   statoutputfile = joinpath(dirname(pathof(TSML)),"../data/testdata_stat.csv")
   csvreader = CSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
   csvstatwtr = CSVDateValWriter(Dict(:filename=>statoutputfile))
   statfier = statfier = Statifier(Dict(:processmissing=>true))
-  filter1 = DateValgator()
+  filter1 = DateValgator(Dict(:nnsize=>1))
   filter2 = DateValNNer(Dict(:nnsize=>1))
 
-  mypipeline = @pipeline csvreader |> filter1 |> filter2 |> statfier |> csvstatwtr
+  mypipeline = @pipeline csvreader |> filter1  |> filter2 |> statfier  |> csvstatwtr
   res=fit_transform!(mypipeline)
+
   @test nrow(res) == 1
   @test ncol(res) == 26
   @test filesize(csvstatwtr.args[:filename]) > 400
   rm(statoutputfile,force=true)
+
 end
 @testset "CSVDateValReaderWriter: writing stat output" begin
   test_statoutputwriter()
@@ -303,13 +296,11 @@ function test_datevalmultinner()
   X.Humidity[gndxmissing2] .= missing
   X.Ozone[gndxmissing3] .= missing
   dnnr = DateValMultiNNer(Dict(:type=>:linear))
-  fit!(dnnr,X)
-  res = transform!(dnnr,X)
+  res = fit_transform!(dnnr,X)
   mysum(x)=sum(skipmissing(x))
   @test mysum.(eachcol(res[:,2:end])) |> sum == 26363.629570617708
   dnnr = DateValMultiNNer(Dict(:type=>:knn))
-  fit!(dnnr,X)
-  res = transform!(dnnr,X)
+  res = fit_transform!(dnnr,X)
   @test mysum.(eachcol(res[:,2:end]))  |> sum == 26368.053898361875
   dnnr = DateValMultiNNer()
   @test_throws ErrorException fit!(dnnr,DataFrame(Date=X.Date,Value1=X.Date,Value2=X.Temperature))
@@ -327,8 +318,7 @@ function test_datevallinearimputer()
     X = DataFrame(Date=gdate,Value=gval)
     X.Value[gndxmissing] .= missing
     dnnr = DateValLinearImputer()
-    fit!(dnnr,X)
-    @test transform!(dnnr,X) |> x-> sum(x.Value) == 8791.719321255328
+    @test fit_transform!(dnnr,X) |> x-> sum(x.Value) == 8791.719321255328
 end
 @testset "DateValLinearImputer: linear imputation" begin
   test_datevallinearimputer()

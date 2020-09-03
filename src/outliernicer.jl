@@ -72,7 +72,7 @@ Locate outliers based on IQR factor and calls DateValNNer to replace them with n
 function transform!(st::Outliernicer, features::DataFrame)
   features != DataFrame() || return DataFrame()
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
-  sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
+  sum(names(features) .== ("Date","Value"))  == 2 || error("wrong column names")
   mfeatures=deepcopy(features)
   rvals = mfeatures.Value
   # compute the outlier range

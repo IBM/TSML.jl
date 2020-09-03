@@ -86,9 +86,9 @@ using AutoMLPipeline.Pipelines
 export @pipeline @pipelinex
 export Pipeline, ComboPipeline
 
-include("schema.jl")
-using .Schemalizers
-export Schemalizer, ML, table
+#include("schema.jl")
+#using .Schemalizers
+#export Schemalizer, ML, table
 
 using AutoMLPipeline.CrossValidators
 export crossvalidate

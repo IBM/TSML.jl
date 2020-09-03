@@ -67,7 +67,7 @@ Normalize monotonic or daily monotonic data by taking the diffs and counting the
 function transform!(st::Monotonicer, features::DataFrame)
   features != DataFrame() || return DataFrame()
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
-  sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
+  sum(names(features) .== ("Date","Value"))  == 2 || error("wrong column names")
   mfeatures=features
   # double check monotonic 
   # based on flips and daily flips
@@ -110,7 +110,7 @@ function antimonotonize(data::DataFrame)
   dat = deepcopy(data)
   typeof(dat) <: DataFrame || error("input must be a dataframe")
   ncol(dat) == 2 || error("input must have two columns")
-  sum(names(dat) .== (:Date,:Value))  == 2 || error("wrong column names")
+  sum(names(dat) .== ("Date","Value"))  == 2 || error("wrong column names")
   vals = dat.Value
   fvals = diff(vals)
   dvals = [fvals[1];fvals]

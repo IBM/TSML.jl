@@ -6,7 +6,8 @@ import AutoMLPipeline.AbsTypes: fit!, transform!
 
 
 using Dates
-using DataFrames
+using DataFrames: DataFrame, rename!, by, ncol
+
 using Statistics
 using CSV
 #using CodecBzip2

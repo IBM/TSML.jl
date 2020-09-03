@@ -74,7 +74,7 @@ function transform!(st::Statifier, features::DataFrame=DataFrame())
   features != [] || return DataFrame()
   typeof(features) <: DataFrame || error("Statifier.fit!: data should be a dataframe: Date,Val ")
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
-  sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
+  sum(names(features) .== ("Date","Value"))  == 2 || error("wrong column names")
   fstat = tsmlfullstat(features.Value)
   timestat = timevalstat(features)
   if st.args[:processmissing] == true

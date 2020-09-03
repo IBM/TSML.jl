@@ -12,7 +12,7 @@ function getprediction(model::Learner,data::Dict)
   troutput = data[:troutput]
   tstoutput = data[:tstoutput]
   fit!(model,trfeatures,troutput)
-  trresults = transform!(model,tstfeatures)
+  trresults = TSML.transform!(model,tstfeatures)
   sum(trresults .== tstoutput)/length(tstoutput)
 end
 

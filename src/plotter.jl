@@ -81,7 +81,7 @@ Convert `missing` into `NaN` to allow plotting of discontinuities.
 function transform!(pltr::Plotter, features::DataFrame)
   features != DataFrame() || return DataFrame()
   ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
-  sum(names(features) .== (:Date,:Value))  == 2 || error("wrong column names")
+  sum(names(features) .== ("Date","Value"))  == 2 || error("wrong column names")
   # covert missing to NaN
   df = deepcopy(features)
   df.Value = Array{Union{Missing, Float64,eltype(features.Value)},1}(missing,nrow(df))

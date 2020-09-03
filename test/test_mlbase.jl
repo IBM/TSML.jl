@@ -24,7 +24,7 @@ using DataFrames
     ] |> DataFrame
     standard_scaler = StandardScaler()
     fit!(standard_scaler, features, labels)
-    transformed = transform!(standard_scaler, features)
+    transformed = TSML.transform!(standard_scaler, features)
     @test (transformed .== expected_transformed) |> Matrix |> sum == 6
   end
 
