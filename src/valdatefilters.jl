@@ -6,7 +6,7 @@ import AutoMLPipeline.AbsTypes: fit!, transform!
 
 
 using Dates
-using DataFrames: DataFrame, rename!, by, ncol
+using DataFrames: DataFrame,rename!,ncol,groupby,combine
 
 using Statistics
 using CSV
@@ -280,7 +280,7 @@ function transform!(dvmr::DateValgator,xx::DataFrame)
   grpby = typeof(dvmr.args[:dateinterval])
   sym = Symbol(grpby)
   x[!,sym] = round.(x.Date,grpby)
-  aggr=by(x,sym,MeanValue = :Value=>fn)
+  aggr=combine(groupby(x,sym),MeanValue = :Value=>fn)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
   lower = round(minimum(x.Date),grpby)
   upper = round(maximum(x.Date),grpby)
@@ -345,7 +345,7 @@ function getMedian(t::Type{T},xx::DataFrame) where {T<:Union{TimePeriod,DatePeri
   catch
     error("unknown dateinterval")
   end
-  gpmeans = by(x,sgp,Value = :Value => skipmedian)
+  gpmeans = combine(groupby(x,sgp),Value = :Value => skipmedian)
   gpmeans
 end
 
@@ -354,7 +354,7 @@ function fullaggregate!(dvzr::DateValizer,xx::DataFrame)
   grpby = typeof(dvzr.args[:dateinterval])
   sym = Symbol(grpby)
   x[!,sym] = round.(x.Date,grpby)
-  aggr = by(x,sym,MeanValue = :Value=>skipmedian)
+  aggr = combine(groupby(x,sym),MeanValue = :Value=>skipmedian)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
   lower = minimum(x.Date)
   upper = maximum(x.Date)
@@ -503,7 +503,7 @@ function transform!(dnnr::DateValNNer,xx::DataFrame)
   sym = Symbol(grpby)
   # aggregate by time period
   x[!,sym] = round.(x.Date,grpby)
-  aggr = by(x,sym,MeanValue = :Value=>fn)
+  aggr = combine(groupby(x,sym),MeanValue = :Value=>fn)
   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
   lower = round(minimum(x.Date),grpby)
   upper = round(maximum(x.Date),grpby)
