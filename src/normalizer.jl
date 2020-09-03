@@ -2,7 +2,7 @@ module Normalizers
 
 using StatsBase
 using Dates
-using DataFrames
+using DataFrames: DataFrame
 using Statistics
 using MultivariateStats
 using Random
@@ -13,6 +13,8 @@ import AutoMLPipeline.AbsTypes: fit!, transform!
 
 export fit!,transform!
 export Normalizer
+
+const MV=MultivariateStats
 
 
 """
@@ -148,8 +150,8 @@ end
 # pca
 function pca(X)
   xp = X' |> collect |> Matrix{Float64}
-  m = fit(PCA,xp)
-  transform(m,xp)' |> collect
+  m = MV.fit(PCA,xp)
+  MV.transform(m,xp)' |> collect
 end
 
 
@@ -159,71 +161,23 @@ function ica(X,kk::Int=0)
     k = size(X)[2]
   end
   xp = X' |> collect |> Matrix{Float64}
-  m = fit(ICA,xp,k)
-  transform(m,xp)' |> collect
+  m = MV.fit(ICA,xp,k)
+  MV.transform(m,xp)' |> collect
 end
 
 
 # ppca
 function ppca(X)
   xp = X' |> collect |> Matrix{Float64}
-  m = fit(PPCA,xp)
-  transform(m,xp)' |> collect
+  m = MV.fit(PPCA,xp)
+  MV.transform(m,xp)' |> collect
 end
 
 # fa
 function fa(X)
   xp = X' |> collect |> Matrix{Float64}
-  m = fit(FactorAnalysis,xp)
-  transform(m,xp)' |> collect
-end
-
-function generatedf()
-    Random.seed!(123)
-    gdate = DateTime(2014,1,1):Dates.Minute(15):DateTime(2016,1,1)
-    gval1 = rand(length(gdate))
-    gval2 = rand(length(gdate))
-    gval3 = rand(length(gdate))
-    X = DataFrame(Date=gdate,Value1=gval1,Value2=gval2,Value3=gval3)
-    X
-end
-
-function testnormalizer()
-  X = generatedf()
-  norm = Normalizer(Dict(:method => :zscore))
-  fit!(norm,X)
-  res=transform!(norm,X)
-  @assert isapprox(mean(res[:,1]),0.0,atol=1e-8)
-  @assert isapprox(mean(res[:,2]),0.0,atol=1e-8)
-  @assert isapprox(std(res[:,1]),1.0,atol=1e-8)
-  @assert isapprox(std(res[:,2]),1.0,atol=1e-8)
-  norm = Normalizer(Dict(:method => :unitrange))
-  fit!(norm,X)
-  res=transform!(norm,X)
-  @assert isapprox(minimum(res[:,1]),0.0,atol=1e-8)
-  @assert isapprox(minimum(res[:,2]),0.0,atol=1e-8)
-  @assert isapprox(maximum(res[:,1]),1.0,atol=1e-8)
-  @assert isapprox(maximum(res[:,2]),1.0,atol=1e-8)
-  norm = Normalizer(Dict(:method => :pca))
-  fit!(norm,X)
-  res=transform!(norm,X)
-  @assert isapprox(std(res[:,1]),0.28996,atol=1e-2)
-  norm = Normalizer(Dict(:method => :fa))
-  fit!(norm,X)
-  res = transform!(norm,X)
-  @assert isapprox(std(res[:,1]),0.81670,atol=1e-2)
-  norm = Normalizer(Dict(:method => :ppca))
-  fit!(norm,X)
-  res = transform!(norm,X)
-  @assert isapprox(std(res[:,1]),0.00408,atol=1e-2)
-  norm = Normalizer(Dict(:method => :log))
-  fit!(norm,X)
-  res = transform!(norm,X)
-  @assert isapprox(std(res[:,1]),0.99941,atol=1e-2)
-  norm = Normalizer(Dict(:method => :sqrt))
-  fit!(norm,X)
-  res = transform!(norm,X)
-  @assert isapprox(std(res[:,1]),0.2355,atol=1e-2)
+  m = MV.fit(FactorAnalysis,xp)
+  MV.transform(m,xp)' |> collect
 end
 
 end
