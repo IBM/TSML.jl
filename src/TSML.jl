@@ -98,10 +98,10 @@ export tsmlmain
 function __init__()
   @require Plots="91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
     include("plotter.jl") 
-    using .Plotters
+    @eval using .Plotters
     export Plotter
     include("demo.jl")
-    using .TSMLDemo
+    @eval using .TSMLDemo
     export tsml_demo
   end
 end
