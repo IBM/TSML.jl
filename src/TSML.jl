@@ -1,5 +1,6 @@
 module TSML
 
+using Requires
 using AutoMLPipeline
 using AutoMLPipeline.BaseFilters
 import AutoMLPipeline.AbsTypes: fit!, transform!
@@ -13,16 +14,15 @@ export holdout, kfold, score, infer_eltype, nested_dict_to_tuples,
        mergedict, getiris,
        skipmean,skipmedian,skipstd,
        aggregatorclskipmissing
-
+ 
 export fit!, transform!,fit_transform!
 
 # reexport common functions to Main
 include("pkgdeps.jl")
 using .PkgDeps
 
-include("baseline.jl")
-using .BaselineAlgos
-export Baseline,Identity
+using AutoMLPipeline.Baselines
+export Baseline, Identity
 
 using AutoMLPipeline.BaseFilters: Imputer, OneHotEncoder, Wrapper
 export Imputer,OneHotEncoder,Wrapper
@@ -68,9 +68,6 @@ include("outliernicer.jl")
 using .Outliernicers
 export Outliernicer
 
-include("plotter.jl")
-using .Plotters
-export Plotter
 
 include("timescaledb.jl")
 using .TimescaleDBs
@@ -97,7 +94,15 @@ include("argparse.jl")
 using .ArgumentParsers
 export tsmlmain
 
-include("demo.jl")
-using .TSMLDemo
-export tsml_demo
+function __init__()
+  @require Plots="91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
+    include("plotter.jl") 
+    @eval using .Plotters
+    export Plotter
+    include("demo.jl")
+    @eval using .TSMLDemo
+    export tsml_demo
+  end
+end
+
 end # module

@@ -1,4 +1,5 @@
 using Documenter, DocumenterTools, DocumenterLaTeX
+using Plots
 using TSML
 
 const ROOT = joinpath(@__DIR__, "..")
@@ -19,7 +20,7 @@ doc = makedocs(
       	 "tutorial/aggregators.md",
       	 "tutorial/pipeline.md",
       	 "tutorial/statistics.md",
-         "tutorial/monotonic_plotting_pdf.md",
+          "tutorial/monotonic_plotting_pdf.md",
       	 "tutorial/tsclassifier.md"
        ],
       "Manual" => Any[
