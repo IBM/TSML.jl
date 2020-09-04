@@ -1,4 +1,5 @@
 using Documenter, DocumenterTools, DocumenterLaTeX
+using Plots
 using TSML
 
 const ROOT = joinpath(@__DIR__, "..")
