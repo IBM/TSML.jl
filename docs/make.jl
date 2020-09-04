@@ -1,4 +1,6 @@
-using Documenter, TSML
+using Documenter
+using Plots
+using TSML
 
 makedocs(
   source = "src",

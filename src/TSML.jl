@@ -14,16 +14,15 @@ export holdout, kfold, score, infer_eltype, nested_dict_to_tuples,
        mergedict, getiris,
        skipmean,skipmedian,skipstd,
        aggregatorclskipmissing
-
+ 
 export fit!, transform!,fit_transform!
 
 # reexport common functions to Main
 include("pkgdeps.jl")
 using .PkgDeps
 
-include("baseline.jl")
-using .BaselineAlgos
-export Baseline,Identity
+using AutoMLPipeline.Baselines
+export Baseline, Identity
 
 using AutoMLPipeline.BaseFilters: Imputer, OneHotEncoder, Wrapper
 export Imputer,OneHotEncoder,Wrapper
