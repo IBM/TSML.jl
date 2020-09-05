@@ -614,7 +614,7 @@ Uses CSV package to read the csv file and converts it to dataframe.
 function transform!(csvrdr::CSVDateValReader,x::DataFrame=DataFrame())
     fname = csvrdr.args[:filename]
     fmt = csvrdr.args[:dateformat]
-    df = CSV.read(fname) |> DataFrame
+    df = CSV.File(fname) |> DataFrame
     ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
     rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
     if !(eltype(df.Date) <: DateTime )
@@ -748,7 +748,7 @@ end
 #    fname = bzcsvrdr.args[:filename]
 #    fmt = bzcsvrdr.args[:dateformat]
 #    stream = Bzip2DecompressorStream(open(fname))
-#    df = CSV.read(stream) |> DataFrame
+#    df = CSV.File(stream) |> DataFrame
 #    ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
 #    rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
 #    df.Date = DateTime.(df.Date,fmt)
