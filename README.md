@@ -222,6 +222,6 @@ Usage questions can be posted in:
 [travis-img]: https://travis-ci.org/IBM/TSML.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/IBM/TSML.jl
 
-[codecov-img]: https://travis-ci.org/IBM/TSML.jl.svg?branch=master
-[codecov-url]: https://travis-ci.org/IBM/TSML.jl
+[codecov-img]: https://codecov.io/gh/IBM/TSML.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/IBM/TSML.jl
 
