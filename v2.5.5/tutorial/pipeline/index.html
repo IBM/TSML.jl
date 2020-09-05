@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Pipeline · TSML Documentation</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">TSML Documentation</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">HOME</a></li><li><span class="tocitem">Tutorial</span><ul><li><a class="tocitem" href="../aggregators/">Aggregators and Imputers</a></li><li class="is-active"><a class="tocitem" href>Pipeline</a><ul class="internal"><li><a class="tocitem" href="#Workflow-of-Pipeline"><span>Workflow of Pipeline</span></a></li><li><a class="tocitem" href="#Extending-TSML"><span>Extending TSML</span></a></li></ul></li><li><a class="tocitem" href="../statistics/">Statistical Metrics</a></li><li><a class="tocitem" href="../monotonic_plotting/">Monotonic Detection and Plotting</a></li><li><a class="tocitem" href="../tsclassifier/">TS Data Discovery</a></li></ul></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../../man/valueproc/">Value PreProcessing</a></li><li><a class="tocitem" href="../../man/dateproc/">Date PreProcessing</a></li><li><a class="tocitem" href="../../man/aggregation/">Aggregation</a></li><li><a class="tocitem" href="../../man/imputation/">Imputation</a></li></ul></li><li><span class="tocitem">ML Library</span><ul><li><a class="tocitem" href="../../lib/functions/">Types and Functions</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorial</a></li><li class="is-active"><a href>Pipeline</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Pipeline</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/IBM/TSML.jl/blob/master/docs/src/tutorial/pipeline.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Pipeline"><a class="docs-heading-anchor" href="#Pipeline">Pipeline</a><a id="Pipeline-1"></a><a class="docs-heading-anchor-permalink" href="#Pipeline" title="Permalink"></a></h1><p>Instead of calling <code>fit!</code> and <code>transform!</code> for each transformer to process time series data, we can use the <code>Pipeline</code> transformer which does this automatically by iterating through the transformers and calling <code>fit!</code> and <code>transform!</code> repeatedly for each transformer in its argument.</p><p>Let&#39;s start again by using a function to generate a time series dataframe with some missing data.</p><pre><code class="language-julia-repl">julia&gt; X = generateDataWithMissing();
+
+julia&gt; first(X,15)
+15×2 DataFrame
+│ Row │ Date                │ Value     │
+│     │ DateTime            │ Float64?  │
+├─────┼─────────────────────┼───────────┤
+│ 1   │ 2014-01-01T00:00:00 │ missing   │
+│ 2   │ 2014-01-01T00:15:00 │ missing   │
+│ 3   │ 2014-01-01T00:30:00 │ missing   │
+│ 4   │ 2014-01-01T00:45:00 │ missing   │
+│ 5   │ 2014-01-01T01:00:00 │ missing   │
+│ 6   │ 2014-01-01T01:15:00 │ missing   │
+│ 7   │ 2014-01-01T01:30:00 │ missing   │
+│ 8   │ 2014-01-01T01:45:00 │ 0.0521332 │
+│ 9   │ 2014-01-01T02:00:00 │ 0.26864   │
+│ 10  │ 2014-01-01T02:15:00 │ 0.108871  │
+│ 11  │ 2014-01-01T02:30:00 │ 0.163666  │
+│ 12  │ 2014-01-01T02:45:00 │ 0.473017  │
+│ 13  │ 2014-01-01T03:00:00 │ 0.865412  │
+│ 14  │ 2014-01-01T03:15:00 │ missing   │
+│ 15  │ 2014-01-01T03:30:00 │ missing   │</code></pre><h2 id="Workflow-of-Pipeline"><a class="docs-heading-anchor" href="#Workflow-of-Pipeline">Workflow of Pipeline</a><a id="Workflow-of-Pipeline-1"></a><a class="docs-heading-anchor-permalink" href="#Workflow-of-Pipeline" title="Permalink"></a></h2><p>Let&#39;s use the pipeline transformer to aggregate and impute:</p><pre><code class="language-julia">using TSML
+
+dtvalgator = DateValgator(Dict(:dateinterval =&gt; Dates.Hour(1)))
+dtvalnner = DateValNNer(Dict(:dateinterval =&gt; Dates.Hour(1)))
+
+mypipeline = @pipeline dtvalgator |&gt; dtvalnner
+
+results = fit_transform!(mypipeline,X)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
+10×2 DataFrame
+│ Row │ Date                │ Value    │
+│     │ DateTime            │ Float64? │
+├─────┼─────────────────────┼──────────┤
+│ 1   │ 2014-01-01T00:00:00 │ 0.108871 │
+│ 2   │ 2014-01-01T01:00:00 │ 0.108871 │
+│ 3   │ 2014-01-01T02:00:00 │ 0.108871 │
+│ 4   │ 2014-01-01T03:00:00 │ 0.473017 │
+│ 5   │ 2014-01-01T04:00:00 │ 0.361194 │
+│ 6   │ 2014-01-01T05:00:00 │ 0.582318 │
+│ 7   │ 2014-01-01T06:00:00 │ 0.918165 │
+│ 8   │ 2014-01-01T07:00:00 │ 0.614255 │
+│ 9   │ 2014-01-01T08:00:00 │ 0.690462 │
+│ 10  │ 2014-01-01T09:00:00 │ 0.92049  │</code></pre><p>Using the <code>Pipeline</code> transformer, it becomes straightforward to process the time series data. It also becomes trivial to extend TSML functionality by adding more transformers and making sure each support the <code>fit!</code> and <code>transform!</code> interfaces. Any new transformer can then be easily added to the <code>Pipeline</code> workflow  without invasively changing the existing codes.</p><h2 id="Extending-TSML"><a class="docs-heading-anchor" href="#Extending-TSML">Extending TSML</a><a id="Extending-TSML-1"></a><a class="docs-heading-anchor-permalink" href="#Extending-TSML" title="Permalink"></a></h2><p>To illustrate how simple it is to add a new transformer, below extends TSML by adding <code>CSVReader</code> transformer and added in the pipeline to process CSV data:</p><pre><code class="language-julia">using TSML
+import AutoMLPipeline.AbsTypes.fit!
+import AutoMLPipeline.AbsTypes.transform!
+
+mutable struct CSVReader &lt;: Transformer
+    model
+    args
+    function CSVReader(args=Dict())
+        default_args = Dict(
+            :filename =&gt; &quot;&quot;,
+            :dateformat =&gt; &quot;&quot;
+        )
+        new(nothing,mergedict(default_args,args))
+    end
+end
+
+function fit!(csvrdr::CSVReader,x::DataFrame=DataFrame(),y::Vector=[])
+    fname = csvrdr.args[:filename]
+    fmt = csvrdr.args[:dateformat]
+    (fname != &quot;&quot; &amp;&amp; fmt != &quot;&quot;) || error(&quot;missing filename or date format&quot;)
+    model = csvrdr.args
+end
+
+function transform!(csvrdr::CSVReader,x::DataFrame=DataFrame())
+    fname = csvrdr.model[:filename]
+    fmt = csvrdr.model[:dateformat]
+    df = CSV.read(fname)
+    ncol(df) == 2 || error(&quot;dataframe should have only two columns: Date,Value&quot;)
+    rename!(df,names(df)[1]=&gt;:Date,names(df)[2]=&gt;:Value)
+    df.Date = DateTime.(df.Date,fmt)
+    df
+end</code></pre><p>Instead of passing table X that contains the time series, we will add  an instance of the <code>CSVReader</code> at the start of the array of transformers in the pipeline  to read the csv data. CSVReader <code>transform!</code> function converts the csv time series table into a dataframe, which will be consumed by the next transformer in the pipeline  for processing.</p><pre><code class="language-julia">fname = joinpath(dirname(pathof(TSML)),&quot;../data/testdata.csv&quot;)
+csvreader = CSVDateValReader(Dict(:filename=&gt;fname,:dateformat=&gt;&quot;d/m/y H:M&quot;))
+fit!(csvreader)
+csvdata = transform!(csvreader)</code></pre><pre><code class="language-julia-repl">julia&gt; first(csvdata,10)
+10×2 DataFrame
+│ Row │ Date                │ Value   │
+│     │ DateTime            │ Float64 │
+├─────┼─────────────────────┼─────────┤
+│ 1   │ 2014-01-01T00:06:00 │ 10.0    │
+│ 2   │ 2014-01-01T00:18:00 │ 10.0    │
+│ 3   │ 2014-01-01T00:29:00 │ 10.0    │
+│ 4   │ 2014-01-01T00:40:00 │ 9.9     │
+│ 5   │ 2014-01-01T00:51:00 │ 9.9     │
+│ 6   │ 2014-01-01T01:02:00 │ 10.0    │
+│ 7   │ 2014-01-01T01:13:00 │ 9.8     │
+│ 8   │ 2014-01-01T01:24:00 │ 10.0    │
+│ 9   │ 2014-01-01T01:35:00 │ 9.8     │
+│ 10  │ 2014-01-01T01:46:00 │ 10.0    │</code></pre><p>Let us now include the newly created <code>CSVReader</code> in the pipeline to read the csv data and process it by aggregation and imputation.</p><pre><code class="language-julia">mypipeline = @pipeline csvreader |&gt; dtvalgator |&gt; dtvalnner
+
+results = fit_transform!(mypipeline)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
+10×2 DataFrame
+│ Row │ Date                │ Value    │
+│     │ DateTime            │ Float64? │
+├─────┼─────────────────────┼──────────┤
+│ 1   │ 2014-01-01T00:00:00 │ 10.0     │
+│ 2   │ 2014-01-01T01:00:00 │ 9.9      │
+│ 3   │ 2014-01-01T02:00:00 │ 10.0     │
+│ 4   │ 2014-01-01T03:00:00 │ 10.0     │
+│ 5   │ 2014-01-01T04:00:00 │ 10.0     │
+│ 6   │ 2014-01-01T05:00:00 │ 10.0     │
+│ 7   │ 2014-01-01T06:00:00 │ 10.0     │
+│ 8   │ 2014-01-01T07:00:00 │ 9.8      │
+│ 9   │ 2014-01-01T08:00:00 │ 9.85     │
+│ 10  │ 2014-01-01T09:00:00 │ 9.9      │</code></pre><p>Notice that there is no more the need to pass X in the arguments of <code>fit!</code> and <code>transform</code> because the data is now transmitted by the <code>CSVReader</code> instance to the other transformers in the pipeline.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../aggregators/">« Aggregators and Imputers</a><a class="docs-footer-nextpage" href="../statistics/">Statistical Metrics »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Saturday 5 September 2020 21:46">Saturday 5 September 2020</span>. Using Julia version 1.5.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
