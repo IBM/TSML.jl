@@ -109,7 +109,6 @@ valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))   # imputer
 stfier = Statifier(Dict(:processmissing=>true))             # get statistics
 mono = Monotonicer(Dict()) # normalize monotonic data
 outnicer = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize outliers
-plotter = Plotter()
 ```
 
 - #### Setup pipeline to load csv data, aggregate, and get statistics
