@@ -100,13 +100,13 @@ Generally, you will need the different transformers and utils in TSML for time-s
 # Setup source data and filters to aggregate and impute hourly
 using TSML 
 
-fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
+fname     = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
 csvreader = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
-valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1))) # aggregator
-valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))   # imputer
-stfier = Statifier(Dict(:processmissing=>true))             # get statistics
-mono = Monotonicer(Dict()) # normalize monotonic data
-outnicer = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize outliers
+valgator  = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))   # aggregator
+valnner   = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))    # imputer
+stfier    = Statifier(Dict(:processmissing=>true))             # get statistics
+mono      = Monotonicer(Dict()) # normalize monotonic data
+outnicer  = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize outliers
 ```
 
 - #### Setup pipeline to load csv data, aggregate, and get statistics
