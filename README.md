@@ -6,6 +6,7 @@ alt="TSML Logo" width="250"></img> </div>
 |:---:|:---:|:---:|
 | [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][travis-img]][travis-url] [![][codecov-img]][codecov-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
 
+
 ### Stargazers over time
 [![Stargazers over time](https://starchart.cc/IBM/TSML.jl.svg)](https://starchart.cc/IBM/TSML.jl)
 
