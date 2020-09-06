@@ -58,8 +58,6 @@ julia> Pkg.add("TSML")
 
 TSML is tested and actively developed on Julia `1.0` and above for Linux and macOS.
 
-There is no support for Julia versions `0.4`, `0.5`, `0.6` and `0.7`.
-
 ## Overview
 
 TSML (Time Series Machine Learning) is a package for Time Series data processing, classification, and prediction. It combines ML libraries from Python's ScikitLearn, R's Caret, and Julia using a common API and allows seamless ensembling and integration of heterogenous ML libraries to create complex models for robust time-series prediction.
