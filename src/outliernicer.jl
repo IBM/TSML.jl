@@ -18,10 +18,11 @@ export Outliernicer
     Outliernicer(Dict(
        :dateinterval => Dates.Hour(1),
        :nnsize => 1,
-       :missdirection => :symmetric
+       :missdirection => :symmetric,
+       :scale => 1.25
     ))
 
-Detects outliers below or above (q25-iqr,q75+iqr)
+Detects outliers below or above (median-scale*iqr,median+scale*iqr)
 and calls DateValNNer to replace them with nearest neighbors.
 
 Example:
@@ -48,7 +49,9 @@ mutable struct Outliernicer <: Transformer
     default_args = Dict(
         :dateinterval => Dates.Hour(1),
         :nnsize => 1,
-        :missdirection => :symmetric
+        :missdirection => :symmetric,
+        :scale => 1.25
+
     )
     new(nothing, mergedict(default_args, args))
   end
@@ -81,8 +84,9 @@ function transform!(st::Outliernicer, features::DataFrame)
   mvals .= rvals
   crvals = skipmissing(rvals) # stat of non-missing
   miqr = iqr(crvals)
-  q25,q75 = quantile(crvals,[0.25,0.75])
-  lower=q25-miqr; upper=q75+miqr
+  med = median(crvals) # median
+  scale = st.model[:scale]
+  lower=med - scale*miqr; upper=med + scale*miqr
   missindx = findall(x -> !ismissing(x) && (x > upper || x < lower),rvals) 
   mvals[missindx] .= missing
   mfeatures.Value = mvals
