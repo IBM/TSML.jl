@@ -1,10 +1,10 @@
 module Plotters
 
-using Plots
-using GR
 #using Interact
+using RecipesBase
 using DataFrames
 using TSML.ValDateFilters
+using Dates
 
 using AutoMLPipeline.AbsTypes
 using AutoMLPipeline.Utils
@@ -27,12 +27,26 @@ function setupplot(pdfoutput::Bool)
   return nothing
 end
 
+struct DateVal{D<:DateTime,V<:Real}
+  dtime::Vector{D}
+  values::Vector{V}
+end
+
+@recipe function plot(dt::DateVal,sz=(390,200))
+  markershape --> :auto
+  markercolor --> :auto
+  fontfamily := "sans-serif"
+  titlefont := 8
+  size := sz
+  return (dt.dtime,dt.values)
+end
+
 """
 Plotter(
-Dict(
-:interactive => false,
-:pdfoutput => false
-)
+  Dict(
+    :interactive => false,
+    :pdfoutput => false
+  )
 )
 
 Plots a TS by default but performs interactive plotting if specified during instance creation.
@@ -88,16 +102,18 @@ function transform!(pltr::Plotter, features::DataFrame)
   df.Value .= features.Value
   ndxmissing = findall(x->ismissing(x),df.Value)
   df.Value[ndxmissing] .= NaN
-  setupplot(pltr.args[:pdfoutput])
-  if pltr.args[:interactive] == true && pltr.args[:pdfoutput] == false
-    # disable interactive plot due to Knockout.jl badly maintained (Interact.jl deps)
-    #interactiveplot(df)
-    pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
-    return pl
-  else
-    pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
-    return pl
-  end
+  #setupplot(pltr.args[:pdfoutput])
+  #if pltr.args[:interactive] == true && pltr.args[:pdfoutput] == false
+  #  # disable interactive plot due to Knockout.jl badly maintained (Interact.jl deps)
+  #  #interactiveplot(df)
+  #  pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
+  #  return pl
+  #else
+  #  pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
+  #  return pl
+  #end
+  dtval = DateVal(df.Date,df.Value,(600,700))
+  plot(dtval,(500,100))
 end
 
 #function interactiveplot(df::Union{Vector,Matrix,DataFrame})
