@@ -6,12 +6,15 @@ alt="TSML Logo" width="250"></img> </div>
 |:---:|:---:|:---:|
 | [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][travis-img]][travis-url] [![][codecov-img]][codecov-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
 
+### Stargazers over time
+[![Stargazers over time](https://starchart.cc/IBM/TSML.jl.svg)](https://starchart.cc/IBM/TSML.jl)
+
 ### TSML is a package for time series data processing, classification, clustering, and prediction written in [Julia](http://julialang.org/).
 
 The design/framework of this package is influenced heavily by Samuel Jenkins' [Orchestra.jl](https://github.com/svs14/Orchestra.jl) and Paulito Palmes [CombineML.jl](https://github.com/ppalmes/CombineML.jl) packages.
 
 Follow these links for demo/tutorial/paper: 
-- [Jupyter Notebook TSML Demo](https://github.com/IBM/TSML.jl/blob/master/docs/StaticPlotting.jl.ipynb)
+- [Jupyter Notebook TSML Demo](https://github.com/IBM/TSML.jl/blob/master/notebooks/StaticPlotting.jl.ipynb)
 - [JuliaCon 2019 Proceedings Paper](https://doi.org/10.21105/jcon.00051) [![DOI](https://proceedings.juliacon.org/papers/10.21105/jcon.00051/status.svg)](https://doi.org/10.21105/jcon.00051)
 
 - [TSML Binder Notebooks Live Demo](https://mybinder.org/v2/gh/IBM/TSML.jl/binder_support)
@@ -58,8 +61,6 @@ julia> Pkg.add("TSML")
 
 TSML is tested and actively developed on Julia `1.0` and above for Linux and macOS.
 
-There is no support for Julia versions `0.4`, `0.5`, `0.6` and `0.7`.
-
 ## Overview
 
 TSML (Time Series Machine Learning) is a package for Time Series data processing, classification, and prediction. It combines ML libraries from Python's ScikitLearn, R's Caret, and Julia using a common API and allows seamless ensembling and integration of heterogenous ML libraries to create complex models for robust time-series prediction.
@@ -102,45 +103,73 @@ Generally, you will need the different transformers and utils in TSML for time-s
 # Setup source data and filters to aggregate and impute hourly
 using TSML 
 
-fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
+fname     = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
 csvreader = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
-valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1))) # aggregator
-valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))   # imputer
-stfier = Statifier(Dict(:processmissing=>true))             # get statistics
-mono = Monotonicer(Dict()) # normalize monotonic data
-outnicer = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize outliers
-plotter = Plotter() # visualize output
+valgator  = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))   # aggregator
+valnner   = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))    # imputer
+stfier    = Statifier(Dict(:processmissing=>true))             # get statistics
+mono      = Monotonicer(Dict()) # normalize monotonic data
+outnicer  = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize outliers
 ```
 
 - #### Setup pipeline to load csv data, aggregate, and get statistics
 ```julia
-# Setup pipeline without imputation and run
-mpipeline1 = @pipeline csvreader |> valgator |> stfier
+julia> mpipeline1 = @pipeline csvreader 
+julia> data=fit_transform!(mpipeline1)
+julia> first(data,5)
 
-stats1=fit_transform!(mpipeline1)
+5×2 DataFrame
+│ Row │ Date                │ Value   │
+│     │ DateTime            │ Float64 │
+├─────┼─────────────────────┼─────────┤
+│ 1   │ 2014-01-01T00:06:00 │ 10.0    │
+│ 2   │ 2014-01-01T00:18:00 │ 10.0    │
+│ 3   │ 2014-01-01T00:29:00 │ 10.0    │
+│ 4   │ 2014-01-01T00:40:00 │ 9.9     │
+│ 5   │ 2014-01-01T00:51:00 │ 9.9     │
 
-# Show statistics including blocks of missing data stats
-show(stats1, allcols=true)
+julia> mpipeline1 = @pipeline csvreader |> valgator |> stfier
+julia> stats1=fit_transform!(mpipeline1)
+
+1×26 DataFrame. Omitted printing of 19 columns
+│ Row │ tstart              │ tend                │ sfreq    │ count │ max     │ min     │ median  │
+│     │ DateTime            │ DateTime            │ Float64  │ Int64 │ Float64 │ Float64 │ Float64 │
+├─────┼─────────────────────┼─────────────────────┼──────────┼───────┼─────────┼─────────┼─────────┤
+│ 1   │ 2014-01-01T00:00:00 │ 2015-01-01T00:00:00 │ 0.999886 │ 3830  │ 18.8    │ 8.5     │ 10.35   │
 ```
 Note: fit_transform! is equivalent to calling `fit!` and `transform!` functions.
 
  - #### Load csv data, aggregate, impute, and get statistics
 ```julia
 # Add imputation in the pipeline and rerun
-mpipeline2 = @pipeline csvreader |> valgator |> valnner |> stfier
+julia> mpipeline2 = @pipeline csvreader |> valgator |> valnner |> stfier
+julia> stats2 = fit_transform!(mpipeline2)
 
-stats2 = fit_transform!(mpipeline2)
-
-# Show statistics including blocks of missing data stats
-show(stats2, allcols=true)
+1×26 DataFrame. Omitted printing of 19 columns
+│ Row │ tstart              │ tend                │ sfreq    │ count │ max     │ min     │ median  │
+│     │ DateTime            │ DateTime            │ Float64  │ Int64 │ Float64 │ Float64 │ Float64 │
+├─────┼─────────────────────┼─────────────────────┼──────────┼───────┼─────────┼─────────┼─────────┤
+│ 1   │ 2014-01-01T00:00:00 │ 2015-01-01T00:00:00 │ 0.999886 │ 8761  │ 18.8    │ 8.5     │ 10.0    │
 ```
 
-- #### Load csv data, aggregate, impute, normalize monotonic data, and plot
+- #### Load csv data, aggregate, impute, normalize monotonic data
 ```julia
 # Add imputation in the pipeline, and plot 
-mpipeline2 = @pipeline csvreader |> valgator |> valnner |> mono |> plotter
+julia> mpipeline2 = @pipeline csvreader |> valgator |> valnner |> mono 
+julia> fit_transform!(mpipeline2)
 
-fit_transform!(mpipeline2)
+8761×2 DataFrame
+│ Row  │ Date                │ Value    │
+│      │ DateTime            │ Float64? │
+├──────┼─────────────────────┼──────────┤
+│ 1    │ 2014-01-01T00:00:00 │ 10.0     │
+│ 2    │ 2014-01-01T01:00:00 │ 9.9      │
+│ 3    │ 2014-01-01T02:00:00 │ 10.0     │
+│ 4    │ 2014-01-01T03:00:00 │ 10.0     │
+│ 5    │ 2014-01-01T04:00:00 │ 10.0     │
+│ 6    │ 2014-01-01T05:00:00 │ 10.0     │
+│ 7    │ 2014-01-01T06:00:00 │ 10.0     │
+⋮
 ```
 Note: It may take some time for the graph to render because just-in-time
 compilation kicks-in and plot package takes a bit of time to be pre-compiled.
@@ -149,34 +178,47 @@ Suceeding plots will be much faster because Julia uses the pre-compiled image.
 - #### Extracting TimeSeries Date,Values into Matrix Form for ML Modeling
 ```julia
 # let's setup date,value dataframe as input
-datn = DateTime(2018,1,1):Dates.Day(1):DateTime(2019,1,31) |> collect
-valn = rand(1:100,length(datn))
-ts = DataFrame(Date=datn,Value=valn)
+julia> datn = DateTime(2018,1,1):Dates.Day(1):DateTime(2019,1,31) |> collect
+julia> valn = rand(1:100,length(datn))
+julia> ts = DataFrame(Date=datn,Value=valn)
+julia> @show first(ts,5);
 
-@show first(ts,5);
+5×2 DataFrame
+│ Row │ Date                │ Value │
+│     │ DateTime            │ Int64 │
+├─────┼─────────────────────┼───────┤
+│ 1   │ 2018-01-01T00:00:00 │ 56    │
+│ 2   │ 2018-01-02T00:00:00 │ 93    │
+│ 3   │ 2018-01-03T00:00:00 │ 40    │
+│ 4   │ 2018-01-04T00:00:00 │ 15    │
+│ 5   │ 2018-01-05T00:00:00 │ 78    │
 
-args = Dict(:ahead=>24,:size=>24,:stride=>5)
-dtfier = Dateifier(args)
-mtfier = Matrifier(args)
-
+julia> args = Dict(:ahead=>24,:size=>24,:stride=>5)
+julia> dtfier = Dateifier(args)
+julia> mtfier = Matrifier(args)
 # setup pipeline concatenating matrified dates with matrified values
-ppl = @pipeline dtfier + mtfier
+julia> ppl = @pipeline dtfier + mtfier
+julia> dateval = fit_transform!(ppl,ts)
+julia> first(dateval,5)
 
-dateval = fit_transform!(ppl,ts)
-@show first(dateval,5);
+5×33 DataFrame. Omitted printing of 21 columns
+│ Row │ year  │ month │ day   │ hour  │ week  │ dow   │ doq   │ qoy   │ x1    │ x2    │ x3    │ x4    │
+│     │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │ Int64 │
+├─────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┤
+│ 1   │ 2019  │ 1     │ 7     │ 0     │ 2     │ 1     │ 7     │ 1     │ 94    │ 97    │ 18    │ 76    │
+│ 2   │ 2019  │ 1     │ 2     │ 0     │ 1     │ 3     │ 2     │ 1     │ 99    │ 93    │ 65    │ 68    │
+│ 3   │ 2018  │ 12    │ 28    │ 0     │ 52    │ 5     │ 89    │ 4     │ 88    │ 8     │ 59    │ 1     │
+│ 4   │ 2018  │ 12    │ 23    │ 0     │ 51    │ 7     │ 84    │ 4     │ 76    │ 5     │ 6     │ 92    │
+│ 5   │ 2018  │ 12    │ 18    │ 0     │ 51    │ 2     │ 79    │ 4     │ 6     │ 54    │ 66    │ 72    │
 ```
 We can use the matrified dateval as input features for prediction/classication.
 Let's create a dummy response consisting of `yes` or `no` and use Random Forest
 to learn the mapping.
 ```julia
-target = rand(["yes","no"],nrow(dateval)) 
-
-rf = RandomForest()
-
-accuracy(x,y) = score(:accuracy,x,y)
-
-crossvalidate(rf,dateval,target,accuracy)
-# sample output:
+julia> target = rand(["yes","no"],nrow(dateval)) 
+julia> rf = RandomForest()
+julia> accuracy(x,y) = score(:accuracy,x,y)
+julia> crossvalidate(rf,dateval,target,accuracy)
 fold: 1, 14.285714285714285
 fold: 2, 57.14285714285714
 fold: 3, 71.42857142857143

@@ -35,15 +35,15 @@ function test_basicoutlier()
 
   mpipeline1 = @pipeline csvfilter |> valgator |> mono |> valnner |> outliernicer |> stfier
   respipe1 = fit_transform!(mpipeline1)
-  @test round(sum(respipe1[1,3:20])) == -213862.0 
+  @test round(sum(respipe1[1,3:20])) == -206651.0
 
   mpipeline2 = @pipeline csvfilter |> valgator |> mono |> outliernicer |> stfier
   respipe2 = fit_transform!(mpipeline2)
-  @test round(sum(respipe2[1,3:20])) == -219595.0 
+  @test round(sum(respipe2[1,3:20])) == -213860.0
 
   mpipeline3 = @pipeline csvfilter |> valgator |> valnner |> mono |> outliernicer |> stfier
   respipe3 = fit_transform!(mpipeline3)
-  @test round(sum(respipe3[1,3:20])) == -213862.0  
+  @test round(sum(respipe3[1,3:20])) == -206651.0  
 end
 @testset "Outliernicer: readcsv |> valgator |> valnner |> mono |> outliernicer |> stfier" begin
   test_basicoutlier()
@@ -66,17 +66,16 @@ function test_typesoutliernicer()
   regpipeline = @pipeline regularfilecsv |> valgator |> valnner |> mono |> outliernicer |> stfier
   fit!(regpipeline)
   regulardf=transform!(regpipeline)
-  @test round(sum(regulardf[1,3:20])) == -61184.0
+  @test round(sum(regulardf[1,3:20])) == -60438.0 
 
   monopipeline = @pipeline monofilecsv |> valgator |> valnner |> mono |> outliernicer |> stfier
   fit!(monopipeline)
   monodf=transform!(monopipeline)
-  @test round(sum(monodf[1,3:20])) == -890049.0 
+  @test round(sum(monodf[1,3:20])) == -884621.0
 
   dailymonopipeline = @pipeline dailymonofilecsv |> valgator |> valnner |> mono |> outliernicer |> stfier
   fit!(dailymonopipeline)
   dailymonodf=transform!(dailymonopipeline)
-
   @test round(sum(dailymonodf[1,3:20])) == -294446.0 
 
 end
