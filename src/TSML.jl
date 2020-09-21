@@ -1,6 +1,5 @@
 module TSML
 
-using Requires
 using AutoMLPipeline
 using AutoMLPipeline.BaseFilters
 import AutoMLPipeline.AbsTypes: fit!, transform!
@@ -94,15 +93,11 @@ include("argparse.jl")
 using .ArgumentParsers
 export tsmlmain
 
-function __init__()
-  @require Plots="91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
-    include("plotter.jl") 
-    @eval using .Plotters
-    export Plotter
-    include("demo.jl")
-    @eval using .TSMLDemo
-    export tsml_demo
-  end
-end
+include("plotter.jl") 
+using .Plotters
+export Plotter
+include("demo.jl")
+using .TSMLDemo
+export tsml_demo
 
 end # module
