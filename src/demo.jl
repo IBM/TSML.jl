@@ -4,7 +4,6 @@ using Dates
 using DataFrames
 using Random
 using Statistics
-using Plots
 
 using TSML: Statifier
 using TSML.ValDateFilters: DateValgator, DateValNNer

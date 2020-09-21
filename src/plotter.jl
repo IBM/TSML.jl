@@ -1,10 +1,10 @@
 module Plotters
 
-using Plots
-using GR
 #using Interact
+using RecipesBase
 using DataFrames
 using TSML.ValDateFilters
+using Dates
 
 using AutoMLPipeline.AbsTypes
 using AutoMLPipeline.Utils
@@ -13,26 +13,41 @@ import AutoMLPipeline.AbsTypes: fit!, transform!
 export fit!,transform!
 export Plotter
 
-# setup plotting for publication
-function setupplot(pdfoutput::Bool)
-  Plots.gr();
-  fntsm = Plots.font("sans-serif", 8);
-  fntlg = Plots.font("sans-serif", 8);
-  Plots.default(titlefont=fntlg, guidefont=fntlg, tickfont=fntsm, legendfont=fntsm);
-  if pdfoutput == true 
-    Plots.default(size=(390,200)); #Plot canvas size
-  else
-    Plots.default(size=(500,300)); #Plot canvas size
-  end
-  return nothing
+## setup plotting for publication
+#function setupplot(pdfoutput::Bool)
+#  Plots.gr();
+#  fntsm = Plots.font("sans-serif", 8);
+#  fntlg = Plots.font("sans-serif", 8);
+#  Plots.default(titlefont=fntlg, guidefont=fntlg, tickfont=fntsm, legendfont=fntsm);
+#  if pdfoutput == true 
+#    Plots.default(size=(390,200)); #Plot canvas size
+#  else
+#    Plots.default(size=(500,300)); #Plot canvas size
+#  end
+#  return nothing
+#end
+
+struct DateVal{D<:DateTime,V<:Union{Missing,Real}}
+  dtime::Vector{D}
+  values::Vector{V}
+end
+
+@recipe function plot(dt::DateVal,sz=(390,200))
+  marker := :none
+  markertype --> :none
+  seriestype := :path
+  fontfamily := "sans-serif"
+  titlefont := 8
+  size := sz
+  return (dt.dtime,dt.values)
 end
 
 """
 Plotter(
-Dict(
-:interactive => false,
-:pdfoutput => false
-)
+  Dict(
+    :interactive => false,
+    :pdfoutput => false
+  )
 )
 
 Plots a TS by default but performs interactive plotting if specified during instance creation.
@@ -58,7 +73,7 @@ mutable struct Plotter <: Transformer
                         :pdfoutput => false
                        )
     margs=mergedict(default_args, args)
-    setupplot(margs[:pdfoutput])
+    #setupplot(margs[:pdfoutput])
     new(nothing,margs)
   end
 end
@@ -88,16 +103,22 @@ function transform!(pltr::Plotter, features::DataFrame)
   df.Value .= features.Value
   ndxmissing = findall(x->ismissing(x),df.Value)
   df.Value[ndxmissing] .= NaN
-  setupplot(pltr.args[:pdfoutput])
-  if pltr.args[:interactive] == true && pltr.args[:pdfoutput] == false
-    # disable interactive plot due to Knockout.jl badly maintained (Interact.jl deps)
-    #interactiveplot(df)
-    pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
-    return pl
-  else
-    pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
-    return pl
+  #setupplot(pltr.args[:pdfoutput])
+  #if pltr.args[:interactive] == true && pltr.args[:pdfoutput] == false
+  #  # disable interactive plot due to Knockout.jl badly maintained (Interact.jl deps)
+  #  #interactiveplot(df)
+  #  pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
+  #  return pl
+  #else
+  #  pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
+  #  return pl
+  #end
+  sz = (500,300) # default
+  if pltr.args[:pdfoutput] == true
+    sz = (390,200)
   end
+  dtval = DateVal(df.Date,df.Value)
+  RecipesBase.plot(dtval,sz)
 end
 
 #function interactiveplot(df::Union{Vector,Matrix,DataFrame})
