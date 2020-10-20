@@ -10,7 +10,7 @@ export Machine, Learner, Transformer, Workflow, Computer
 using AutoMLPipeline.Utils
 export holdout, kfold, score, infer_eltype, nested_dict_to_tuples, 
        nested_dict_set!, nested_dict_merge, create_transformer,
-       mergedict, getiris,
+       mergedict, getiris,getprofb,
        skipmean,skipmedian,skipstd,
        aggregatorclskipmissing
  
@@ -47,9 +47,9 @@ export Standardize,standardize, standardize!,
 using AutoMLPipeline.DecisionTreeLearners
 export PrunedTree,RandomForest,Adaboost
 
-include("normalizer.jl")
-using .Normalizers
-export Normalizer
+#include("normalizer.jl")
+#using .Normalizers
+#export Normalizer
 
 include("monotonicer.jl")
 using .Monotonicers

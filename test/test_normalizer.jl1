@@ -1,7 +1,11 @@
 module TestNormalizer
 
 using Test
-using TSML
+using Random
+using Dates
+using DataFrames
+using Statistics
+using AMLPBase
 
 function generatedf()
     Random.seed!(123)
@@ -12,7 +16,6 @@ function generatedf()
     X = DataFrame(Date=gdate,Value1=gval1,Value2=gval2,Value3=gval3)
     X
 end
-
 
 function test_normalizer()
   Random.seed!(123)
