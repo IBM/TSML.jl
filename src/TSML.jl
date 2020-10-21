@@ -5,10 +5,11 @@ include("pkgdeps.jl")
 
 export fit!, transform!,fit_transform!
 
-using AutoMLPipeline
-using AutoMLPipeline: AbsTypes, Utils, Baselines, Pipelines
-using AutoMLPipeline: BaseFilters, FeatureSelectors, DecisionTreeLearners
-using AutoMLPipeline: EnsembleMethods
+using AMLPipelineBase
+using AMLPipelineBase: AbsTypes, Utils, BaselineModels, Pipelines
+using AMLPipelineBase: BaseFilters, FeatureSelectors, DecisionTreeLearners
+using AMLPipelineBase: EnsembleMethods, CrossValidators
+using AMLPipelineBase: NARemovers
 
 export Machine, Learner, Transformer, Workflow, Computer
 export holdout, kfold, score, infer_eltype, nested_dict_to_tuples, 
@@ -17,7 +18,7 @@ export holdout, kfold, score, infer_eltype, nested_dict_to_tuples,
        skipmean,skipmedian,skipstd,
        aggregatorclskipmissing
 export Baseline, Identity
-export Imputer,OneHotEncoder
+export Imputer,OneHotEncoder,Wrapper
 export PrunedTree,RandomForest,Adaboost
 export VoteEnsemble, StackEnsemble, BestLearner
 export FeatureSelector, CatFeatureSelector, NumFeatureSelector, CatNumDiscriminator
@@ -26,7 +27,9 @@ export NARemover
 export @pipeline @pipelinex, @pipelinez
 export Pipeline, ComboPipeline
 
-import AutoMLPipeline.AbsTypes: fit!, transform!
+import AMLPipelineBase.AbsTypes: fit!, transform!
+
+# ----------------------------------------------
 
 include("valdatefilters.jl")
 using .ValDateFilters
