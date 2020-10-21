@@ -1,15 +1,14 @@
 module BaselineAlgos
 
-using AutoMLPipeline.AbsTypes
-using AutoMLPipeline.Utils
-
 using DataFrames
 
-import AutoMLPipeline.AbsTypes: fit!, transform!
+using ..AbsTypes
+using ..Utils
+
+import ..AbsTypes: fit!, transform!
+export fit!,transform!
 
 export Baseline,Identity
-       fit!,
-       transform!
 
 using StatsBase: mode
 

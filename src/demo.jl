@@ -5,16 +5,16 @@ using DataFrames
 using Random
 using Statistics
 
-using TSML: Statifier
-using TSML.ValDateFilters: DateValgator, DateValNNer
+using ..Statifiers
+using ..ValDateFilters: DateValgator, DateValNNer
 
-using AutoMLPipeline.Pipelines
-using AutoMLPipeline.AbsTypes
-using AutoMLPipeline.Utils
+using ..Pipelines
+using ..AbsTypes
+using ..Utils
 
-import AutoMLPipeline.AbsTypes: fit!, transform!
+import ..AbsTypes: fit!, transform!
 
-using TSML: Plotter
+using ..Plotters
 
 export tsml_demo
 

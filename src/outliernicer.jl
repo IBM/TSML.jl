@@ -5,11 +5,11 @@ using Dates
 using DataFrames
 using Statistics
 using StatsBase: iqr, quantile, sample
-using TSML.ValDateFilters
 
-using AutoMLPipeline.AbsTypes
-using AutoMLPipeline.Utils
-import AutoMLPipeline.AbsTypes: fit!, transform!
+using ..ValDateFilters
+using ..AbsTypes
+using ..Utils
+import ..AbsTypes: fit!, transform!
 
 export fit!,transform!
 export Outliernicer

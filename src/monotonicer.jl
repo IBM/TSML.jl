@@ -5,9 +5,9 @@ using Dates
 using DataFrames
 using Statistics
 
-using AutoMLPipeline.AbsTypes
-using AutoMLPipeline.Utils
-import AutoMLPipeline.AbsTypes: fit!, transform!
+using ..AbsTypes
+using ..Utils
+import ..AbsTypes: fit!, transform!
 
 export fit!,transform!
 export Monotonicer,ismonotonic,dailyflips

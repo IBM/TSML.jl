@@ -1,6 +1,10 @@
 module CLIWrappers
 
 using Random
+using Dates
+using DataFrames
+using CSV
+
 using ..DecisionTreeLearners
 using ..Pipelines
 using ..AbsTypes
@@ -9,10 +13,6 @@ using ..Utils
 using ..ValDateFilters
 using ..Statifiers
 using ..Monotonicers
-
-using Dates
-using DataFrames
-using CSV
 
 export tsmlrun
 

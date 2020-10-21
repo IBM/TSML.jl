@@ -11,9 +11,9 @@ export fit!,transform!
 
 export Statifier,tsmlfullstat
 
-using AutoMLPipeline.AbsTypes
-using AutoMLPipeline.Utils
-import AutoMLPipeline.AbsTypes: fit!, transform!
+using ..AbsTypes
+using ..Utils
+import ..AbsTypes: fit!, transform!
 
 
 # Transforms instances with nominal features into one-hot form

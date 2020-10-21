@@ -12,7 +12,7 @@ using ..Statifiers
 using ..ValDateFilters
 using ..AbsTypes
 using ..Utils
-import AutoMLPipeline.AbsTypes: fit!, transform!
+import ..AbsTypes: fit!, transform!
 
 export fit!, transform!
 export TSClassifier, getstats

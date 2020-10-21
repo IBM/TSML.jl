@@ -7,11 +7,11 @@ using CSV
 using DataFrames: DataFrame,rename!,ncol,groupby,combine,leftjoin,innerjoin
 using MLDataUtils: slidingwindow
 
-using AutoMLPipeline.AbsTypes
-using AutoMLPipeline.Utils
+using ..AbsTypes
+using ..Utils
 
 
-import AutoMLPipeline.AbsTypes: fit!, transform!
+import ..AbsTypes: fit!, transform!
 export fit!,transform!
 
 export Matrifier,Dateifier

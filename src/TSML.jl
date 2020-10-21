@@ -1,35 +1,32 @@
 module TSML
 
+# reexport some needed functions from packages to Main
+include("pkgdeps.jl")
+
 export fit!, transform!,fit_transform!
 
 using AutoMLPipeline
-using AutoMLPipeline.AbsTypes
-using AutoMLPipeline.Pipelines
-using AutoMLPipeline.BaseFilters
-using AutoMLPipeline.DecisionTreeLearners
-import AutoMLPipeline.AbsTypes: fit!, transform!
-export Machine, Learner, Transformer, Workflow, Computer
+using AutoMLPipeline: AbsTypes, Utils, Baselines, Pipelines
+using AutoMLPipeline: BaseFilters, FeatureSelectors, DecisionTreeLearners
+using AutoMLPipeline: EnsembleMethods
 
-using AutoMLPipeline.Utils
+export Machine, Learner, Transformer, Workflow, Computer
 export holdout, kfold, score, infer_eltype, nested_dict_to_tuples, 
        nested_dict_set!, nested_dict_merge, create_transformer,
        mergedict, getiris,getprofb,
        skipmean,skipmedian,skipstd,
        aggregatorclskipmissing
-
-# reexport common functions to Main
-include("pkgdeps.jl")
-
 export Baseline, Identity
-export BaseFilter
-export Imputer,OneHotEncoder,Wrapper
+export Imputer,OneHotEncoder
 export PrunedTree,RandomForest,Adaboost
 export VoteEnsemble, StackEnsemble, BestLearner
 export FeatureSelector, CatFeatureSelector, NumFeatureSelector, CatNumDiscriminator
 export crossvalidate
-export @pipeline @pipelinex
+export NARemover
+export @pipeline @pipelinex, @pipelinez
 export Pipeline, ComboPipeline
 
+import AutoMLPipeline.AbsTypes: fit!, transform!
 
 include("valdatefilters.jl")
 using .ValDateFilters
