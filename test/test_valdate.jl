@@ -1,4 +1,4 @@
-module TestDateVal
+module TestValDate
 
 using Test
 using TSML
@@ -21,14 +21,14 @@ const (X1,Y1)=generateXY()
 
 function test_datevalizer()
     dvzr1 = DateValizer(Dict(:dateinterval=>Dates.Hour(1)))
-    dvzr2 = DateValizer(dvzr1.args)
-    @test dvzr1.args == dvzr2.args
+    dvzr2 = DateValizer(dvzr1.model)
+    @test dvzr1.model[:dateinterval] == dvzr2.model[:dateinterval]
     res = fit_transform!(dvzr2,XX)
     @test sum(ismissing.(res.Value)) == 0
     @test sum(X1.Value .!== XX.Value) == 0
     @test sum(Y1 .!== YY) == 0
     @test round(sum(res.Value),digits=2) == 8798.2
-    @test nrow(dvzr2.args[:medians]) == 24
+    @test nrow(dvzr2.model[:medians]) == 24
 end
 @testset "DateValizer: Fill missings with medians" begin
     test_datevalizer()
@@ -106,15 +106,15 @@ function test_datevalnner()
     @test sum(size(res) .== (701,2)) == 2
     @test round(sum(res.Value),digits=2) == 350.57
 
-    dnnr.args[:missdirection] = :reverse
+    dnnr.model[:missdirection] = :reverse
     res=TSML.transform!(dnnr,XX)
     @test sum(size(res) .== (701,2)) == 2
     @test round(sum(res.Value),digits=2) == 350.17
-    dnnr.args[:dateinterval]=Dates.Hour(1)
+    dnnr.model[:dateinterval]=Dates.Hour(1)
     @test_throws ErrorException res=TSML.transform!(dnnr,XX) 
-    dnnr.args[:missdirection] = :reverse
+    dnnr.model[:missdirection] = :reverse
     @test_throws ErrorException res=TSML.transform!(dnnr,XX) 
-    dnnr.args[:missdirection] = :symmetric
+    dnnr.model[:missdirection] = :symmetric
     @test sum(size(TSML.transform!(dnnr,XX)) .== (17521,2)) == 2
 
     # testing boundaries
@@ -130,14 +130,14 @@ function test_datevalnner()
     x[45:end-1,:Value] .= missing
     fit!(dlnr,x,[])
     @test_throws ErrorException TSML.transform!(dlnr,x)
-    dlnr.args[:missdirection] = :reverse
+    dlnr.model[:missdirection] = :reverse
     res = TSML.transform!(dlnr,x)
     @test sum((size(res)) .== (49,2)) == 2
-    @test round(sum(res.Value),digits=2) == 27.85
-    dlnr.args[:missdirection] = :forward
-    dlnr.args[:strict] = false
+    @test round(sum(res.Value),digits=2) == 25.3
+    dlnr.model[:missdirection] = :forward
+    dlnr.model[:strict] = false
     @test sum(ismissing.(TSML.transform!(dlnr,x)[!,:Value])) == 2
-    dlnr.args[:missdirection] = :symmetric
+    dlnr.model[:missdirection] = :symmetric
     @test sum(ismissing.(TSML.transform!(dlnr,x)[!,:Value])) == 0
     defdnr=DateValNNer(Dict(:strict=>false))
     fit!(defdnr,XX,YY)
@@ -156,9 +156,9 @@ function test_datevalnner()
     fit!(dlnr,x,[])
     res = TSML.transform!(dlnr,x)
     @test sum(ismissing.(TSML.transform!(dlnr,x)[!,:Value])) == 6
-    dlnr.args[:missdirection] = :reverse
+    dlnr.model[:missdirection] = :reverse
     @test sum(ismissing.(TSML.transform!(dlnr,x)[!,:Value])) == 5 
-    dlnr.args[:missdirection] = :symmetric
+    dlnr.model[:missdirection] = :symmetric
     @test sum(ismissing.(TSML.transform!(dlnr,x)[!,:Value])) == 0
 end
 @testset "DateValNNer: replace missings with nearest neighbors" begin
@@ -175,7 +175,7 @@ function test_dateifier()
   fit!(dtr,x)
   res = TSML.transform!(dtr,x)
   @test sum(size(res) .== (389,8)) == 2
-  dtr.args[:stride]=2
+  dtr.model[:stride]=2
   res = TSML.transform!(dtr,x)
   @test sum(size(res) .== (194,8)) == 2
 end
@@ -185,7 +185,7 @@ end
 
 function test_matrifier()
   mtr = Matrifier(Dict(:ahead=>24,:size=>24,:stride=>5))
-  sz = mtr.args[:size]
+  sz = mtr.model[:size]
   lower = DateTime(2017,1,1)
   upper = DateTime(2017,1,5)
   dat=lower:Dates.Hour(1):upper |> collect 
@@ -193,10 +193,10 @@ function test_matrifier()
   x = DataFrame(Date=dat,Value=vals)
   res = fit_transform!(mtr,x)
   @test sum(size(res) .== (10,25)) == 2
-  mtr.args = Dict(:ahead=>24,:size=>24,:stride=>1)
+  mtr.model = Dict(:ahead=>24,:size=>24,:stride=>1)
   res = TSML.transform!(mtr,x)
   @test sum(size(res) .== (50,25)) == 2
-  mtr.args = Dict(:ahead=>1,:size=>24,:stride=>12)
+  mtr.model = Dict(:ahead=>1,:size=>24,:stride=>12)
   res = TSML.transform!(mtr,x)
   @test sum(size(res) .== (6,25)) == 2
   dtr = Matrifier()
@@ -204,7 +204,7 @@ function test_matrifier()
   res = TSML.transform!(dtr,x)
   res
   @test sum(size(res) .== (90,8)) == 2
-  dtr.args = Dict(:ahead=>-1,:size=>24,:stride=>12)
+  dtr.model = Dict(:ahead=>-1,:size=>24,:stride=>12)
   @test_throws AssertionError TSML.transform!(dtr,x)
 end
 @testset "Dateifier: extract sliding windows date features" begin
@@ -237,7 +237,7 @@ function test_csvreaderwriter()
   @test ncol(res2) == 2
   @test sum(ismissing.(res2.Value)) == 0
   @test floor(sum(res2.Value)) == 97564.0
-  @test filesize(csvwtr.args[:filename]) > 209220
+  @test filesize(csvwtr.model[:filename]) > 209220
   rm(outputfile,force=true)
 end
 @testset "CSVDateValReaderWriter: reading csv with Date,Value columns" begin
@@ -259,12 +259,11 @@ end
 #end
 
 function test_statoutputwriter()
-
   inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
   statoutputfile = joinpath(dirname(pathof(TSML)),"../data/testdata_stat.csv")
   csvreader = CSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
   csvstatwtr = CSVDateValWriter(Dict(:filename=>statoutputfile))
-  statfier = statfier = Statifier(Dict(:processmissing=>true))
+  statfier =  Statifier(Dict(:processmissing=>true))
   filter1 = DateValgator(Dict(:nnsize=>1))
   filter2 = DateValNNer(Dict(:nnsize=>1))
 
@@ -273,7 +272,7 @@ function test_statoutputwriter()
 
   @test nrow(res) == 1
   @test ncol(res) == 26
-  @test filesize(csvstatwtr.args[:filename]) > 400
+  @test filesize(csvstatwtr.model[:filename]) > 400
   rm(statoutputfile,force=true)
 
 end
@@ -303,7 +302,7 @@ function test_datevalmultinner()
   res = fit_transform!(dnnr,X)
   @test mysum.(eachcol(res[:,2:end]))  |> sum == 26368.053898361875
   dnnr = DateValMultiNNer()
-  @test_throws ErrorException fit!(dnnr,DataFrame(Date=X.Date,Value1=X.Date,Value2=X.Temperature))
+  @test_throws ArgumentError fit!(dnnr,DataFrame(Date=X.Date,Value1=X.Date,Value2=X.Temperature))
 end
 @testset "DateValMultiNNer: multicolumn imputation" begin
   test_datevalmultinner()

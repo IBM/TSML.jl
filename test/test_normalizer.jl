@@ -1,6 +1,10 @@
 module TestNormalizer
 
+using Dates
 using Test
+using Random
+using Statistics
+using DataFrames
 using TSML
 
 function generatedf()
@@ -13,40 +17,39 @@ function generatedf()
     X
 end
 
-
 function test_normalizer()
-  Random.seed!(123)
-  X = generatedf()
-  norm = Normalizer(Dict(:method => :zscore))
-  res=fit_transform!(norm,X)
-  @test isapprox(mean(res[:,1]),0.0,atol=1e-8)
-  @test isapprox(mean(res[:,2]),0.0,atol=1e-8)
-  @test isapprox(std(res[:,1]),1.0,atol=1e-8)
-  @test isapprox(std(res[:,2]),1.0,atol=1e-8)
-  norm = Normalizer(Dict(:method => :unitrange))
-  res=fit_transform!(norm,X)
-  @test isapprox(minimum(res[:,1]),0.0,atol=1e-8)
-  @test isapprox(minimum(res[:,2]),0.0,atol=1e-8)
-  @test isapprox(maximum(res[:,1]),1.0,atol=1e-8)
-  @test isapprox(maximum(res[:,2]),1.0,atol=1e-8)
-  norm = Normalizer(Dict(:method => :pca))
-  res=fit_transform!(norm,X)
-  @test isapprox(std(res[:,1]),0.28996,atol=1e-2)
-  norm = Normalizer(Dict(:method => :fa))
-  res = fit_transform!(norm,X)
-  @test isapprox(std(res[:,1]),0.81670,atol=1e-2)
-  norm = Normalizer(Dict(:method => :ppca))
-  res = fit_transform!(norm,X)
-  @test isapprox(std(res[:,1]),0.00408,atol=1e-2)
-  norm = Normalizer(Dict(:method => :log))
-  res = fit_transform!(norm,X)
-  @test isapprox(std(res[:,1]),0.99941,atol=1e-2)
-  norm = Normalizer(Dict(:method => :sqrt))
-  res = fit_transform!(norm,X)
-  @test isapprox(std(res[:,1]),0.2355,atol=1e-2)
+   Random.seed!(123)
+   X = generatedf()
+   norm = Normalizer(Dict(:method => :zscore))
+   res=fit_transform!(norm,X)
+   @test isapprox(mean(res[:,1]),0.0,atol=1e-8)
+   @test isapprox(mean(res[:,2]),0.0,atol=1e-8)
+   @test isapprox(std(res[:,1]),1.0,atol=1e-8)
+   @test isapprox(std(res[:,2]),1.0,atol=1e-8)
+   norm = Normalizer(Dict(:method => :unitrange))
+   res=fit_transform!(norm,X)
+   @test isapprox(minimum(res[:,1]),0.0,atol=1e-8)
+   @test isapprox(minimum(res[:,2]),0.0,atol=1e-8)
+   @test isapprox(maximum(res[:,1]),1.0,atol=1e-8)
+   @test isapprox(maximum(res[:,2]),1.0,atol=1e-8)
+   norm = Normalizer(Dict(:method => :pca))
+   res=fit_transform!(norm,X)
+   @test isapprox(std(res[:,1]),0.28996,atol=1e-2)
+   norm = Normalizer(Dict(:method => :fa))
+   res = fit_transform!(norm,X)
+   @test isapprox(std(res[:,1]),0.81670,atol=1e-2)
+   norm = Normalizer(Dict(:method => :ppca))
+   res = fit_transform!(norm,X)
+   @test isapprox(std(res[:,1]),0.00408,atol=1e-2)
+   norm = Normalizer(Dict(:method => :log))
+   res = fit_transform!(norm,X)
+   @test isapprox(std(res[:,1]),0.99941,atol=1e-2)
+   norm = Normalizer(Dict(:method => :sqrt))
+   res = fit_transform!(norm,X)
+   @test isapprox(std(res[:,1]),0.2355,atol=1e-2)
 end
 @testset "Normalizer: zscore, unitrange, pca, ppca, fa" begin
-  test_normalizer()
+   test_normalizer()
 end
 
 end

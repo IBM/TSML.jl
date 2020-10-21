@@ -1,5 +1,6 @@
 module ValDateFilters
 
+using Random
 using Dates
 using Statistics
 using CSV
@@ -23,25 +24,25 @@ using .Imputers
 export impute, impute!, chain, chain!, drop, drop!, interp, interp!, ImputeError, locf, nocb
 
 const gAggDict = Dict(
-    :median => Statistics.median,
-    :mean =>   Statistics.mean,
-    :maximum => Statistics.maximum,
-    :minimum => Statistics.minimum,
-    :sum => sum
+    :median            => Statistics.median,
+    :mean              => Statistics.mean,
+    :maximum           => Statistics.maximum,
+    :minimum           => Statistics.minimum,
+    :sum               => sum
 )
 
 """
     Matrifier(Dict(
        Dict(
-        :ahead => 1,
-        :size => 7,
+        :ahead  => 1,
+        :size   => 7,
         :stride => 1,
       )
     )
 
 Converts a 1-D timeseries into sliding window matrix for ML training:
-- `:ahead` => steps ahead to predict
-- `:size` => size of sliding window
+- `:ahead`  => steps ahead to predict
+- `:size`   => size of sliding window
 - `:stride` => amount of overlap in sliding window
 
 Example:
@@ -59,17 +60,20 @@ Example:
 Implements: `fit!`, `transform`
 """
 mutable struct Matrifier <: Transformer
-  model
-  args
+   name::String
+   model::Dict{Symbol,Any}
 
-  function Matrifier(args=Dict())
-    default_args = Dict{Symbol,Any}(
-        :ahead => 1,
-        :size => 7,
-        :stride => 1,
-    )
-    new(nothing,mergedict(default_args,args))
-  end
+   function Matrifier(args=Dict())
+      default_args = Dict{Symbol,Any}(
+          :name   => "mtr",
+          :ahead  => 1,
+          :size   => 7,
+          :stride => 1
+      )
+      cargs=nested_dict_merge(default_args,args)
+      cargs[:name] = cargs[:name]*"_"*randstring(3)
+      new(cargs[:name],cargs)
+   end
 end
 
 
@@ -79,9 +83,8 @@ end
 Checks and validate inputs are in correct structure
 """
 function fit!(mtr::Matrifier,xx::DataFrame,y::Vector=[]) 
-  x = deepcopy(xx.Value) |> collect
-  x isa Vector || error("data should be a vector")
-  mtr.model = mtr.args
+   x = xx.Value |> collect
+   x isa Vector || error("data should be a vector")
 end
 
 """
@@ -90,31 +93,31 @@ end
 Applies the parameters of sliding windows to create the corresponding matrix
 """
 function transform!(mtr::Matrifier,xx::DataFrame)
-  x = deepcopy(xx.Value) |> collect
-  x isa Vector || error("data should be a vector")
-  mtype = eltype(x)
-  res=toMatrix(mtr,x)
-  resarray=convert(Array{mtype},res) |> DataFrame
-  rename!(resarray,names(resarray)[end] => :output)
+   x = xx.Value |> collect
+   x isa Vector || error("data should be a vector")
+   mtype = eltype(x)
+   res=toMatrix(mtr,x)
+   resarray=convert(Array{mtype},res) |> DataFrame
+   rename!(resarray,names(resarray)[end] => :output)
 end
 
 function toMatrix(mtr::Transformer, x::Vector)
-  stride=mtr.args[:stride];sz=mtr.args[:size];ahead=mtr.args[:ahead]
-  @assert stride>0 && sz>0 && ahead > 0
-  xlength = length(x)
-  xlength > sz || error("data too short for the given size of sliding window")
-  ndx=collect(xlength:-1:1)
-  mtuples = slidingwindow(i->(i-ahead),ndx,sz,stride)
-  height=size(mtuples)[1]
-  mmatrix = Array{Union{DateTime,<:Real},2}(zeros(height,sz+1))
-  ctr=1
-  gap = xlength - mtuples[1][2][1]
-  for (s,k) in mtuples
-    v = [reverse(s);k] .+ gap
-    mmatrix[ctr,:].=x[v]
-    ctr+=1
-  end
-  mmatrix
+   stride=mtr.model[:stride];sz=mtr.model[:size];ahead=mtr.model[:ahead]
+   @assert stride>0 && sz>0 && ahead > 0
+   xlength = length(x)
+   xlength > sz || error("data too short for the given size of sliding window")
+   ndx=collect(xlength:-1:1)
+   mtuples = slidingwindow(i->(i-ahead),ndx,sz,stride)
+   height=size(mtuples)[1]
+   mmatrix = Array{Union{DateTime,<:Real},2}(zeros(height,sz+1))
+   ctr=1
+   gap = xlength - mtuples[1][2][1]
+   for (s,k) in mtuples
+      v = [reverse(s);k] .+ gap
+      mmatrix[ctr,:].=x[v]
+      ctr+=1
+   end
+   mmatrix
 end
 
 ### ====
@@ -145,17 +148,20 @@ Example:
 Implements: `'fit!`, `transform!`
 """
 mutable struct Dateifier <: Transformer
-  model
-  args
+   name::String
+   model::Dict{Symbol,Any}
 
-  function Dateifier(args=Dict())
-    default_args = Dict{Symbol,Any}(
-        :ahead => 1,
-        :size => 7,
-        :stride => 1
-    )
-    new(nothing,mergedict(default_args,args))
-  end
+   function Dateifier(args=Dict())
+      default_args = Dict{Symbol,Any}(
+          :name => "dtfier",
+          :ahead => 1,
+          :size => 7,
+          :stride => 1
+      )
+      cargs=nested_dict_merge(default_args,args)
+      cargs[:name] = cargs[:name]*"_"*randstring(3)
+      new(cargs[:name],cargs)
+   end
 end
 
 """
@@ -164,11 +170,10 @@ end
 Computes range of dates to be used during transform.
 """
 function fit!(dtr::Dateifier,xx::DataFrame,y::Vector=[])
-  x = deepcopy(xx.Date)
-  (eltype(x) <: DateTime || eltype(x) <: Date) || error("array element types are not dates")
-  dtr.args[:lower] = minimum(x)
-  dtr.args[:upper] = maximum(x)
-  dtr.model = dtr.args
+   x = xx.Date
+   (eltype(x) <: DateTime || eltype(x) <: Date) || throw(ArgumentError("array element types are not dates"))
+   dtr.model[:lower] = minimum(x)
+   dtr.model[:upper] = maximum(x)
 end
 
 """
@@ -177,22 +182,22 @@ end
 Transforms to day of the month, day of the week, etc
 """
 function transform!(dtr::Dateifier,xx::DataFrame)
-  x = deepcopy(xx.Date)
-  x isa Vector || error("data should be a vector")
-  @assert eltype(x) <: DateTime || eltype(x) <: Date
-  res=toMatrix(dtr,x)
-  endpoints = convert(Array{DateTime},res)[:,end-1]
-  dt = DataFrame()
-  dt.year=Dates.year.(endpoints)
-  dt.month=Dates.month.(endpoints)
-  dt.day=Dates.day.(endpoints)
-  dt.hour=Dates.hour.(endpoints)
-  dt.week=Dates.week.(endpoints)
-  dt.dow=Dates.dayofweek.(endpoints)
-  dt.doq=Dates.dayofquarter.(endpoints)
-  dt.qoy=Dates.quarterofyear.(endpoints)
-  dtr.args[:header] = names(dt)
-  return dt
+   x = xx.Date
+   x isa Vector || throw(ArgumentError("data should be a vector"))
+   @assert eltype(x) <: DateTime || eltype(x) <: Date
+   res=toMatrix(dtr,x)
+   endpoints = convert(Array{DateTime},res)[:,end-1]
+   dt = DataFrame()
+   dt.year=Dates.year.(endpoints)
+   dt.month=Dates.month.(endpoints)
+   dt.day=Dates.day.(endpoints)
+   dt.hour=Dates.hour.(endpoints)
+   dt.week=Dates.week.(endpoints)
+   dt.dow=Dates.dayofweek.(endpoints)
+   dt.doq=Dates.dayofquarter.(endpoints)
+   dt.qoy=Dates.quarterofyear.(endpoints)
+   dtr.model[:header] = names(dt)
+   return dt
 end
 
 
@@ -226,23 +231,27 @@ Example:
 Implements: `fit!`, `transform!`
 """
 mutable struct DateValgator <: Transformer
-  model
-  args
-  function DateValgator(args=Dict())
-    default_args = Dict{Symbol,Any}(
-        :dateinterval => Dates.Hour(1),
-        :aggregator => :median
-    )
-    new(nothing,mergedict(default_args,args))
-  end
+   name::String
+   model::Dict{Symbol,Any}
+
+   function DateValgator(args=Dict())
+      default_args = Dict{Symbol,Any}(
+         :name => "dtvalgtr",
+         :dateinterval => Dates.Hour(1),
+         :aggregator => :median
+      )
+      cargs=nested_dict_merge(default_args,args)
+      cargs[:name] = cargs[:name]*"_"*randstring(3)
+      new(cargs[:name],cargs)
+   end
 end
 
 function validdateval!(x::DataFrame)
-  size(x)[2] == 2 || error("Date Val timeseries need two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  eltype(x[:,2]) <: Union{Missing,Real} || error("array element types are not values")
-  cnames = names(x)
-  rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
+   size(x)[2] == 2 || throw(ArgumentError("Date Val timeseries need two columns"))
+   (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || throw(ArgumentError("array element types are not dates"))
+   eltype(x[:,2]) <: Union{Missing,Real} || error("array element types are not values")
+   cnames = names(x)
+   rename!(x,Dict(cnames[1]=>:Date,cnames[2]=>:Value))
 end
 
 """
@@ -251,11 +260,10 @@ end
 Checks and validates arguments.
 """
 function fit!(dvmr::DateValgator,xx::DataFrame,y::Vector=[])
-  x = deepcopy(xx)
-  validdateval!(x)
-  aggr = dvmr.args[:aggregator] 
-  aggr in keys(gAggDict) || error("aggregator function passed is not recognized: ",aggr)
-  dvmr.model=dvmr.args
+   x = deepcopy(xx)
+   validdateval!(x)
+   aggr = dvmr.model[:aggregator] 
+   aggr in keys(gAggDict) || throw(ArgumentError("aggregator function passed is not recognized: ",aggr))
 end
 
 """
@@ -265,26 +273,26 @@ Aggregates values grouped by date-time period using aggregate
 function such as mean, median, maximum, minimum. Default is mean.
 """
 function transform!(dvmr::DateValgator,xx::DataFrame)
-  x = deepcopy(xx)
-  validdateval!(x)
-  # make sure aggregator function exists
-  aggr = dvmr.args[:aggregator] 
-  aggr in keys(gAggDict) || error("aggregator function passed is not recognized: ",aggr)
-  # get the Statistics function
-  aggfn = gAggDict[aggr]
-  # pass the aggregator function to the generic aggregator function
-  fn = aggregatorclskipmissing(aggfn)
-  grpby = typeof(dvmr.args[:dateinterval])
-  sym = Symbol(grpby)
-  x[!,sym] = round.(x.Date,grpby)
-  aggr=combine(groupby(x,sym),:Value=> (x->fn(x)) => :MeanValue)
-  rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
-  lower = round(minimum(x.Date),grpby)
-  upper = round(maximum(x.Date),grpby)
-  #create list of complete dates and join with aggregated data
-  cdate = DataFrame(Date = collect(lower:dvmr.args[:dateinterval]:upper))
-  joined = leftjoin(cdate,aggr,on=:Date)
-  joined
+   x = deepcopy(xx)
+   validdateval!(x)
+   # make sure aggregator function exists
+   aggr = dvmr.model[:aggregator] 
+   aggr in keys(gAggDict) || throw(ArgumentError("aggregator function passed is not recognized: ",aggr))
+   # get the Statistics function
+   aggfn = gAggDict[aggr]
+   # pass the aggregator function to the generic aggregator function
+   fn = aggregatorclskipmissing(aggfn)
+   grpby = typeof(dvmr.model[:dateinterval])
+   sym = Symbol(grpby)
+   x[!,sym] = round.(x.Date,grpby)
+   aggr=combine(groupby(x,sym),:Value=> (x->fn(x)) => :MeanValue)
+   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
+   lower = round(minimum(x.Date),grpby)
+   upper = round(maximum(x.Date),grpby)
+   #create list of complete dates and join with aggregated data
+   cdate = DataFrame(Date = collect(lower:dvmr.model[:dateinterval]:upper))
+   joined = leftjoin(cdate,aggr,on=:Date)
+   joined
 end
 
 """
@@ -317,48 +325,51 @@ Example:
 Implements: `fit!`, `transform!`
 """
 mutable struct DateValizer <: Transformer
-  model
-  args
+  name::String
+  model::Dict{Symbol,Any}
 
   function DateValizer(args=Dict())
     default_args = Dict{Symbol,Any}(
+        :name => "dtvlzr",
         :medians => DataFrame(),
         :dateinterval => Dates.Hour(1)
     )
-    new(nothing,mergedict(default_args,args))
+    cargs=nested_dict_merge(default_args,args)
+    cargs[:name] = cargs[:name]*"_"*randstring(3)
+    new(cargs[:name],cargs)
   end
 end
 
 function getMedian(t::Type{T},xx::DataFrame) where {T<:Union{TimePeriod,DatePeriod}}
-  x = deepcopy(xx)
-  sgp = Symbol(t)
-  fn = Dict(Dates.Second=>Dates.second,
-            Dates.Minute=>Dates.minute,
-            Dates.Hour=>Dates.hour,
-            Dates.Day=>Dates.day,
-            Dates.Month=>Dates.month)
-  try
-    x[!,sgp]=fn[t].(x.Date)
-  catch
-    error("unknown dateinterval")
-  end
-  gpmeans = combine(groupby(x,sgp),:Value => (x->skipmedian(x)) => :Value)
-  gpmeans
+   x = deepcopy(xx)
+   sgp = Symbol(t)
+   fn = Dict(Dates.Second=>Dates.second,
+             Dates.Minute=>Dates.minute,
+             Dates.Hour=>Dates.hour,
+             Dates.Day=>Dates.day,
+             Dates.Month=>Dates.month)
+   try
+      x[!,sgp]=fn[t].(x.Date)
+   catch
+      error("unknown dateinterval")
+   end
+   gpmeans = combine(groupby(x,sgp),:Value => (x->skipmedian(x)) => :Value)
+   gpmeans
 end
 
 function fullaggregate!(dvzr::DateValizer,xx::DataFrame)
-  x = deepcopy(xx)
-  grpby = typeof(dvzr.args[:dateinterval])
-  sym = Symbol(grpby)
-  x[!,sym] = round.(x.Date,grpby)
-  aggr = combine(groupby(x,sym),:Value=> (x->skipmedian(x)) => :MeanValue)
-  rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
-  lower = minimum(x.Date)
-  upper = maximum(x.Date)
-  #create list of complete dates and join with aggregated data
-  cdate = DataFrame(Date = collect(lower:dvzr.args[:dateinterval]:upper))
-  joined = leftjoin(cdate,aggr,on=:Date)
-  joined
+   x = deepcopy(xx)
+   grpby = typeof(dvzr.model[:dateinterval])
+   sym = Symbol(grpby)
+   x[!,sym] = round.(x.Date,grpby)
+   aggr = combine(groupby(x,sym),:Value=> (x->skipmedian(x)) => :MeanValue)
+   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
+   lower = minimum(x.Date)
+   upper = maximum(x.Date)
+   #create list of complete dates and join with aggregated data
+   cdate = DataFrame(Date = collect(lower:dvzr.model[:dateinterval]:upper))
+   joined = leftjoin(cdate,aggr,on=:Date)
+   joined
 end
 
 """
@@ -367,15 +378,14 @@ end
 Validates input and computes global medians grouped by time period.
 """
 function fit!(dvzr::DateValizer,xx::DataFrame,y::Vector=[]) 
-  x = deepcopy(xx)
-  validdateval!(x)
-  # get complete dates and aggregate
-  joined = fullaggregate!(dvzr,x)
-  grpby = typeof(dvzr.args[:dateinterval])
-  sym = Symbol(grpby)
-  medians = getMedian(grpby,joined)
-  dvzr.args[:medians] = medians
-  dvzr.model=dvzr.args
+   x = deepcopy(xx)
+   validdateval!(x)
+   # get complete dates and aggregate
+   joined = fullaggregate!(dvzr,x)
+   grpby = typeof(dvzr.model[:dateinterval])
+   sym = Symbol(grpby)
+   medians = getMedian(grpby,joined)
+   dvzr.model[:medians] = medians
 end
 
 """
@@ -384,31 +394,31 @@ end
 Replaces `missing` with the corresponding global medians with respect to time period.
 """
 function transform!(dvzr::DateValizer,xx::DataFrame) 
-  x = deepcopy(xx)
-  validdateval!(x)
-  # get complete dates, aggregate, and get medians
-  joined = fullaggregate!(dvzr,x)
-  # copy medians
-  medians = dvzr.args[:medians]
-  grpby = typeof(dvzr.args[:dateinterval])
-  sym = Symbol(grpby)
-  fn = Dict(Dates.Hour=>Dates.hour,
-            Dates.Minute=>Dates.minute,
-            Dates.Second=>Dates.second,
-            Dates.Day => Dates.day,
-            Dates.Month=>Dates.month)
-  try
-    joined[!,sym]=fn[grpby].(joined.Date)
-  catch
-    error("unknown dateinterval")
-  end
-  # find indices of missing
-  missingndx = findall(ismissing.(joined.Value))
-  jmndx=joined[missingndx,sym] .+ 1 # get time period index of missing, convert 0 index time to 1 index
-  missingvals::SubArray = @view joined[missingndx,:Value]
-  missingvals .= medians[jmndx,:Value] # replace missing with median value
-  sum(ismissing.(joined.Value)) == 0 || error("Aggregation by time period failed to replace missings")
-  joined[:,[:Date,:Value]]
+   x = deepcopy(xx)
+   validdateval!(x)
+   # get complete dates, aggregate, and get medians
+   joined = fullaggregate!(dvzr,x)
+   # copy medians
+   medians = dvzr.model[:medians]
+   grpby = typeof(dvzr.model[:dateinterval])
+   sym = Symbol(grpby)
+   fn = Dict(Dates.Hour=>Dates.hour,
+             Dates.Minute=>Dates.minute,
+             Dates.Second=>Dates.second,
+             Dates.Day => Dates.day,
+             Dates.Month=>Dates.month)
+   try
+      joined[!,sym]=fn[grpby].(joined.Date)
+   catch
+      throw(ArgumentError("unknown dateinterval"))
+   end
+   # find indices of missing
+   missingndx = findall(ismissing.(joined.Value))
+   jmndx=joined[missingndx,sym] .+ 1 # get time period index of missing, convert 0 index time to 1 index
+   missingvals::SubArray = @view joined[missingndx,:Value]
+   missingvals .= medians[jmndx,:Value] # replace missing with median value
+   sum(ismissing.(joined.Value)) == 0 || error("Aggregation by time period failed to replace missings")
+   joined[:,[:Date,:Value]]
 end
 
 """
@@ -453,19 +463,22 @@ Example:
 Implements: `fit!`, transform!`
 """
 mutable struct DateValNNer <: Transformer
-  model
-  args
+   name::String
+   model::Dict{Symbol,Any}
 
-  function DateValNNer(args=Dict())
-    default_args = Dict{Symbol,Any}(
-        :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
-        :dateinterval => Dates.Hour(1),
-        :nnsize => 1,
-        :strict => true,
-        :aggregator => :median
-    )
-    new(nothing,mergedict(default_args,args))
-  end
+   function DateValNNer(args=Dict())
+      default_args = Dict{Symbol,Any}(
+         :name => "dtvlnnr",
+         :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
+         :dateinterval => Dates.Hour(1),
+         :nnsize => 1,
+         :strict => true,
+         :aggregator => :median
+      )
+      cargs=nested_dict_merge(default_args,args)
+      cargs[:name] = cargs[:name]*"_"*randstring(3)
+      new(cargs[:name],cargs)
+   end
 end
 
 """
@@ -474,11 +487,10 @@ end
 Validates and checks arguments for errors.
 """
 function fit!(dnnr::DateValNNer,xx::DataFrame,y::Vector=[])
-  x = deepcopy(xx)
-  validdateval!(x)
-  aggr = dnnr.args[:aggregator]
-  aggr in keys(gAggDict) || error("aggregator function passed is not recognized: ",aggr)
-  dnnr.model=dnnr.args
+   x = deepcopy(xx)
+   validdateval!(x)
+   aggr = dnnr.model[:aggregator]
+   aggr in keys(gAggDict) || throw(ArgumentError("aggregator function passed is not recognized: ",aggr))
 end
 
 """
@@ -487,38 +499,38 @@ end
 Replaces `missings` by nearest neighbor looping over the dataset until all missing values are gone.
 """
 function transform!(dnnr::DateValNNer,xx::DataFrame)
-  x = deepcopy(xx)
-  validdateval!(x)
-  # make sure aggregator function exists
-  aggr = dnnr.args[:aggregator]
-  aggr in keys(gAggDict) || error("aggregator function pass is not recognized: ",aggr)
-  # get the Statistics function
-  aggfn = gAggDict[aggr]
-  # pass the aggregator function to the generic aggregator function
-  fn = aggregatorclskipmissing(aggfn)
-  grpby = typeof(dnnr.args[:dateinterval])
-  sym = Symbol(grpby)
-  # aggregate by time period
-  x[!,sym] = round.(x.Date,grpby)
-  aggr = combine(groupby(x,sym),:Value=> (x->fn(x)) => :MeanValue)
-  rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
-  lower = round(minimum(x.Date),grpby)
-  upper = round(maximum(x.Date),grpby)
-  #create list of complete dates and join with aggregated data
-  cdate = DataFrame(Date = collect(lower:dnnr.args[:dateinterval]:upper))
-  joined = leftjoin(cdate,aggr,on=:Date)
-  missingcount = sum(ismissing.(joined.Value))
-  dnnr.args[:missingcount] = missingcount
-  res = transform_worker!(dnnr,joined)
-  count=1
-  if dnnr.args[:missdirection] == :symmetric
-    while sum(ismissing.(res.Value)) > 0
-      res = transform_worker!(dnnr,res)
-      count += 1
-    end
-  end
-  dnnr.args[:loopcount] = count
-  res
+   x = deepcopy(xx)
+   validdateval!(x)
+   # make sure aggregator function exists
+   aggr = dnnr.model[:aggregator]
+   aggr in keys(gAggDict) || error("aggregator function pass is not recognized: ",aggr)
+   # get the Statistics function
+   aggfn = gAggDict[aggr]
+   # pass the aggregator function to the generic aggregator function
+   fn = aggregatorclskipmissing(aggfn)
+   grpby = typeof(dnnr.model[:dateinterval])
+   sym = Symbol(grpby)
+   # aggregate by time period
+   x[!,sym] = round.(x.Date,grpby)
+   aggr = combine(groupby(x,sym),:Value=> (x->fn(x)) => :MeanValue)
+   rename!(aggr,Dict(names(aggr)[1]=>:Date,names(aggr)[2]=>:Value))
+   lower = round(minimum(x.Date),grpby)
+   upper = round(maximum(x.Date),grpby)
+   #create list of complete dates and join with aggregated data
+   cdate = DataFrame(Date = collect(lower:dnnr.model[:dateinterval]:upper))
+   joined = leftjoin(cdate,aggr,on=:Date)
+   missingcount = sum(ismissing.(joined.Value))
+   dnnr.model[:missingcount] = missingcount
+   res = transform_worker!(dnnr,joined)
+   count=1
+   if dnnr.model[:missdirection] == :symmetric
+      while sum(ismissing.(res.Value)) > 0
+         res = transform_worker!(dnnr,res)
+         count += 1
+      end
+   end
+   dnnr.model[:loopcount] = count
+   res
 end
 
 function transform_worker!(dnnr::DateValNNer,joinc::DataFrame)
@@ -526,11 +538,11 @@ function transform_worker!(dnnr::DateValNNer,joinc::DataFrame)
   maxrow = size(joined)[1]
 
   # to fill-in with nearest neighbors
-  nnsize::Int64 = dnnr.args[:nnsize]
+  nnsize::Int64 = dnnr.model[:nnsize]
   themissing = findall(ismissing.(joined.Value))
   # ==== symmetric nearest neighbor
   missingndx = DataFrame()
-  if dnnr.args[:missdirection] == :symmetric
+  if dnnr.model[:missdirection] == :symmetric
     missed = themissing |> reverse
     missingndx.Missed = missed
     # get lower:upper range
@@ -541,7 +553,7 @@ function transform_worker!(dnnr::DateValNNer,joinc::DataFrame)
     end
   else
     # ===== reverse and forward
-    missed = (dnnr.args[:missdirection] == :reverse) ? (themissing |> reverse) : themissing
+    missed = (dnnr.model[:missdirection] == :reverse) ? (themissing |> reverse) : themissing
     missingndx.Missed = missed
     # dealing with boundary exceptions, default to range until the maxrow
     missingndx.neighbors = (m->((m+1>=maxrow) || (m+nnsize>=maxrow)) ? (m+1:maxrow) : (m+1:m+nnsize)).(missingndx.Missed) # NN ranges
@@ -549,7 +561,7 @@ function transform_worker!(dnnr::DateValNNer,joinc::DataFrame)
   #joined[missingndx[:Missed],:Value] = (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # iterate to each range
   missingvals::SubArray = @view joined[missingndx.Missed,:Value] # get view of only missings
   missingvals .=  (r -> skipmedian(joined[r,:Value])).(missingndx.neighbors) # replace with nn medians
-  dnnr.args[:strict] && (sum(ismissing.(joined.Value)) == 0 || error("Nearest Neigbour algo failed to replace missings"))
+  dnnr.model[:strict] && (sum(ismissing.(joined.Value)) == 0 || error("Nearest Neigbour algo failed to replace missings"))
   joined
 end
 
@@ -583,15 +595,20 @@ Example:
 Implements: `fit!`, `transform!`
 """
 mutable struct CSVDateValReader <: Transformer
-    model
-    args
-    function CSVDateValReader(args=Dict())
-        default_args = Dict(
-            :filename => "",
-            :dateformat => ""
-        )
-        new(nothing,mergedict(default_args,args))
-    end
+   name::String
+   model::Dict{Symbol,Any}
+
+   function CSVDateValReader(args=Dict())
+      default_args = Dict(
+          :name => "csvrdr",
+          :filename => "",
+          :dateformat => ""
+      )
+      cargs=nested_dict_merge(default_args,args)
+      cargs[:name] = cargs[:name]*"_"*randstring(3)
+      new(cargs[:name],cargs)
+
+   end
 end
 
 """
@@ -600,10 +617,9 @@ end
 Makes sure filename and dateformat are not empty strings.
 """
 function fit!(csvrdr::CSVDateValReader,x::DataFrame=DataFrame(),y::Vector=[])
-    fname = csvrdr.args[:filename]
-    fmt = csvrdr.args[:dateformat]
-    (fname != "" && fmt != "") || error("missing filename or date format")
-    csvrdr.model = csvrdr.args
+   fname = csvrdr.model[:filename]
+   fmt = csvrdr.model[:dateformat]
+   (fname != "" && fmt != "") || throw(ArgumentError("missing filename or date format"))
 end
 
 """
@@ -612,15 +628,15 @@ end
 Uses CSV package to read the csv file and converts it to dataframe.
 """
 function transform!(csvrdr::CSVDateValReader,x::DataFrame=DataFrame())
-    fname = csvrdr.args[:filename]
-    fmt = csvrdr.args[:dateformat]
-    df = CSV.File(fname) |> DataFrame
-    ncol(df) == 2 || error("dataframe should have only two columns: Date,Value")
-    rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
-    if !(eltype(df.Date) <: DateTime )
+   fname = csvrdr.model[:filename]
+   fmt = csvrdr.model[:dateformat]
+   df = CSV.File(fname) |> DataFrame
+   ncol(df) == 2 || throw(ArgumentError("dataframe should have only two columns: Date,Value"))
+   rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
+   if !(eltype(df.Date) <: DateTime )
       df.Date = DateTime.(df.Date,fmt)
-    end
-    df
+   end
+   df
 end
 
 """
@@ -652,15 +668,19 @@ Example:
 Implements: `fit!`, `transform!`
 """
 mutable struct CSVDateValWriter <: Transformer
-    model
-    args
-    function CSVDateValWriter(args=Dict())
-        default_args = Dict(
-            :filename => "",
-            :dateformat => ""
-        )
-        new(nothing,mergedict(default_args,args))
-    end
+   name::String
+   model::Dict{Symbol,Any}
+
+   function CSVDateValWriter(args=Dict())
+      default_args = Dict(
+          :name => "csvdtwtr",
+          :filename => "",
+          :dateformat => ""
+      )
+      cargs=nested_dict_merge(default_args,args)
+      cargs[:name] = cargs[:name]*"_"*randstring(3)
+      new(cargs[:name],cargs)
+   end
 end
 
 """
@@ -669,10 +689,9 @@ end
 Makes sure filename and dateformat are not empty strings.
 """
 function fit!(csvwtr::CSVDateValWriter,x::DataFrame=DataFrame(),y::Vector=[])
-    fname = csvwtr.args[:filename]
-    fmt = csvwtr.args[:dateformat]
-    fname != ""  || error("missing filename")
-    csvwtr.model = csvwtr.args
+   fname = csvwtr.model[:filename]
+   fmt = csvwtr.model[:dateformat]
+   fname != ""  || throw(ArgumentError("missing filename"))
 end
 
 """
@@ -681,15 +700,15 @@ end
 Uses CSV package to write the dataframe into a csv file.
 """
 function transform!(csvwtr::CSVDateValWriter,x::DataFrame)
-    fname = csvwtr.args[:filename]
-    fmt = csvwtr.args[:dateformat]
-    df = deepcopy(x) |> DataFrame
-    if ncol(df) == 2 
+   fname = csvwtr.model[:filename]
+   fmt = csvwtr.model[:dateformat]
+   df = deepcopy(x) |> DataFrame
+   if ncol(df) == 2 
       rename!(df,names(df)[1]=>:Date,names(df)[2]=>:Value)
       eltype(df.Date) <: DateTime || error("Date format error")
-    end
-    df |> CSV.write(fname)
-    return df
+   end
+   df |> CSV.write(fname)
+   return df
 end
 
 #"""
@@ -809,26 +828,29 @@ Example:
 Implements: `fit!`, transform!`
 """
 mutable struct DateValMultiNNer <: Transformer
-  model
-  args
+   name::String
+   model::Dict{Symbol,Any}
 
-  function DateValMultiNNer(args=Dict())
-    default_args = Dict{Symbol,Any}(
-        :type => :knn,
-        :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
-        :dateinterval => Dates.Hour(1),
-        :nnsize => 1,
-        :strict => true,
-        :aggregator => :median
-    )
-    new(nothing,mergedict(default_args,args))
-  end
+   function DateValMultiNNer(args=Dict())
+      default_args = Dict{Symbol,Any}(
+         :name => "dtvalmnnr",
+         :type => :knn,
+         :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
+         :dateinterval => Dates.Hour(1),
+         :nnsize => 1,
+         :strict => true,
+         :aggregator => :median
+      )
+      cargs=nested_dict_merge(default_args,args)
+      cargs[:name] = cargs[:name]*"_"*randstring(3)
+      new(cargs[:name],cargs)
+   end
 end
 
 function multivalidateval(x::DataFrame)
-  #size(x)[2] > 2 || error("Multi Date Val timeseries need more than two columns")
-  (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || error("array element types are not dates")
-  sum(broadcast(y->eltype(y)<:Union{Missing,Real},eachcol(x[:,2:end]))) == ncol(x)-1 || error("columns 2:end should be real numbers")
+   #size(x)[2] > 2 || error("Multi Date Val timeseries need more than two columns")
+   (eltype(x[:,1]) <: DateTime || eltype(x[:,1]) <: Date) || throw(ArgumentError("array element types are not dates"))
+   sum(broadcast(y->eltype(y)<:Union{Missing,Real},eachcol(x[:,2:end]))) == ncol(x)-1 || throw(ArgumentError("columns 2:end should be real numbers"))
 end
 
 """
@@ -837,14 +859,13 @@ end
 Validates and checks arguments for errors.
 """
 function fit!(dnnr::DateValMultiNNer,xx::DataFrame,y::Vector=[])
-  x = deepcopy(xx)
-  # validate it's multi-dimensional and first column is date
-  multivalidateval(x)
-  cnames = names(x)
-  rename!(x,Dict(cnames[1]=>:Date))
-  aggr = dnnr.args[:aggregator]
-  aggr in keys(gAggDict) || error("aggregator function passed is not recognized: ",aggr)
-  dnnr.model=dnnr.args
+   x = deepcopy(xx)
+   # validate it's multi-dimensional and first column is date
+   multivalidateval(x)
+   cnames = names(x)
+   rename!(x,Dict(cnames[1]=>:Date))
+   aggr = dnnr.model[:aggregator]
+   aggr in keys(gAggDict) || throw(ArgumentError("aggregator function passed is not recognized: ",aggr))
 end
 
 """
@@ -854,48 +875,48 @@ Replaces `missings` by nearest neighbor or linear interpolation by looping over 
 for each column until all missing values are gone.
 """
 function transform!(dnnr::DateValMultiNNer,xx::DataFrame)
-  x = deepcopy(xx)
-  # make sure data is valid
-  multivalidateval(x)
-  # loop each column and call ValdateNNer to impute
-  df = DataFrame()
-  if dnnr.args[:type] == :knn
-    df = knnimpute(dnnr,x)
-  elseif dnnr.args[:type] == :linear
-    df = linearimpute(dnnr,x)
-  end
-  return df
+   x = deepcopy(xx)
+   # make sure data is valid
+   multivalidateval(x)
+   # loop each column and call ValdateNNer to impute
+   df = DataFrame()
+   if dnnr.model[:type] == :knn
+      df = knnimpute(dnnr,x)
+   elseif dnnr.model[:type] == :linear
+      df = linearimpute(dnnr,x)
+   end
+   return df
 end
 
 function knnimpute(dnnr::DateValMultiNNer,x::DataFrame)
-  valnner = DateValNNer(dnnr.args)
-  df = DataFrame(Date=x.Date) 
-  cnames = names(x)
-  for y in eachcol(x[:,2:end])
-    input = DataFrame(Date=x.Date,Value=y)
-    fit!(valnner,input)
-    res=transform!(valnner,input)
-    df = innerjoin(df,res,on=:Date,makeunique=true)
-  end
-  rename!(df,cnames)
-  return df
+   valnner = DateValNNer(dnnr.model)
+   df = DataFrame(Date=x.Date) 
+   cnames = names(x)
+   for y in eachcol(x[:,2:end])
+      input = DataFrame(Date=x.Date,Value=y)
+      fit!(valnner,input)
+      res=transform!(valnner,input)
+      df = innerjoin(df,res,on=:Date,makeunique=true)
+   end
+   rename!(df,cnames)
+   return df
 end
 
 function linearimpute(dnnr::DateValMultiNNer,x::DataFrame)
-  valgator = DateValgator(dnnr.args)
-  linearputer = DateValLinearImputer(dnnr.args)
-  df = DataFrame(Date=x.Date) 
-  cnames = names(x)
-  for y in eachcol(x[:,2:end])
-    input = DataFrame(Date=x.Date,Value=y)
-    fit!(valgator,input)
-    agg=transform!(valgator,input)
-    fit!(linearputer,agg)
-    res=transform!(linearputer,agg)
-    df = innerjoin(df,res,on=:Date,makeunique=true)
-  end
-  rename!(df,cnames)
-  return df
+   valgator = DateValgator(dnnr.model)
+   linearputer = DateValLinearImputer(dnnr.model)
+   df = DataFrame(Date=x.Date) 
+   cnames = names(x)
+   for y in eachcol(x[:,2:end])
+      input = DataFrame(Date=x.Date,Value=y)
+      fit!(valgator,input)
+      agg=transform!(valgator,input)
+      fit!(linearputer,agg)
+      res=transform!(linearputer,agg)
+      df = innerjoin(df,res,on=:Date,makeunique=true)
+   end
+   rename!(df,cnames)
+   return df
 end
 
 
@@ -928,15 +949,18 @@ Example:
 Implements: `fit!`, transform!`
 """
 mutable struct DateValLinearImputer <: Transformer
-  model
-  args
+   name::String
+   model::Dict{Symbol,Any}
 
-  function DateValLinearImputer(args=Dict())
-    default_args = Dict{Symbol,Any}(
-        :dateinterval => Dates.Hour(1),
-    )
-    new(nothing,mergedict(default_args,args))
-  end
+   function DateValLinearImputer(args=Dict())
+      default_args = Dict{Symbol,Any}(
+         :name => "dtvlnimptr",
+         :dateinterval => Dates.Hour(1)
+      )
+      cargs=nested_dict_merge(default_args,args)
+      cargs[:name] = cargs[:name]*"_"*randstring(3)
+      new(cargs[:name],cargs)
+   end
 end
 
 
@@ -946,9 +970,8 @@ end
 Validates and checks arguments for errors.
 """
 function fit!(dnnr::DateValLinearImputer,xx::DataFrame,y::Vector=[])
-  x = deepcopy(xx)
-  validdateval!(x)
-  dnnr.model=dnnr.args
+   x = deepcopy(xx)
+   validdateval!(x)
 end
 
 """
@@ -957,13 +980,13 @@ end
 Replaces `missings` by linear interpolation.
 """
 function transform!(dnnr::DateValLinearImputer,xx::DataFrame)
-  x = deepcopy(xx)
-  validdateval!(x)
-  valgator = DateValgator(dnnr.args)
-  fit!(valgator,x)
-  df=transform!(valgator,x)
-  df.Value = interp(df.Value) |> locf() |> nocb()
-  return df
+   x = deepcopy(xx)
+   validdateval!(x)
+   valgator = DateValgator(dnnr.model)
+   fit!(valgator,x)
+   df=transform!(valgator,x)
+   df.Value = interp(df.Value) |> locf() |> nocb()
+   return df
 end
 
 end

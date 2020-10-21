@@ -2,6 +2,7 @@ module TestSchemalizer
 
 using Test
 using TSML
+using TSML.Schemalizers
 
 function generatedf()
   Random.seed!(123)

@@ -1,5 +1,6 @@
 module Outliernicers
 
+using Random
 using Dates
 using DataFrames
 using Statistics
@@ -42,19 +43,21 @@ Example:
 Implements: `fit!`, `transform!`
 """
 mutable struct Outliernicer <: Transformer
-  model
-  args
+   name::String
+   model::Dict{Symbol,Any}
 
-  function Outliernicer(args=Dict())
-    default_args = Dict(
-        :dateinterval => Dates.Hour(1),
-        :nnsize => 1,
-        :missdirection => :symmetric,
-        :scale => 1.25
-
-    )
-    new(nothing, mergedict(default_args, args))
-  end
+   function Outliernicer(args=Dict())
+      default_args = Dict{Symbol,Any}(
+         :name => "outlrncr",
+         :dateinterval => Dates.Hour(1),
+         :nnsize => 1,
+         :missdirection => :symmetric,
+         :scale => 1.25
+      )
+      cargs=nested_dict_merge(default_args,args)
+      cargs[:name] = cargs[:name]*"_"*randstring(3)
+      new(cargs[:name],cargs)
+   end
 end
 
 """
@@ -63,8 +66,7 @@ end
 Check that `features` are two-colum data.
 """
 function fit!(st::Outliernicer, features::DataFrame, labels::Vector=[]) 
-  ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
-  st.model = st.args
+   ncol(features) == 2 || throw(ArgumentError("dataframe must have 2 columns: Date, Val"))
 end
 
 """
@@ -73,29 +75,29 @@ end
 Locate outliers based on IQR factor and calls DateValNNer to replace them with nearest neighbors.
 """
 function transform!(st::Outliernicer, features::DataFrame)
-  features != DataFrame() || return DataFrame()
-  ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
-  sum(names(features) .== ("Date","Value"))  == 2 || error("wrong column names")
-  mfeatures=deepcopy(features)
-  rvals = mfeatures.Value
-  # compute the outlier range
-  # setup to store both missing and numbers
-  mvals = Array{Union{Missing,eltype(rvals)},1}(missing,length(rvals))
-  mvals .= rvals
-  crvals = skipmissing(rvals) # stat of non-missing
-  miqr = iqr(crvals)
-  med = median(crvals) # median
-  scale = st.model[:scale]
-  lower=med - scale*miqr; upper=med + scale*miqr
-  missindx = findall(x -> !ismissing(x) && (x > upper || x < lower),rvals) 
-  mvals[missindx] .= missing
-  mfeatures.Value = mvals
-  # use ValNNer to replace missings
-  valnner = DateValNNer(st.args)
-  fit!(valnner,mfeatures)
-  resdf = transform!(valnner,mfeatures)
-  resdf.Value = collect(skipmissing(resdf.Value)) 
-  resdf
+   features != DataFrame() || return DataFrame()
+   ncol(features) == 2 || throw(ArgumentError("dataframe must have 2 columns: Date, Val"))
+   sum(names(features) .== ("Date","Value"))  == 2 || throw(ArgumentError("wrong column names"))
+   mfeatures=deepcopy(features)
+   rvals = mfeatures.Value
+   # compute the outlier range
+   # setup to store both missing and numbers
+   mvals = Array{Union{Missing,eltype(rvals)},1}(missing,length(rvals))
+   mvals .= rvals
+   crvals = skipmissing(rvals) # stat of non-missing
+   miqr = iqr(crvals)
+   med = median(crvals) # median
+   scale = st.model[:scale]
+   lower=med - scale*miqr; upper=med + scale*miqr
+   missindx = findall(x -> !ismissing(x) && (x > upper || x < lower),rvals) 
+   mvals[missindx] .= missing
+   mfeatures.Value = mvals
+   # use ValNNer to replace missings
+   valnner = DateValNNer(st.model)
+   fit!(valnner,mfeatures)
+   resdf = transform!(valnner,mfeatures)
+   resdf.Value = collect(skipmissing(resdf.Value)) 
+   resdf
 end
 
 end

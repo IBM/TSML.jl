@@ -1,5 +1,7 @@
 # MLBase transformers.
 module MLBaseWrapper
+
+using Random
 using DataFrames
 using LinearAlgebra
 
@@ -15,8 +17,10 @@ export standardize, standardize!, estimate, transform,StandardScaler
 """
     StandardScaler(
        Dict( 
-          :center => true,
-          :scale => true
+          :impl_args => Dict(
+              :center => true,
+              :scale => true
+          )
        )
     )
 
@@ -24,16 +28,21 @@ Standardizes each feature using (X - mean) / stddev.
 Will produce NaN if standard deviation is zero.
 """
 mutable struct StandardScaler <: Transformer
-  model
-  args
+   name::String
+   model::Dict{Symbol,Any}
 
   function StandardScaler(args=Dict())
-    default_args = Dict( 
-      :center => true,
-      :scale => true
+     default_args = Dict{Symbol,Any}( 
+      :name => "stdsclr",
+      :impl_args => Dict{Symbol,Any}(
+         :center => true,
+         :scale => true
+      )
     )
-    new(nothing, mergedict(default_args, args))
-  end
+    cargs=nested_dict_merge(default_args,args)
+    cargs[:name] = cargs[:name]*"_"*randstring(3)
+    new(cargs[:name],cargs)
+ end
 end
 
 """
@@ -42,12 +51,11 @@ end
 Compute the parameters to center and scale.
 """
 function fit!(st::StandardScaler, features::DataFrame, labels::Vector=[]) 
-  mfeatures = convert(Matrix{Float64},features)
-  pfeatures = mfeatures' |> collect |> Matrix{Float64}
-  st_transform = estimate(Standardize, Array(mfeatures'); st.args...)
-  st.model = Dict(
-    :standardize_transform => st_transform
-  )
+   mfeatures = convert(Matrix{Float64},features)
+   pfeatures = mfeatures' |> collect |> Matrix{Float64}
+   impl_args = st.model[:impl_args]
+   st_transform = estimate(Standardize, Array(mfeatures'); impl_args...)
+   st.model[:standardize_transform] = st_transform
 end
 
 """
@@ -56,12 +64,12 @@ end
 Apply the computed parameters for centering and scaling to new data.
 """
 function transform!(st::StandardScaler, features::DataFrame)
-  mfeatures = convert(Matrix{Float64},features)
-  st_transform = st.model[:standardize_transform]
-  pfeatures = mfeatures' |> collect |> Matrix{Float64}
-  transposed_instances = Array(pfeatures)
-  pres = transform(st_transform, transposed_instances)
-  return (pres' |> collect |> Array{Float64}) |> DataFrame
+   mfeatures = convert(Matrix{Float64},features)
+   st_transform = st.model[:standardize_transform]
+   pfeatures = mfeatures' |> collect |> Matrix{Float64}
+   transposed_instances = Array(pfeatures)
+   pres = transform(st_transform, transposed_instances)
+   return (pres' |> collect |> Array{Float64}) |> DataFrame
 end
 
 ### Standardization
