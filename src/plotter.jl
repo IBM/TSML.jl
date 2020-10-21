@@ -1,6 +1,7 @@
 module Plotters
 
 #using Interact
+using Random
 using RecipesBase
 using DataFrames
 using Dates
@@ -70,6 +71,7 @@ mutable struct Plotter <: Transformer
 
    function Plotter(args=Dict())
       default_args = Dict(
+         :name => "pltr",
          :interactive => false,
          :pdfoutput => false
       )
