@@ -1,5 +1,6 @@
 module Monotonicers
 
+using Random
 using Dates
 using DataFrames
 using Statistics
@@ -38,14 +39,17 @@ Implements: `fit!`, `transform!`
 
 """
 mutable struct Monotonicer <: Transformer
-  model
-  args
+   name::String
+   model::Dict{Symbol,Any}
 
   function Monotonicer(args=Dict())
     default_args = Dict(
+       :name => "mntncr"
     )
-    new(nothing, mergedict(default_args, args))
-  end
+    cargs=nested_dict_merge(default_args,args)
+    cargs[:name] = cargs[:name]*"_"*randstring(3)
+    new(cargs[:name],cargs)
+ end
 end
 
 """
@@ -54,8 +58,7 @@ end
 A function that checks if `features` are two-column data of  Dates and Values
 """
 function fit!(st::Monotonicer, features::DataFrame, labels::Vector=[]) 
-  ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
-  st.model = st.args
+   ncol(features) == 2 || throw(ArgumentError("dataframe must have 2 columns: Date, Val"))
 end
 
 
@@ -65,25 +68,25 @@ end
 Normalize monotonic or daily monotonic data by taking the diffs and counting the flips.
 """
 function transform!(st::Monotonicer, features::DataFrame)
-  features != DataFrame() || return DataFrame()
-  ncol(features) == 2 || error("dataframe must have 2 columns: Date, Val")
-  sum(names(features) .== ("Date","Value"))  == 2 || error("wrong column names")
-  mfeatures=features
-  # double check monotonic 
-  # based on flips and daily flips
-  if ismonotonic(features.Value)
-    mfeatures = antimonotonize(features)
-  end
-  # daily mono reset everynight at most 2x
-  ndailyflips = dailyflips(mfeatures)
-  if ndailyflips < 0.5
-    antimono = antimonotonize(mfeatures)
-  elseif 0.5 <= ndailyflips <= 2.0
-    antimono = antimonotonizedaily(mfeatures)
-  else
-    antimono = mfeatures
-  end
-  return antimono
+   features != DataFrame() || return DataFrame()
+   ncol(features) == 2 ||  throw(ArgumentError("dataframe must have 2 columns: Date, Val"))
+   sum(names(features) .== ("Date","Value"))  == 2 || throw(ArgumentError("wrong column names"))
+   mfeatures=features
+   # double check monotonic 
+   # based on flips and daily flips
+   if ismonotonic(features.Value)
+      mfeatures = antimonotonize(features)
+   end
+   # daily mono reset everynight at most 2x
+   ndailyflips = dailyflips(mfeatures)
+   if ndailyflips < 0.5
+      antimono = antimonotonize(mfeatures)
+   elseif 0.5 <= ndailyflips <= 2.0
+      antimono = antimonotonizedaily(mfeatures)
+   else
+      antimono = mfeatures
+   end
+   return antimono
 end
 
 function antimonotonizedaily(dat::DataFrame)

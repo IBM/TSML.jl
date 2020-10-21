@@ -5,9 +5,9 @@ using Dates
 using DataFrames
 using JuliaDB: ML, table
 
-using AutoMLPipeline.AbsTypes
-using AutoMLPipeline.Utils
-import AutoMLPipeline.AbsTypes: fit!, transform!
+using ..AbsTypes
+using ..Utils
+import ..AbsTypes: fit!, transform!
 
 export fit!,transform!
 export Schemalizer, ML, table
@@ -49,15 +49,17 @@ Example:
 Implements: `fit!`, `transform!`
 """
 mutable struct Schemalizer <: Transformer
-  model
-  args
-  function Schemalizer(args=Dict())
-    default_args = Dict(
-        :schema => ML.Schema(),
-    )
-    margs=mergedict(default_args, args)
-    new(nothing,margs)
-  end
+   name::String
+   model::Dict{Symbol,Any}
+
+   function Schemalizer(args=Dict())
+      default_args = Dict(
+         :schema => ML.Schema()
+      )
+      cargs=nested_dict_merge(default_args,args)
+      cargs[:name] = cargs[:name]*"_"*randstring(3)
+      new(cargs[:name],cargs)
+   end
 end
 
 """
@@ -66,13 +68,12 @@ end
 Check validity of `features`: Date,Val data or just Vals Matrix
 """
 function fit!(sch::Schemalizer, features::DataFrame, labels::Vector=[])
-  isempty(features) && error("Schemalizer.fit: data format not recognized.")
-  if isempty(sch.args[:schema]) 
-    sch.args[:schema] = ML.schema(table(features))  
-  else 
-    sch.args[:schema] = ML.schema(table(features),hints=sch.args[:schema])
-  end
-  sch.model = sch.args
+   isempty(features) && throw(ArgumentError("Schemalizer.fit: data format not recognized."))
+   if isempty(sch.model[:schema]) 
+      sch.model[:schema] = ML.schema(table(features))  
+   else 
+      sch.model[:schema] = ML.schema(table(features),hints=sch.model[:schema])
+   end
 end
 
 """
@@ -81,8 +82,8 @@ end
 Normalized continous features and hot-bit encode categorical features
 """
 function transform!(sch::Schemalizer, features::DataFrame) 
-  isempty(features) && (return DataFrame())
-  ML.featuremat(sch.args[:schema],table(features))' |> DataFrame
+   isempty(features) && (return DataFrame())
+   ML.featuremat(sch.model[:schema],table(features))' |> DataFrame
 end
 
 

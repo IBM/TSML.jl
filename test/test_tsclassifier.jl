@@ -5,7 +5,7 @@ using TSML
 
 function test_realdatatsclassifier()
   tscl=TSClassifier(Dict()) 
-  @test_throws ErrorException fit!(tscl)
+  @test_throws ArgumentError fit!(tscl)
   trdirname = joinpath(dirname(pathof(TSML)),"../data/realdatatsclassification/training")
   tstdirname = joinpath(dirname(pathof(TSML)),"../data/realdatatsclassification/testing")
   modeldirname = joinpath(dirname(pathof(TSML)),"../data/realdatatsclassification/model")

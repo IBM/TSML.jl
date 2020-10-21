@@ -1,10 +1,13 @@
 module TSML
 
-using AutoMLPipeline
-using AutoMLPipeline.BaseFilters
-import AutoMLPipeline.AbsTypes: fit!, transform!
+export fit!, transform!,fit_transform!
 
+using AutoMLPipeline
 using AutoMLPipeline.AbsTypes
+using AutoMLPipeline.Pipelines
+using AutoMLPipeline.BaseFilters
+using AutoMLPipeline.DecisionTreeLearners
+import AutoMLPipeline.AbsTypes: fit!, transform!
 export Machine, Learner, Transformer, Workflow, Computer
 
 using AutoMLPipeline.Utils
@@ -13,18 +16,20 @@ export holdout, kfold, score, infer_eltype, nested_dict_to_tuples,
        mergedict, getiris,getprofb,
        skipmean,skipmedian,skipstd,
        aggregatorclskipmissing
- 
-export fit!, transform!,fit_transform!
 
 # reexport common functions to Main
 include("pkgdeps.jl")
-using .PkgDeps
 
-using AutoMLPipeline.Baselines
 export Baseline, Identity
-
-using AutoMLPipeline.BaseFilters: Imputer, OneHotEncoder, Wrapper
+export BaseFilter
 export Imputer,OneHotEncoder,Wrapper
+export PrunedTree,RandomForest,Adaboost
+export VoteEnsemble, StackEnsemble, BestLearner
+export FeatureSelector, CatFeatureSelector, NumFeatureSelector, CatNumDiscriminator
+export crossvalidate
+export @pipeline @pipelinex
+export Pipeline, ComboPipeline
+
 
 include("valdatefilters.jl")
 using .ValDateFilters
@@ -42,14 +47,7 @@ export Statifier,tsmlfullstat
 include("mlbase.jl")
 using .MLBaseWrapper
 export Standardize,standardize, standardize!, 
-       transform, estimate, transform,StandardScaler
-
-using AutoMLPipeline.DecisionTreeLearners
-export PrunedTree,RandomForest,Adaboost
-
-#include("normalizer.jl")
-#using .Normalizers
-#export Normalizer
+       estimate, transform,StandardScaler
 
 include("monotonicer.jl")
 using .Monotonicers
@@ -67,27 +65,17 @@ include("outliernicer.jl")
 using .Outliernicers
 export Outliernicer
 
+include("normalizer.jl")
+using .Normalizers
+export Normalizer
+
+include("svm.jl")
+using .SVMModels
+export SVMModel
 
 include("timescaledb.jl")
 using .TimescaleDBs
 export TimescaleDB
-
-using AutoMLPipeline.EnsembleMethods
-export VoteEnsemble, StackEnsemble, BestLearner
-
-using AutoMLPipeline.FeatureSelectors
-export FeatureSelector, CatFeatureSelector, NumFeatureSelector, CatNumDiscriminator
-
-using AutoMLPipeline.Pipelines
-export @pipeline @pipelinex
-export Pipeline, ComboPipeline
-
-#include("schema.jl")
-#using .Schemalizers
-#export Schemalizer, ML, table
-
-using AutoMLPipeline.CrossValidators
-export crossvalidate
 
 include("argparse.jl")
 using .ArgumentParsers
@@ -96,8 +84,15 @@ export tsmlmain
 include("plotter.jl") 
 using .Plotters
 export Plotter
+
 include("demo.jl")
 using .TSMLDemo
 export tsml_demo
+
+
+#include("schema.jl")
+#using .Schemalizers
+#export Schemalizer, ML, table
+
 
 end # module

@@ -1,4 +1,4 @@
-module TestDateVal
+module TestValDate
 
 using Test
 using TSML
@@ -133,7 +133,7 @@ function test_datevalnner()
     dlnr.model[:missdirection] = :reverse
     res = TSML.transform!(dlnr,x)
     @test sum((size(res)) .== (49,2)) == 2
-    @test round(sum(res.Value),digits=2) == 27.85
+    @test round(sum(res.Value),digits=2) == 25.3
     dlnr.model[:missdirection] = :forward
     dlnr.model[:strict] = false
     @test sum(ismissing.(TSML.transform!(dlnr,x)[!,:Value])) == 2
