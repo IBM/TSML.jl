@@ -83,8 +83,8 @@ nothing #hide
 We can examine the extracted features saved by the model that is used for its training.
 
 ```@example tsclassifier
-mdirname = tscl.args[:modeldirectory]
-modelfname=tscl.args[:juliarfmodelname]
+mdirname = tscl.model[:modeldirectory]
+modelfname=tscl.model[:juliarfmodelname]
 
 trstatfname = joinpath(mdirname,modelfname*".csv")
 res = CSV.read(trstatfname) |> DataFrame

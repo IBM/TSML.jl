@@ -9,7 +9,7 @@ Author = "Paulito Palmes"
 Modules = [
    TSML.ArgumentParsers,
    TSML.BaseFilters,
-   TSML.Baselines, 
+   TSML.BaselineModels, 
    TSML.CLIWrappers,
    TSML.CrossValidators,
    TSML.DecisionTreeLearners,
@@ -24,7 +24,9 @@ Modules = [
    TSML.Statifiers,
    TSML.TSClassifiers,
    TSML.TSMLDemo,
-   TSML.ValDateFilters
+   TSML.ValDateFilters,
+   TSML.ValDateFilters.Imputers,
+   TSML.SVMModels
    ]
 ```
 
@@ -33,7 +35,7 @@ Modules = [
 Modules = [
    TSML.ArgumentParsers,
    TSML.BaseFilters,
-   TSML.Baselines,
+   TSML.BaselineModels,
    TSML.CLIWrappers,
    TSML.CrossValidators,
    TSML.DecisionTreeLearners,
@@ -48,6 +50,8 @@ Modules = [
    TSML.Statifiers,
    TSML.TSClassifiers,
    TSML.TSMLDemo,
-   TSML.ValDateFilters
+   TSML.ValDateFilters,
+   TSML.ValDateFilters.Imputers,
+   TSML.SVMModels
    ]
 ```

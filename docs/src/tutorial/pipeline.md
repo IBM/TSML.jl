@@ -62,26 +62,27 @@ TSML by adding `CSVReader` transformer and added in the pipeline to process CSV 
 
 ```@example pipeline
 using TSML
-import AutoMLPipeline.AbsTypes.fit!
-import AutoMLPipeline.AbsTypes.transform!
+import TSML.AbsTypes.fit!
+import TSML.AbsTypes.transform!
 
 mutable struct CSVReader <: Transformer
-    model
-    args
+    filename::String
+    model::Dict{Symbol,Any}
+
     function CSVReader(args=Dict())
         default_args = Dict(
             :filename => "",
             :dateformat => ""
         )
-        new(nothing,mergedict(default_args,args))
+        margs = nested_dict_merge(default_args, args)
+        new(margs[:filename],margs)
     end
 end
 
 function fit!(csvrdr::CSVReader,x::DataFrame=DataFrame(),y::Vector=[]) 
-    fname = csvrdr.args[:filename]
-    fmt = csvrdr.args[:dateformat]
+    fname = csvrdr.model[:filename]
+    fmt = csvrdr.model[:dateformat]
     (fname != "" && fmt != "") || error("missing filename or date format")
-    model = csvrdr.args
 end
 
 function transform!(csvrdr::CSVReader,x::DataFrame=DataFrame())
