@@ -242,7 +242,7 @@ complementary packages: [AutoMLPipeline](https://github.com/IBM/AutoMLPipeline.j
 target = rand(["yes","no"],nrow(dateval)) 
 rf = RandomForest()
 accuracy(x,y) = score(:accuracy,x,y)
-crossvalidate(rf,dateval,target,accuracy)
+crossvalidate(rf,dateval,target,accuracy,10,true)
 
 fold: 1, 14.285714285714285
 fold: 2, 57.14285714285714
