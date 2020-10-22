@@ -1,6 +1,6 @@
-<div align="center"> <img
-src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo13.png"
-alt="TSML Logo" width="250"></img> </div>
+#<div align="center"> <img
+#src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo13.png"
+#alt="TSML Logo" width="250"></img> </div>
 
 | **Documentation** | **Build Status** | **Help** |
 |:---:|:---:|:---:|
@@ -84,19 +84,39 @@ described below.
 
 ## Main Workflow
 
-The package assumes a two-column input composed of Dates and Values. The first part of the workflow aggregates values based on the specified date/time interval which minimizes occurrence of missing values and noise. The aggregated data is then left-joined to the complete sequence of dates in a specified date/time interval. Remaining missing values are replaced by `k` nearest neighbors where `k` is the `symmetric` distance from the location of missing value. This approach can be called several times until there are no more missing values.
+The package assumes a two-column input composed of Dates and Values. 
+The first part of the workflow aggregates values based on the specified 
+date/time interval which minimizes occurrence of missing values and noise.
+The aggregated data is then left-joined to the complete sequence of dates 
+in a specified date/time interval. Remaining missing values are replaced 
+by `k` nearest neighbors where `k` is the `symmetric` distance from the 
+location of missing value. This approach can be called several times until 
+there are no more missing values.
 
-TSML uses a pipeline of filters and transformers which iteratively calls the __fit__ and __transform__ families of functions relying on multiple dispatch to select the correct algorithm from the steps outlined above.
+TSML uses a pipeline of filters and transformers which iteratively calls 
+the `fit!` and `transform!` families of functions relying on multiple 
+dispatch to select the correct algorithm from the steps outlined above.
 
-TSML supports transforming time series data into matrix form for ML training and prediction. `Dateifier` filter extracts the date features and convert the values into matrix form parameterized by the _size_ and _stride_ of the sliding window representing the dimension of the input for ML training and prediction. Similar workflow is done by the `Matrifier` filter to convert the time series values into matrix form.
+TSML supports transforming time series data into matrix form for 
+ML training and prediction. `Dateifier` filter extracts the date 
+features and convert the values into matrix form parameterized by 
+the _size_ and _stride_ of the sliding window representing the 
+dimension of the input for ML training and prediction. Similar 
+workflow is done by the `Matrifier` filter to convert the time 
+series values into matrix form.
 
-The final part combines the dates matrix with the values matrix to become input of the ML with the output representing the values of the time periods to be predicted ahead of time.
+The final part combines the dates matrix with the values matrix to 
+become input of the ML with the output representing the values 
+of the time periods to be predicted ahead of time.
 
-Machine learning functions in TSML are wrappers to the corresponding Scikit-learn, Caret, and native Julia ML libraries. There are more than hundred classifiers and regression functions available using a common API. 
+Machine learning functions in TSML are wrappers to the 
+corresponding Scikit-learn, Caret, and native Julia ML libraries. 
+There are more than hundred classifiers and regression 
+functions available using a common API. In order to access these
+Scikit-learn wrappers, one should load the related package
+called [AutoMLPipeline](https://github.com/IBM/AutoMLPipeline.jl).
 
 Below are examples of the `Pipeline` workflow.
-
-Generally, you will need the different transformers and utils in TSML for time-series processing. To use them, it is standard in TSML code to have the following declared at the topmost part of your application:
 
 - #### Load TSML and setup filters/transformers
 ```julia
@@ -112,11 +132,11 @@ mono      = Monotonicer(Dict()) # normalize monotonic data
 outnicer  = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize outliers
 ```
 
-- #### Setup pipeline to load csv data, aggregate, and get statistics
+- #### Setup pipeline to load csv data
 ```julia
-julia> mpipeline1 = @pipeline csvreader 
-julia> data=fit_transform!(mpipeline1)
-julia> first(data,5)
+mpipeline1 = @pipeline csvreader 
+data=fit_transform!(mpipeline1)
+first(data,5)
 
 5×2 DataFrame
 │ Row │ Date                │ Value   │
@@ -127,9 +147,12 @@ julia> first(data,5)
 │ 3   │ 2014-01-01T00:29:00 │ 10.0    │
 │ 4   │ 2014-01-01T00:40:00 │ 9.9     │
 │ 5   │ 2014-01-01T00:51:00 │ 9.9     │
+```
 
-julia> mpipeline1 = @pipeline csvreader |> valgator |> stfier
-julia> stats1=fit_transform!(mpipeline1)
+- #### Aggregate, and get statistics
+```julia
+mpipeline1 = @pipeline csvreader |> valgator |> stfier
+stats1=fit_transform!(mpipeline1)
 
 1×26 DataFrame. Omitted printing of 19 columns
 │ Row │ tstart              │ tend                │ sfreq    │ count │ max     │ min     │ median  │
@@ -137,13 +160,12 @@ julia> stats1=fit_transform!(mpipeline1)
 ├─────┼─────────────────────┼─────────────────────┼──────────┼───────┼─────────┼─────────┼─────────┤
 │ 1   │ 2014-01-01T00:00:00 │ 2015-01-01T00:00:00 │ 0.999886 │ 3830  │ 18.8    │ 8.5     │ 10.35   │
 ```
-Note: fit_transform! is equivalent to calling `fit!` and `transform!` functions.
+Note: `fit_transform!` is equivalent to calling in sequence `fit!` and `transform!` functions.
 
- - #### Load csv data, aggregate, impute, and get statistics
+ - #### Add imputation in the pipeline and rerun
 ```julia
-# Add imputation in the pipeline and rerun
-julia> mpipeline2 = @pipeline csvreader |> valgator |> valnner |> stfier
-julia> stats2 = fit_transform!(mpipeline2)
+mpipeline2 = @pipeline csvreader |> valgator |> valnner |> stfier
+stats2 = fit_transform!(mpipeline2)
 
 1×26 DataFrame. Omitted printing of 19 columns
 │ Row │ tstart              │ tend                │ sfreq    │ count │ max     │ min     │ median  │
@@ -152,11 +174,10 @@ julia> stats2 = fit_transform!(mpipeline2)
 │ 1   │ 2014-01-01T00:00:00 │ 2015-01-01T00:00:00 │ 0.999886 │ 8761  │ 18.8    │ 8.5     │ 10.0    │
 ```
 
-- #### Load csv data, aggregate, impute, normalize monotonic data
+- #### Add imputation and monotonic processing in the pipeline
 ```julia
-# Add imputation in the pipeline, and plot 
-julia> mpipeline2 = @pipeline csvreader |> valgator |> valnner |> mono 
-julia> fit_transform!(mpipeline2)
+mpipeline2 = @pipeline csvreader |> valgator |> valnner |> mono 
+fit_transform!(mpipeline2)
 
 8761×2 DataFrame
 │ Row  │ Date                │ Value    │
@@ -171,17 +192,14 @@ julia> fit_transform!(mpipeline2)
 │ 7    │ 2014-01-01T06:00:00 │ 10.0     │
 ⋮
 ```
-Note: It may take some time for the graph to render because just-in-time
-compilation kicks-in and plot package takes a bit of time to be pre-compiled.
-Suceeding plots will be much faster because Julia uses the pre-compiled image.
 
-- #### Extracting TimeSeries Date,Values into Matrix Form for ML Modeling
+- #### Transforming timeseries data into matrix form for ML Modeling
+- ##### Create a timeseries dataframe as input
 ```julia
-# let's setup date,value dataframe as input
-julia> datn = DateTime(2018,1,1):Dates.Day(1):DateTime(2019,1,31) |> collect
-julia> valn = rand(1:100,length(datn))
-julia> ts = DataFrame(Date=datn,Value=valn)
-julia> @show first(ts,5);
+datn = DateTime(2018,1,1):Dates.Day(1):DateTime(2019,1,31) |> collect
+valn = rand(1:100,length(datn))
+ts = DataFrame(Date=datn,Value=valn)
+@show first(ts,5);
 
 5×2 DataFrame
 │ Row │ Date                │ Value │
@@ -192,14 +210,16 @@ julia> @show first(ts,5);
 │ 3   │ 2018-01-03T00:00:00 │ 40    │
 │ 4   │ 2018-01-04T00:00:00 │ 15    │
 │ 5   │ 2018-01-05T00:00:00 │ 78    │
+```
 
-julia> args = Dict(:ahead=>24,:size=>24,:stride=>5)
-julia> dtfier = Dateifier(args)
-julia> mtfier = Matrifier(args)
-# setup pipeline concatenating matrified dates with matrified values
-julia> ppl = @pipeline dtfier + mtfier
-julia> dateval = fit_transform!(ppl,ts)
-julia> first(dateval,5)
+- ##### Setup pipeline concatenating matrified dates with matrified values
+```julia
+args = Dict(:ahead=>24,:size=>24,:stride=>5)
+dtfier = Dateifier(args)
+mtfier = Matrifier(args)
+ppl = @pipeline dtfier + mtfier
+dateval = fit_transform!(ppl,ts)
+first(dateval,5)
 
 5×33 DataFrame. Omitted printing of 21 columns
 │ Row │ year  │ month │ day   │ hour  │ week  │ dow   │ doq   │ qoy   │ x1    │ x2    │ x3    │ x4    │
@@ -211,14 +231,19 @@ julia> first(dateval,5)
 │ 4   │ 2018  │ 12    │ 23    │ 0     │ 51    │ 7     │ 84    │ 4     │ 76    │ 5     │ 6     │ 92    │
 │ 5   │ 2018  │ 12    │ 18    │ 0     │ 51    │ 2     │ 79    │ 4     │ 6     │ 54    │ 66    │ 72    │
 ```
+
+- ##### Setup ML Modeling
 We can use the matrified dateval as input features for prediction/classication.
 Let's create a dummy response consisting of `yes` or `no` and use Random Forest
-to learn the mapping.
+to learn the mapping. More examples of ML modeling can be found in TSML's 
+complementary packages: [AutoMLPipeline](https://github.com/IBM/AutoMLPipeline.jl) and
+[AMLPipelineBase](https://github.com/IBM/AMLPipelineBase.jl).
 ```julia
-julia> target = rand(["yes","no"],nrow(dateval)) 
-julia> rf = RandomForest()
-julia> accuracy(x,y) = score(:accuracy,x,y)
-julia> crossvalidate(rf,dateval,target,accuracy)
+target = rand(["yes","no"],nrow(dateval)) 
+rf = RandomForest()
+accuracy(x,y) = score(:accuracy,x,y)
+crossvalidate(rf,dateval,target,accuracy)
+
 fold: 1, 14.285714285714285
 fold: 2, 57.14285714285714
 fold: 3, 71.42857142857143
