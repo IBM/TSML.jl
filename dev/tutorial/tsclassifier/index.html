@@ -31,8 +31,8 @@ getting stats of Energy4.csv on thread:1
 getting stats of RetTemp41.csv on thread:2
 getting stats of Energy6.csv on thread:1
 getting stats of RetTemp51.csv on thread:2
-getting stats of Energy7.csv on thread:1</code></pre><p>We can examine the extracted features saved by the model that is used for its training.</p><pre><code class="language-julia">mdirname = tscl.args[:modeldirectory]
-modelfname=tscl.args[:juliarfmodelname]
+getting stats of Energy7.csv on thread:1</code></pre><p>We can examine the extracted features saved by the model that is used for its training.</p><pre><code class="language-julia">mdirname = tscl.model[:modeldirectory]
+modelfname=tscl.model[:juliarfmodelname]
 
 trstatfname = joinpath(mdirname,modelfname*&quot;.csv&quot;)
 res = CSV.read(trstatfname) |&gt; DataFrame</code></pre><pre><code class="language-julia-repl">julia&gt; first(res,5)
@@ -60,7 +60,7 @@ julia&gt; first(dfresults,5)
 │ 1   │ Pressure5.csv   │ Pressure   │
 │ 2   │ AirOffTemp4.csv │ AirOffTemp │
 │ 3   │ RetTemp31.csv   │ Energy     │
-│ 4   │ AirOffTemp5.csv │ Energy     │
+│ 4   │ AirOffTemp5.csv │ AirOffTemp │
 │ 5   │ Energy5.csv     │ Energy     │</code></pre><p>The table above shows the prediction corresponding to each filename which is the groundtruth. We can compute the accuracy by extracting from the filename the TS type and compare it with the corresponding prediction. Below computes the prediction accuracy:</p><pre><code class="language-julia">prediction = dfresults.predtype
 fnames = dfresults.fname
 myregex = r&quot;(?&lt;dtype&gt;[A-Z _ - a-z]+)(?&lt;number&gt;\d*).(?&lt;ext&gt;\w+)&quot;
@@ -68,4 +68,4 @@ groundtruth=map(fnames) do fname
   mymatch=match(myregex,fname)
   mymatch[:dtype]
 end</code></pre><pre><code class="language-julia-repl">julia&gt; sum(groundtruth .== prediction) / length(groundtruth) * 100
-60.0</code></pre><p>Of course we need more data to split between training and testing to improve accuracy and get a more stable measurement of performance.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../monotonic_plotting/">« Monotonic Detection and Plotting</a><a class="docs-footer-nextpage" href="../../man/valueproc/">Value PreProcessing »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 25 September 2020 16:23">Friday 25 September 2020</span>. Using Julia version 1.5.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+80.0</code></pre><p>Of course we need more data to split between training and testing to improve accuracy and get a more stable measurement of performance.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../monotonic_plotting/">« Monotonic Detection and Plotting</a><a class="docs-footer-nextpage" href="../../man/valueproc/">Value PreProcessing »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 22 October 2020 15:16">Thursday 22 October 2020</span>. Using Julia version 1.5.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

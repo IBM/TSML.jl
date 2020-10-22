@@ -42,26 +42,27 @@ results = fit_transform!(mypipeline,X)</code></pre><pre><code class="language-ju
 │ 8   │ 2014-01-01T07:00:00 │ 0.614255 │
 │ 9   │ 2014-01-01T08:00:00 │ 0.690462 │
 │ 10  │ 2014-01-01T09:00:00 │ 0.92049  │</code></pre><p>Using the <code>Pipeline</code> transformer, it becomes straightforward to process the time series data. It also becomes trivial to extend TSML functionality by adding more transformers and making sure each support the <code>fit!</code> and <code>transform!</code> interfaces. Any new transformer can then be easily added to the <code>Pipeline</code> workflow  without invasively changing the existing codes.</p><h2 id="Extending-TSML"><a class="docs-heading-anchor" href="#Extending-TSML">Extending TSML</a><a id="Extending-TSML-1"></a><a class="docs-heading-anchor-permalink" href="#Extending-TSML" title="Permalink"></a></h2><p>To illustrate how simple it is to add a new transformer, below extends TSML by adding <code>CSVReader</code> transformer and added in the pipeline to process CSV data:</p><pre><code class="language-julia">using TSML
-import AutoMLPipeline.AbsTypes.fit!
-import AutoMLPipeline.AbsTypes.transform!
+import TSML.AbsTypes.fit!
+import TSML.AbsTypes.transform!
 
 mutable struct CSVReader &lt;: Transformer
-    model
-    args
+    filename::String
+    model::Dict{Symbol,Any}
+
     function CSVReader(args=Dict())
         default_args = Dict(
             :filename =&gt; &quot;&quot;,
             :dateformat =&gt; &quot;&quot;
         )
-        new(nothing,mergedict(default_args,args))
+        margs = nested_dict_merge(default_args, args)
+        new(margs[:filename],margs)
     end
 end
 
 function fit!(csvrdr::CSVReader,x::DataFrame=DataFrame(),y::Vector=[])
-    fname = csvrdr.args[:filename]
-    fmt = csvrdr.args[:dateformat]
+    fname = csvrdr.model[:filename]
+    fmt = csvrdr.model[:dateformat]
     (fname != &quot;&quot; &amp;&amp; fmt != &quot;&quot;) || error(&quot;missing filename or date format&quot;)
-    model = csvrdr.args
 end
 
 function transform!(csvrdr::CSVReader,x::DataFrame=DataFrame())
@@ -105,4 +106,4 @@ results = fit_transform!(mypipeline)</code></pre><pre><code class="language-juli
 │ 7   │ 2014-01-01T06:00:00 │ 10.0     │
 │ 8   │ 2014-01-01T07:00:00 │ 9.8      │
 │ 9   │ 2014-01-01T08:00:00 │ 9.85     │
-│ 10  │ 2014-01-01T09:00:00 │ 9.9      │</code></pre><p>Notice that there is no more the need to pass X in the arguments of <code>fit!</code> and <code>transform</code> because the data is now transmitted by the <code>CSVReader</code> instance to the other transformers in the pipeline.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../aggregators/">« Aggregators and Imputers</a><a class="docs-footer-nextpage" href="../statistics/">Statistical Metrics »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 25 September 2020 16:23">Friday 25 September 2020</span>. Using Julia version 1.5.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+│ 10  │ 2014-01-01T09:00:00 │ 9.9      │</code></pre><p>Notice that there is no more the need to pass X in the arguments of <code>fit!</code> and <code>transform</code> because the data is now transmitted by the <code>CSVReader</code> instance to the other transformers in the pipeline.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../aggregators/">« Aggregators and Imputers</a><a class="docs-footer-nextpage" href="../statistics/">Statistical Metrics »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 22 October 2020 15:16">Thursday 22 October 2020</span>. Using Julia version 1.5.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
