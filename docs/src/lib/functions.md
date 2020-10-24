@@ -25,7 +25,6 @@ Modules = [
    TSML.TSClassifiers,
    TSML.TSMLDemo,
    TSML.ValDateFilters,
-   TSML.ValDateFilters.Imputers,
    TSML.SVMModels
    ]
 ```
@@ -51,7 +50,6 @@ Modules = [
    TSML.TSClassifiers,
    TSML.TSMLDemo,
    TSML.ValDateFilters,
-   TSML.ValDateFilters.Imputers,
    TSML.SVMModels
    ]
 ```
