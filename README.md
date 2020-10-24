@@ -123,19 +123,19 @@ Below are examples of the `Pipeline` workflow.
 # Setup source data and filters to aggregate and impute hourly
 using TSML 
 
-fname     = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
-csvreader = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
-valgator  = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))   # aggregator
-valnner   = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))    # imputer
-stfier    = Statifier(Dict(:processmissing=>true))             # get statistics
-mono      = Monotonicer(Dict()) # normalize monotonic data
-outnicer  = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize outliers
+fname        = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
+csvread      = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
+aggregate    = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))   # aggregator
+impute       = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))    # imputer
+chkstats     = Statifier(Dict(:processmissing=>true))             # get statistics
+normtonic    = Monotonicer(Dict()) # normalize monotonic data
+chkoutlier   = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize outliers
 ```
 
 - #### Setup pipeline to load csv data
 ```julia
-mpipeline1 = @pipeline csvreader 
-data=fit_transform!(mpipeline1)
+pipexpr = @pipeline csvread
+data    = fit_transform!(pipexpr)
 first(data,5)
 
 5×2 DataFrame
@@ -149,10 +149,10 @@ first(data,5)
 │ 5   │ 2014-01-01T00:51:00 │ 9.9     │
 ```
 
-- #### Aggregate, and get statistics
+- #### Aggregate and check statistics
 ```julia
-mpipeline1 = @pipeline csvreader |> valgator |> stfier
-stats1=fit_transform!(mpipeline1)
+pipexpr = @pipeline csvread |> aggregate |> chkstats
+stats   = fit_transform!(pipexpr)
 
 1×26 DataFrame. Omitted printing of 19 columns
 │ Row │ tstart              │ tend                │ sfreq    │ count │ max     │ min     │ median  │
@@ -162,10 +162,10 @@ stats1=fit_transform!(mpipeline1)
 ```
 Note: `fit_transform!` is equivalent to calling in sequence `fit!` and `transform!` functions.
 
- - #### Add imputation in the pipeline and rerun
+ - #### Aggregate, impute, and check stats
 ```julia
-mpipeline2 = @pipeline csvreader |> valgator |> valnner |> stfier
-stats2 = fit_transform!(mpipeline2)
+pipexpr = @pipeline csvread |> aggregate |> impute |> chkstats
+stats2  = fit_transform!(pipexpr)
 
 1×26 DataFrame. Omitted printing of 19 columns
 │ Row │ tstart              │ tend                │ sfreq    │ count │ max     │ min     │ median  │
@@ -174,10 +174,10 @@ stats2 = fit_transform!(mpipeline2)
 │ 1   │ 2014-01-01T00:00:00 │ 2015-01-01T00:00:00 │ 0.999886 │ 8761  │ 18.8    │ 8.5     │ 10.0    │
 ```
 
-- #### Add imputation and monotonic processing in the pipeline
+- #### Aggregate, impute, and normalize monotonic data
 ```julia
-mpipeline2 = @pipeline csvreader |> valgator |> valnner |> mono 
-fit_transform!(mpipeline2)
+pipexpr = @pipeline csvread |> aggregate |> impute |> normtonic  
+fit_transform!(pipexpr)
 
 8761×2 DataFrame
 │ Row  │ Date                │ Value    │
@@ -196,9 +196,9 @@ fit_transform!(mpipeline2)
 - #### Transforming timeseries data into matrix form for ML Modeling
 - ##### Create a timeseries dataframe as input
 ```julia
-datn = DateTime(2018,1,1):Dates.Day(1):DateTime(2019,1,31) |> collect
-valn = rand(1:100,length(datn))
-ts = DataFrame(Date=datn,Value=valn)
+datets  = DateTime(2018,1,1):Dates.Day(1):DateTime(2019,1,31) |> collect
+valuets = rand(1:100,length(datets))
+ts      = DataFrame(Date=datets,Value=valuets)
 @show first(ts,5);
 
 5×2 DataFrame
@@ -212,13 +212,13 @@ ts = DataFrame(Date=datn,Value=valn)
 │ 5   │ 2018-01-05T00:00:00 │ 78    │
 ```
 
-- ##### Setup pipeline concatenating matrified dates with matrified values
+- ##### Pipeline concatenating matrified dates with matrified values
 ```julia
-args = Dict(:ahead=>24,:size=>24,:stride=>5)
-dtfier = Dateifier(args)
-mtfier = Matrifier(args)
-ppl = @pipeline dtfier + mtfier
-dateval = fit_transform!(ppl,ts)
+args     = Dict(:ahead => 24,:size => 24,:stride => 5)
+datemtr  = Dateifier(args)
+valuemtr = Matrifier(args)
+ppl      = @pipeline datemtr + valuemtr
+dateval  = fit_transform!(ppl,ts)
 first(dateval,5)
 
 5×33 DataFrame. Omitted printing of 21 columns
@@ -232,17 +232,17 @@ first(dateval,5)
 │ 5   │ 2018  │ 12    │ 18    │ 0     │ 51    │ 2     │ 79    │ 4     │ 6     │ 54    │ 66    │ 72    │
 ```
 
-- ##### Setup ML Modeling
+- ##### ML Modeling and Prediction
 We can use the matrified dateval as input features for prediction/classication.
 Let's create a dummy response consisting of `yes` or `no` and use Random Forest
 to learn the mapping. More examples of ML modeling can be found in TSML's 
 complementary packages: [AutoMLPipeline](https://github.com/IBM/AutoMLPipeline.jl) and
 [AMLPipelineBase](https://github.com/IBM/AMLPipelineBase.jl).
 ```julia
-target = rand(["yes","no"],nrow(dateval)) 
-rf = RandomForest()
+target        = rand(["yes","no"],nrow(dateval))
+rf            = RandomForest()
 accuracy(x,y) = score(:accuracy,x,y)
-crossvalidate(rf,dateval,target,accuracy,10,true)
+crossvalidate(rf,dateval,target,accuracy)
 
 fold: 1, 14.285714285714285
 fold: 2, 57.14285714285714
