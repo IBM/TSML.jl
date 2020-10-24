@@ -8,16 +8,16 @@ df = DataFrame(Date=gdate,Value=gval)</code></pre><pre><code class="language-jul
 │ Row │ Date                │ Value     │
 │     │ DateTime            │ Float64   │
 ├─────┼─────────────────────┼───────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.977854  │
-│ 2   │ 2014-01-01T00:05:00 │ 0.39331   │
-│ 3   │ 2014-01-01T00:10:00 │ 0.0826843 │
-│ 4   │ 2014-01-01T00:15:00 │ 0.630053  │
-│ 5   │ 2014-01-01T00:20:00 │ 0.161206  │
-│ 6   │ 2014-01-01T00:25:00 │ 0.244359  │
-│ 7   │ 2014-01-01T00:30:00 │ 0.753541  │
-│ 8   │ 2014-01-01T00:35:00 │ 0.477416  │
-│ 9   │ 2014-01-01T00:40:00 │ 0.975126  │
-│ 10  │ 2014-01-01T00:45:00 │ 0.052123  │</code></pre><h2 id="DateValgator"><a class="docs-heading-anchor" href="#DateValgator">DateValgator</a><a id="DateValgator-1"></a><a class="docs-heading-anchor-permalink" href="#DateValgator" title="Permalink"></a></h2><p>Let&#39;s apply the aggregator and try diffent groupings: hourly vs half hourly vs daily aggregates of the data.</p><pre><code class="language-julia">using TSML
+│ 1   │ 2014-01-01T00:00:00 │ 0.635695  │
+│ 2   │ 2014-01-01T00:05:00 │ 0.504563  │
+│ 3   │ 2014-01-01T00:10:00 │ 0.998239  │
+│ 4   │ 2014-01-01T00:15:00 │ 0.01202   │
+│ 5   │ 2014-01-01T00:20:00 │ 0.0154942 │
+│ 6   │ 2014-01-01T00:25:00 │ 0.392146  │
+│ 7   │ 2014-01-01T00:30:00 │ 0.548686  │
+│ 8   │ 2014-01-01T00:35:00 │ 0.64483   │
+│ 9   │ 2014-01-01T00:40:00 │ 0.220397  │
+│ 10  │ 2014-01-01T00:45:00 │ 0.434298  │</code></pre><h2 id="DateValgator"><a class="docs-heading-anchor" href="#DateValgator">DateValgator</a><a id="DateValgator-1"></a><a class="docs-heading-anchor-permalink" href="#DateValgator" title="Permalink"></a></h2><p>Let&#39;s apply the aggregator and try diffent groupings: hourly vs half hourly vs daily aggregates of the data.</p><pre><code class="language-julia">using TSML
 
 hourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Hour(1)))
 halfhourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Minute(30)))
@@ -32,30 +32,30 @@ dailyres = fit_transform!(dailyagg,df)</code></pre><p>The first 5 rows of half-h
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64? │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.977854 │
-│ 2   │ 2014-01-01T00:30:00 │ 0.753541 │
-│ 3   │ 2014-01-01T01:00:00 │ 0.653054 │
-│ 4   │ 2014-01-01T01:30:00 │ 0.932475 │
-│ 5   │ 2014-01-01T02:00:00 │ 0.643119 │
+│ 1   │ 2014-01-01T00:00:00 │ 0.635695 │
+│ 2   │ 2014-01-01T00:30:00 │ 0.548686 │
+│ 3   │ 2014-01-01T01:00:00 │ 0.671727 │
+│ 4   │ 2014-01-01T01:30:00 │ 0.650108 │
+│ 5   │ 2014-01-01T02:00:00 │ 0.622183 │
 
 julia&gt; first(hourlyres,5)
 5×2 DataFrame
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64? │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.318834 │
-│ 2   │ 2014-01-01T01:00:00 │ 0.522616 │
-│ 3   │ 2014-01-01T02:00:00 │ 0.627761 │
-│ 4   │ 2014-01-01T03:00:00 │ 0.544308 │
-│ 5   │ 2014-01-01T04:00:00 │ 0.670321 │
+│ 1   │ 2014-01-01T00:00:00 │ 0.448355 │
+│ 2   │ 2014-01-01T01:00:00 │ 0.547439 │
+│ 3   │ 2014-01-01T02:00:00 │ 0.587139 │
+│ 4   │ 2014-01-01T03:00:00 │ 0.488329 │
+│ 5   │ 2014-01-01T04:00:00 │ 0.374258 │
 
 julia&gt; first(dailyres,5)
 5×2 DataFrame
 │ Row │ Date                │ Value    │
 │     │ DateTime            │ Float64? │
 ├─────┼─────────────────────┼──────────┤
-│ 1   │ 2014-01-01T00:00:00 │ 0.5448   │
-│ 2   │ 2014-01-02T00:00:00 │ 0.479041 │
-│ 3   │ 2014-01-03T00:00:00 │ 0.538482 │
-│ 4   │ 2014-01-04T00:00:00 │ 0.506005 │
-│ 5   │ 2014-01-05T00:00:00 │ 0.453386 │</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../dateproc/">« Date PreProcessing</a><a class="docs-footer-nextpage" href="../imputation/">Imputation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Saturday 24 October 2020 10:35">Saturday 24 October 2020</span>. Using Julia version 1.5.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+│ 1   │ 2014-01-01T00:00:00 │ 0.508298 │
+│ 2   │ 2014-01-02T00:00:00 │ 0.529891 │
+│ 3   │ 2014-01-03T00:00:00 │ 0.567923 │
+│ 4   │ 2014-01-04T00:00:00 │ 0.457523 │
+│ 5   │ 2014-01-05T00:00:00 │ 0.534077 │</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../dateproc/">« Date PreProcessing</a><a class="docs-footer-nextpage" href="../imputation/">Imputation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Saturday 24 October 2020 12:11">Saturday 24 October 2020</span>. Using Julia version 1.5.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
