@@ -7,6 +7,10 @@ using CSV
 using DataFrames: DataFrame,rename!,ncol,groupby,combine,leftjoin,innerjoin
 using MLDataUtils: slidingwindow
 
+using Impute
+using Impute: impute, impute!, chain, chain!, drop, drop!, interp, interp!, ImputeError, locf, nocb
+export impute, impute!, chain, chain!, drop, drop!, interp, interp!, ImputeError, locf, nocb
+
 using ..AbsTypes
 using ..Utils
 
@@ -19,9 +23,6 @@ export DateValizer,DateValgator,DateValNNer,DateValMultiNNer
 export CSVDateValReader, CSVDateValWriter, DateValLinearImputer
 export BzCSVDateValReader
 
-include("Imputers.jl")
-using .Imputers
-export impute, impute!, chain, chain!, drop, drop!, interp, interp!, ImputeError, locf, nocb
 
 const gAggDict = Dict(
     :median            => Statistics.median,

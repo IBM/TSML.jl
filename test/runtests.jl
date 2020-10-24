@@ -12,6 +12,7 @@ include("test_cliwrapper.jl")
 include("test_normalizer.jl")
 include("test_svm.jl")
 
+# test if running windows
 if !Base.Sys.iswindows()
   include("test_plotter.jl")
 end
