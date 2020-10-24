@@ -6,27 +6,37 @@ alt="TSML Logo" width="250"></img> </div>
 |:---:|:---:|:---:|
 | [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][travis-img]][travis-url] [![][codecov-img]][codecov-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
 
-### Stargazers over time
+#### Stargazers over time
 [![Stargazers over time](https://starchart.cc/IBM/TSML.jl.svg)](https://starchart.cc/IBM/TSML.jl)
 
-### TSML is a package for time series data processing, classification, clustering, and prediction written in [Julia](http://julialang.org/).
+### TSML (Timeseries Machine Learning)
+---------------------------------------
+**TSML** is a package for time series data 
+processing, classification, clustering, 
+and prediction. It combines ML libraries 
+from Python's ScikitLearn (thru its complementary
+AutoMLPipeline package) and Julia MLs using 
+a common API and allows seamless ensembling 
+and integration of heterogenous ML libraries 
+to create complex models for robust time-series prediction.
+The design/framework of this package is influenced heavily 
+by Samuel Jenkins' [Orchestra.jl](https://github.com/svs14/Orchestra.jl) 
+and [CombineML.jl](https://github.com/ppalmes/CombineML.jl) packages.
+**TSML** actively developed and tested in Julia `1.0` and above for Linux, MacOS, and Windows.
 
-The design/framework of this package is influenced heavily by Samuel Jenkins' [Orchestra.jl](https://github.com/svs14/Orchestra.jl) and Paulito Palmes [CombineML.jl](https://github.com/ppalmes/CombineML.jl) packages.
-
-Follow these links for demo/tutorial/paper: 
+Links to **TSML** demo, tutorial, and published JuliaCon paper: 
+- [TSML Binder Notebooks Live Demo](https://mybinder.org/v2/gh/IBM/TSML.jl/binder_support)
 - [Jupyter Notebook TSML Demo](https://github.com/IBM/TSML.jl/blob/master/notebooks/StaticPlotting.jl.ipynb)
 - [JuliaCon 2019 Proceedings Paper](https://doi.org/10.21105/jcon.00051) [![DOI](https://proceedings.juliacon.org/papers/10.21105/jcon.00051/status.svg)](https://doi.org/10.21105/jcon.00051)
 
-- [TSML Binder Notebooks Live Demo](https://mybinder.org/v2/gh/IBM/TSML.jl/binder_support)
-
-## Package Features
+#### Package Features
 
 - Support for symbolic pipeline composition of transformers and learners
 - TS data type clustering/classification for automatic data discovery
 - TS aggregation based on date/time interval
 - TS imputation based on `symmetric` Nearest Neighbors
 - TS statistical metrics for data quality assessment
-- TS ML wrapper with more than 100+ libraries from caret, scikitlearn, and julia
+- TS ML wrapper with more than 100+ libraries from scikitlearn and julia
 - TS date/value matrix conversion of 1-D TS using sliding windows for ML input
 - Common API wrappers for ML libs from JuliaML, PyCall, and RCall
 - Pipeline API allows high-level description of the processing workflow
@@ -37,8 +47,12 @@ Follow these links for demo/tutorial/paper:
 - Meta-ensembles for robust prediction
 - Support for threads and distributed computation for scalability, and speed
 
-## Installation
-TSML is in the Julia Official package registry. The latest release can be installed at the Julia prompt using Julia's package management which is triggered by pressing `]` at the julia prompt:
+
+#### Installation
+**TSML** is in the Julia Official package registry. 
+The latest release can be installed at the Julia 
+prompt using Julia's package management 
+which is triggered by pressing `]` at the Julia prompt:
 
 ```julia
 julia> ]
@@ -52,20 +66,7 @@ julia> using Pkg
 julia> Pkg.add("TSML")
 ```
 
-## Documentation
-
-- [**STABLE**][docs-stable-url] &mdash; **documentation of the most recently tagged version.**
-- [**DEVEL**][docs-dev-url] &mdash; *documentation of the in-development version.*
-
-## Project Status
-
-TSML is tested and actively developed on Julia `1.0` and above for Linux and macOS.
-
-## Overview
-
-TSML (Time Series Machine Learning) is a package for Time Series data processing, classification, and prediction. It combines ML libraries from Python's ScikitLearn, R's Caret, and Julia using a common API and allows seamless ensembling and integration of heterogenous ML libraries to create complex models for robust time-series prediction.
-
-## Motivations
+#### Motivations
 Over the past years, the industrial sector has seen
 many innovations brought about by automation.
 Inherent in this automation is the installation of
@@ -76,13 +77,13 @@ information from these large volume of data to
 detect anomalies, discover patterns to reduce
 downtimes and manufacturing errors, reduce energy usage, etc.
 
-To address these issues, we developed TSML package.
-It leverages AI and ML libraries from ScikitLearn, Caret,
+To address these issues, we developed **TSML** package.
+It leverages AI and ML libraries from ScikitLearn
 and Julia as building blocks in processing huge amount of
 industrial times series data. It has the following characteristics
 described below.
 
-## Main Workflow
+#### Main Workflow
 
 The package assumes a two-column input composed of Dates and Values. 
 The first part of the workflow aggregates values based on the specified 
@@ -93,11 +94,11 @@ by `k` nearest neighbors where `k` is the `symmetric` distance from the
 location of missing value. This approach can be called several times until 
 there are no more missing values.
 
-TSML uses a pipeline of filters and transformers which iteratively calls 
+**TSML** uses a pipeline of filters and transformers which iteratively calls 
 the `fit!` and `transform!` families of functions relying on multiple 
 dispatch to select the correct algorithm from the steps outlined above.
 
-TSML supports transforming time series data into matrix form for 
+**TSML** supports transforming time series data into matrix form for 
 ML training and prediction. `Dateifier` filter extracts the date 
 features and convert the values into matrix form parameterized by 
 the _size_ and _stride_ of the sliding window representing the 
@@ -109,8 +110,8 @@ The final part combines the dates matrix with the values matrix to
 become input of the ML with the output representing the values 
 of the time periods to be predicted ahead of time.
 
-Machine learning functions in TSML are wrappers to the 
-corresponding Scikit-learn, Caret, and native Julia ML libraries. 
+Machine learning functions in **TSML** are wrappers to the 
+corresponding Scikit-learn and native Julia ML libraries. 
 There are more than hundred classifiers and regression 
 functions available using a common API. In order to access these
 Scikit-learn wrappers, one should load the related package
@@ -118,7 +119,7 @@ called [AutoMLPipeline](https://github.com/IBM/AutoMLPipeline.jl).
 
 Below are examples of the `Pipeline` workflow.
 
-- #### Load TSML and setup filters/transformers
+- ##### Load TSML and setup filters/transformers
 ```julia
 # Setup source data and filters to aggregate and impute hourly
 using TSML 
@@ -132,7 +133,7 @@ normtonic    = Monotonicer(Dict()) # normalize monotonic data
 chkoutlier   = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize outliers
 ```
 
-- #### Setup pipeline to load csv data
+- ##### Pipeline to load csv data
 ```julia
 pipexpr = @pipeline csvread
 data    = fit_transform!(pipexpr)
@@ -149,7 +150,7 @@ first(data,5)
 │ 5   │ 2014-01-01T00:51:00 │ 9.9     │
 ```
 
-- #### Aggregate and check statistics
+- ##### Pipeline to aggregate and check statistics
 ```julia
 pipexpr = @pipeline csvread |> aggregate |> chkstats
 stats   = fit_transform!(pipexpr)
@@ -162,7 +163,7 @@ stats   = fit_transform!(pipexpr)
 ```
 Note: `fit_transform!` is equivalent to calling in sequence `fit!` and `transform!` functions.
 
- - #### Aggregate, impute, and check stats
+ - ##### Pipeline to aggregate, impute, and check stats
 ```julia
 pipexpr = @pipeline csvread |> aggregate |> impute |> chkstats
 stats2  = fit_transform!(pipexpr)
@@ -174,7 +175,7 @@ stats2  = fit_transform!(pipexpr)
 │ 1   │ 2014-01-01T00:00:00 │ 2015-01-01T00:00:00 │ 0.999886 │ 8761  │ 18.8    │ 8.5     │ 10.0    │
 ```
 
-- #### Aggregate, impute, and normalize monotonic data
+- ##### Pipeline to aggregate, impute, and normalize monotonic data
 ```julia
 pipexpr = @pipeline csvread |> aggregate |> impute |> normtonic  
 fit_transform!(pipexpr)
@@ -193,9 +194,9 @@ fit_transform!(pipexpr)
 ⋮
 ```
 
-- #### Transforming timeseries data into matrix form for ML Modeling
-- ##### Create a timeseries dataframe as input
+- ##### Transforming timeseries data into matrix form for ML Modeling
 ```julia
+# create artificial timeseries data
 datets  = DateTime(2018,1,1):Dates.Day(1):DateTime(2019,1,31) |> collect
 valuets = rand(1:100,length(datets))
 ts      = DataFrame(Date=datets,Value=valuets)
@@ -212,8 +213,8 @@ ts      = DataFrame(Date=datets,Value=valuets)
 │ 5   │ 2018-01-05T00:00:00 │ 78    │
 ```
 
-- ##### Pipeline concatenating matrified dates with matrified values
 ```julia
+# Pipeline to concatinate matrified value and date series
 args     = Dict(:ahead => 24,:size => 24,:stride => 5)
 datemtr  = Dateifier(args)
 valuemtr = Matrifier(args)
