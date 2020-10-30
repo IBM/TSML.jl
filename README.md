@@ -28,7 +28,7 @@ and above for Linux, MacOS, and Windows.
 
 Links to **TSML** demo, tutorial, and published JuliaCon paper: 
 - [TSML Binder Notebooks Live Demo](https://mybinder.org/v2/gh/IBM/TSML.jl/binder_support)
-- [Jupyter Notebook TSML Demo](https://github.com/IBM/TSML.jl/blob/master/notebooks/StaticPlotting.jl.ipynb)
+- [Jupyter Notebook TSML Demo](https://github.com/IBM/TSML.jl/blob/master/docs/notebooks/StaticPlotting.jl.ipynb)
 - [JuliaCon 2019 Proceedings Paper](https://doi.org/10.21105/jcon.00051) [![DOI](https://proceedings.juliacon.org/papers/10.21105/jcon.00051/status.svg)](https://doi.org/10.21105/jcon.00051)
 
 #### Package Features
