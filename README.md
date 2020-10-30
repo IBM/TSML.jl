@@ -15,14 +15,16 @@ alt="TSML Logo" width="250"></img> </div>
 processing, classification, clustering, 
 and prediction. It combines ML libraries 
 from Python's ScikitLearn (thru its complementary
-AutoMLPipeline package) and Julia MLs using 
+[AutoMLPipeline](https://github.com/IBM/AutoMLPipeline.jl) 
+package) and Julia MLs using 
 a common API and allows seamless ensembling 
 and integration of heterogenous ML libraries 
 to create complex models for robust time-series prediction.
 The design/framework of this package is influenced heavily 
 by Samuel Jenkins' [Orchestra.jl](https://github.com/svs14/Orchestra.jl) 
 and [CombineML.jl](https://github.com/ppalmes/CombineML.jl) packages.
-**TSML** actively developed and tested in Julia `1.0` and above for Linux, MacOS, and Windows.
+**TSML** is actively developed and tested in `Julia 1.0` 
+and above for Linux, MacOS, and Windows.
 
 Links to **TSML** demo, tutorial, and published JuliaCon paper: 
 - [TSML Binder Notebooks Live Demo](https://mybinder.org/v2/gh/IBM/TSML.jl/binder_support)
@@ -257,6 +259,62 @@ fold: 9, 42.857142857142854
 fold: 10, 71.42857142857143
 (mean = 58.57142857142857, std = 19.57600456294711, folds = 10)
 ```
+
+## Extending TSML
+If you want to add your own filter or transformer or learner,
+take note that `filters` and `transformers` process the
+input features but ignores the output argument. On the other hand,
+`learners` process both their input and output arguments during `fit!`
+while `transform!` expects one input argument in all cases.
+
+The first step is to import the abstract types and define your own mutable structure
+as subtype of either Learner or Transformer. Next is to import the `fit!` and
+`transform!` functions so that you can overload them. Also, you must
+load the DataFrames package because it is the main format for data processing.
+Finally, implement your own `fit` and `transform` and export them.
+
+```julia
+  using DataFrames
+  using TSML.AbsTypes
+
+  # import functions for overloading
+  import TSML.AbsTypes: fit!, transform!
+
+  # export the new definitions for dynamic dispatch
+  export fit!, transform!, MyFilter
+
+  # define your filter structure
+  mutable struct MyFilter <: Transformer
+    name::String
+    model::Dict
+    args::Dict
+    function MyFilter(args::Dict())
+        ....
+    end
+  end
+
+# define your fit! function.
+  function fit!(fl::MyFilter, inputfeatures::DataFrame, target::Vector=Vector())
+       ....
+  end
+
+  #define your transform! function
+  function transform!(fl::MyFilter, inputfeatures::DataFrame)::DataFrame
+       ....
+  end
+```
+
+Remember that the main format to exchange data is dataframe which requires `transform!`
+output to return a dataframe. The features as input for fit! and transform! shall
+be in dataframe format too. This is necessary so that
+the pipeline passes the dataframe format consistently to
+its corresponding filters or transformers or learners. Once you have
+create this transformer, you can use plug is as part of the pipeline element
+together with the other learners and transformers.
+
+
+
+
 
 ## Feature Requests and Contributions
 
