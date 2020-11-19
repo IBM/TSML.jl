@@ -8,8 +8,8 @@ using DataFrames: DataFrame,rename!,ncol,groupby,combine,leftjoin,innerjoin
 using MLDataUtils: slidingwindow
 
 using Impute
-using Impute: impute, impute!, drop, drop!, interp, interp!, ImputeError, locf, nocb
-export impute, impute!, drop, drop!, interp, interp!, ImputeError, locf, nocb
+using Impute: impute, impute!, interp, interp!, ImputeError, locf, nocb
+export impute, impute!, interp, interp!, ImputeError, locf, nocb
 
 using ..AbsTypes
 using ..Utils
