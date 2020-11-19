@@ -37,7 +37,7 @@ export Matrifier,Dateifier,
        DateValizer,DateValgator,DateValNNer,DateValMultiNNer,
        CSVDateValReader, CSVDateValWriter, DateValLinearImputer
        #BzCSVDateValReader
-export impute, impute!, chain, chain!, drop, drop!, 
+export impute, impute!, drop, drop!, 
        interp, interp!, ImputeError, locf, nocb
 
 include("statifier.jl")
