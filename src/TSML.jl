@@ -69,9 +69,9 @@ include("normalizer.jl")
 using .Normalizers
 export Normalizer
 
-include("svm.jl")
-using .SVMModels
-export SVMModel
+#include("svm.jl")
+#using .SVMModels
+#export SVMModel
 
 include("timescaledb.jl")
 using .TimescaleDBs

@@ -10,7 +10,7 @@ include("test_outliernicer.jl")
 include("test_ensemble.jl")
 include("test_cliwrapper.jl")
 include("test_normalizer.jl")
-include("test_svm.jl")
+#include("test_svm.jl")
 
 # test if running windows
 if !Base.Sys.iswindows()
