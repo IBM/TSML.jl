@@ -986,7 +986,7 @@ function transform!(dnnr::DateValLinearImputer,xx::DataFrame)
    valgator = DateValgator(dnnr.model)
    fit!(valgator,x)
    df=transform!(valgator,x)
-   df.Value = interp(df.Value) |> locf() |> nocb()
+   df.Value = interp(df.Value) |> locf |> nocb
    return df
 end
 
