@@ -4,6 +4,13 @@ using Test
 using Random
 using TSML
 using DataFrames
+using Pkg
+
+pkgversion(m::Module) = Pkg.TOML.parsefile(joinpath(dirname(string(first(methods(m.eval)).file)), "..", "Project.toml"))["version"]
+
+if pkgversion(DataFrames) <= "0.22.0"
+   DataFrames.DataFrame(x::Matrix,y::Symbol) = DataFrames.DataFrame(x)
+end
 
 function getprediction(model::Learner,data::Dict)
   Random.seed!(126)
