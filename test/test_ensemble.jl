@@ -14,8 +14,8 @@ end
 
 function getprediction(model::Learner,data::Dict)
   Random.seed!(126)
-  trfeatures = data[:trfeatures] |> DataFrame
-  tstfeatures = data[:tstfeatures] |> DataFrame
+  trfeatures = data[:trfeatures] 
+  tstfeatures = data[:tstfeatures] 
   troutput = data[:troutput]
   tstoutput = data[:tstoutput]
   fit!(model,trfeatures,troutput)
@@ -29,11 +29,11 @@ function test_ensembles()
   tstdirname = joinpath(dirname(pathof(TSML)),"../data/realdatatsclassification/testing")
 
   frange = 5:20
-  trdata = getstats(trdirname) |> DataFrame
+  trdata = getstats(trdirname) 
   trfeatures = trdata[:,frange] 
   troutput = trdata[:,:dtype] |> Vector{String}
 
-  tstdata = getstats(tstdirname) |> DataFrame
+  tstdata = getstats(tstdirname) 
   tstfeatures = tstdata[:,frange] 
   tstoutput = tstdata[:,:dtype] |> Vector{String}
 

@@ -45,7 +45,7 @@ function test_realdataplotter()
   fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
   csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
   pltr = TSML.Plotter(Dict(:interactive => false))
-  mpipeline1 = @pipeline csvfilter |> pltr
+  mpipeline1 = csvfilter |> pltr
   myplot = fit_transform!(mpipeline1);
   @test isa(myplot,Plots.Plot) == true;
 end

@@ -25,6 +25,7 @@ export FeatureSelector, CatFeatureSelector, NumFeatureSelector, CatNumDiscrimina
 export crossvalidate
 export NARemover
 export @pipeline @pipelinex, @pipelinez
+export +, |>, *, |
 export Pipeline, ComboPipeline
 
 import AMLPipelineBase.AbsTypes: fit!, transform!

@@ -218,7 +218,7 @@ function test_csvreaderwriter()
   csvwtr = CSVDateValWriter(Dict(:filename=>outputfile,:dateformat=>"d/m/y H:M"))
   filter1 = DateValgator()
   filter2 = DateValNNer(Dict(:nnsize=>1))
-  mypipeline = @pipeline csvreader |> filter1 |> filter2
+  mypipeline = csvreader |> filter1 |> filter2
   res=fit_transform!(mypipeline)
   @test nrow(res) == 8761
   @test ncol(res) == 2
@@ -231,7 +231,7 @@ function test_csvreaderwriter()
   @test ncol(res2) == 2
   @test sum(ismissing.(res2.Value)) == 0
   @test floor(sum(res2.Value)) == 97564.0
-  mypipeline = @pipeline csvreader |> filter1 |> filter2 |> csvwtr
+  mypipeline = csvreader |> filter1 |> filter2 |> csvwtr
   res=fit_transform!(mypipeline)
   @test nrow(res2) == 8761
   @test ncol(res2) == 2
@@ -249,7 +249,7 @@ end
 #  csvreader = BzCSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
 #  filter1 = DateValgator()
 #  filter2 = DateValNNer(Dict(:nnsize=>1))
-#  mypipeline = @pipeline csvreader |> filter1 |> filter2
+#  mypipeline = csvreader |> filter1 |> filter2
 #  res=fit_transform!(mypipeline)
 #  @test nrow(res) == 8761
 #  @test ncol(res) == 2
@@ -267,7 +267,7 @@ function test_statoutputwriter()
   filter1 = DateValgator(Dict(:nnsize=>1))
   filter2 = DateValNNer(Dict(:nnsize=>1))
 
-  mypipeline = @pipeline csvreader |> filter1  |> filter2 |> statfier  |> csvstatwtr
+  mypipeline = csvreader |> filter1  |> filter2 |> statfier  |> csvstatwtr
   res=fit_transform!(mypipeline)
 
   @test nrow(res) == 1

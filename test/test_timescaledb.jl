@@ -5,7 +5,7 @@ using TSML
 
 function test_timescaledb()
   tsdb = TimescaleDB()
-  mpipeline = @pipeline tsdb
+  mpipeline = tsdb
   try 
     respipe = fit_transform!(mpipeline)
     @test sum(respipe.Value) ≈ 560997.0
