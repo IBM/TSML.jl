@@ -51,7 +51,7 @@ end
 Compute the parameters to center and scale.
 """
 function fit!(st::StandardScaler, features::DataFrame, labels::Vector=[]) 
-   mfeatures = convert(Matrix{Float64},features)
+   mfeatures = Matrix(features)
    pfeatures = mfeatures' |> collect |> Matrix{Float64}
    impl_args = st.model[:impl_args]
    st_transform = estimate(Standardize, Array(mfeatures'); impl_args...)
@@ -64,7 +64,7 @@ end
 Apply the computed parameters for centering and scaling to new data.
 """
 function transform!(st::StandardScaler, features::DataFrame)
-   mfeatures = convert(Matrix{Float64},features)
+   mfeatures = Matrix(features)
    st_transform = st.model[:standardize_transform]
    pfeatures = mfeatures' |> collect |> Matrix{Float64}
    transposed_instances = Array(pfeatures)
