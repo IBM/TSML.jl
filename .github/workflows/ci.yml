@@ -64,8 +64,8 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Documenter: doctest
-            using AutoMLPipeline
-            doctest(AutoMLPipeline)' # change MYPACKAGE to the name of your package
+            using TSML
+            doctest(TSML)' # change MYPACKAGE to the name of your package
       - run: julia --project=docs docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
