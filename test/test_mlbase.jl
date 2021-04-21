@@ -2,7 +2,9 @@ module TestMLBaseWrapper
 
 using Test
 using TSML
-using DataFrames
+using DataFrames: DataFrame
+
+mtodf(x) = DataFrame(x,:auto)
 
 @testset "MLBase transformers" begin
 
@@ -11,7 +13,7 @@ using DataFrames
       5 10;
       -5 0;
       0 5;
-    ] |> DataFrame
+    ] |> mtodf
     labels = [
       "x";
       "y";
@@ -21,7 +23,7 @@ using DataFrames
       1.0 1.0;
       -1.0 -1.0;
       0.0 0.0;
-    ] |> DataFrame
+    ] |> mtodf
     standard_scaler = StandardScaler()
     fit!(standard_scaler, features, labels)
     transformed = TSML.transform!(standard_scaler, features)

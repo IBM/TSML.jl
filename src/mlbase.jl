@@ -69,7 +69,7 @@ function transform!(st::StandardScaler, features::DataFrame)
    pfeatures = mfeatures' |> collect |> Matrix{Float64}
    transposed_instances = Array(pfeatures)
    pres = transform(st_transform, transposed_instances)
-   return (pres' |> collect |> Array{Float64}) |> DataFrame
+   return (pres' |> collect |> Array{Float64}) |> x->DataFrame(x,:auto)
 end
 
 ### Standardization

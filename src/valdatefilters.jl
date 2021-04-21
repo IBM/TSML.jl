@@ -98,7 +98,7 @@ function transform!(mtr::Matrifier,xx::DataFrame)
    x isa Vector || error("data should be a vector")
    mtype = eltype(x)
    res=toMatrix(mtr,x)
-   resarray=convert(Array{mtype},res) |> DataFrame
+   resarray=convert(Array{mtype},res) |> x->DataFrame(x,:auto)
    rename!(resarray,names(resarray)[end] => :output)
 end
 

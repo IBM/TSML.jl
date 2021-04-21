@@ -2,7 +2,7 @@ module TestValDate
 
 using Test
 using TSML
-using DataFrames
+using DataFrames: DataFrame, nrow
 
 function generateXY()
     Random.seed!(123)

@@ -2,7 +2,7 @@ module TSClassifiers
 
 using Random
 using CSV
-using DataFrames
+using DataFrames: DataFrame, nrow
 using Dates
 using Serialization
 
