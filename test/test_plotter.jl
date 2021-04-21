@@ -1,9 +1,10 @@
 module TestPlotter
 
 using Test
-using Plots
 using StatsBase: sample 
 using TSML
+using DataFrames: nrow
+using Plots
 
 default(show=false, reuse=true)
 
@@ -30,11 +31,11 @@ function test_artificialdataplotter()
   pltr = TSML.Plotter(Dict(:interactive => false))
   fit!(pltr,df)
   myplot=transform!(pltr,df);
-  @test isa(myplot,Plots.Plot) == true;
+  @test nrow(myplot) == nrow(df);
   df = generatedf()
   fit!(pltr,df)
   myplot1=transform!(pltr,df);
-  @test isa(myplot1,Plots.Plot) == true;
+  @test nrow(myplot1) == nrow(df);
 end
 @testset "Plotter: using artificial data" begin
   test_artificialdataplotter()
@@ -47,7 +48,7 @@ function test_realdataplotter()
   pltr = TSML.Plotter(Dict(:interactive => false))
   mpipeline1 = csvfilter |> pltr
   myplot = fit_transform!(mpipeline1);
-  @test isa(myplot,Plots.Plot) == true;
+  @test nrow(myplot) > 0;
 end
 @testset "Plotter: readcsv |> plotter" begin
   test_realdataplotter()

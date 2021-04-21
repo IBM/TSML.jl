@@ -122,6 +122,7 @@ function transform!(pltr::Plotter, features::DataFrame)
    end
    dtval = DateVal(df.Date,df.Value)
    RecipesBase.plot(dtval,sz)
+   return features
 end
 
 #function interactiveplot(df::Union{Vector,Matrix,DataFrame})
