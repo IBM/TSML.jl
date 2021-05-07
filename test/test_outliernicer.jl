@@ -17,6 +17,9 @@ function test_artificialdata()
   fit!(outnicer,df)
   resdf = transform!(outnicer,df)
   @test round(mean(resdf.Value),digits=2) > 0.0
+  m=fit(outnicer,df)
+  resdf = transform(m,df)
+  @test round(mean(resdf.Value),digits=2) > 0.0
 end
 @testset "Outliernicer: using artificial data" begin
   test_artificialdata()
@@ -36,13 +39,19 @@ function test_basicoutlier()
   mpipeline1 = csvfilter |> valgator |> mono |> valnner |> outliernicer |> stfier
   respipe1 = fit_transform!(mpipeline1)
   @test round(sum(respipe1[1,3:20])) == -206651.0
+  respipe1 = fit_transform(mpipeline1)
+  @test round(sum(respipe1[1,3:20])) == -206651.0
 
   mpipeline2 = csvfilter |> valgator |> mono |> outliernicer |> stfier
   respipe2 = fit_transform!(mpipeline2)
   @test round(sum(respipe2[1,3:20])) == -213860.0
+  respipe2 = fit_transform(mpipeline2)
+  @test round(sum(respipe2[1,3:20])) == -213860.0
 
   mpipeline3 = csvfilter |> valgator |> valnner |> mono |> outliernicer |> stfier
   respipe3 = fit_transform!(mpipeline3)
+  @test round(sum(respipe3[1,3:20])) == -206651.0  
+  respipe3 = fit_transform(mpipeline3)
   @test round(sum(respipe3[1,3:20])) == -206651.0  
 end
 @testset "Outliernicer: readcsv |> valgator |> valnner |> mono |> outliernicer |> stfier" begin
@@ -67,15 +76,24 @@ function test_typesoutliernicer()
   fit!(regpipeline)
   regulardf=transform!(regpipeline)
   @test round(sum(regulardf[1,3:20])) == -60438.0 
+  m=fit(regpipeline)
+  regulardf=transform(m)
+  @test round(sum(regulardf[1,3:20])) == -60438.0 
 
   monopipeline = monofilecsv |> valgator |> valnner |> mono |> outliernicer |> stfier
   fit!(monopipeline)
   monodf=transform!(monopipeline)
   @test round(sum(monodf[1,3:20])) == -884621.0
+  m=fit(monopipeline)
+  monodf=transform(m)
+  @test round(sum(monodf[1,3:20])) == -884621.0
 
   dailymonopipeline = dailymonofilecsv |> valgator |> valnner |> mono |> outliernicer |> stfier
   fit!(dailymonopipeline)
   dailymonodf=transform!(dailymonopipeline)
+  @test round(sum(dailymonodf[1,3:20])) == -294446.0 
+  m=fit(dailymonopipeline)
+  dailymonodf=transform(m)
   @test round(sum(dailymonodf[1,3:20])) == -294446.0 
 
 end

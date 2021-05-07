@@ -28,6 +28,9 @@ mtodf(x) = DataFrame(x,:auto)
     fit!(standard_scaler, features, labels)
     transformed = TSML.transform!(standard_scaler, features)
     @test (transformed .== expected_transformed) |> Matrix |> sum == 6
+    m=fit(standard_scaler, features, labels)
+    transformed = TSML.transform(m, features)
+    @test (transformed .== expected_transformed) |> Matrix |> sum == 6
   end
 
 end

@@ -25,9 +25,11 @@ function test_libsvm()
    @test_throws ArgumentError SVMModel("SVCP"; gamma = :auto)
    linear=SVMModel("LinearSVC"; gamma = :auto)
    @test_throws MethodError fit!(linear,X,Y)
+   @test_throws MethodError fit(linear,X,Y)
 
    model = SVMModel("OneClassSVM")
    @test fit_transform!(model,X,Y) |> sum == 133
+   @test fit_transform(model,X,Y) |> sum == 133
 
    learner1 = SVMModel("SVC"; gamma = :auto)
    learner2 = SVMModel("SVC",Dict(:gamma => :auto))

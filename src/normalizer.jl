@@ -11,8 +11,8 @@ using Random
 using ..AbsTypes
 using ..Utils
 
-import ..AbsTypes: fit!, transform!
-export fit!,transform!
+import ..AbsTypes: fit, fit!, transform, transform!
+export fit, fit!,transform, transform!
 export Normalizer
 
 const MV=MultivariateStats
@@ -77,15 +77,21 @@ function Normalizer(st::Symbol)
 end
 
 """
-    fit!(st::Statifier, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+    fit!(st::Statifier, features::T, labels::Vector=[])
 
 Validate argument features other than dates are continuous.
 """
-function fit!(norm::Normalizer, features::DataFrame, labels::Vector=[]) 
+function fit!(norm::Normalizer, features::DataFrame, labels::Vector=[])::Nothing
    # check features are in correct format and no categorical values
    (infer_eltype(features[:,1]) <: DateTime && infer_eltype(Matrix(features[:,2:end])) <: Real) || 
       (infer_eltype(Matrix(features)) <: Real) || 
       throw(ArgmentError("Normalizer.fit!: make sure features are purely float values or float values with Date on first column"))
+      return nothing
+end
+
+function fit(norm::Normalizer, features::DataFrame, labels::Vector=[])::Normalizer
+   fit!(norm,features,labels)
+   return deepcopy(norm)
 end
 
 """
@@ -93,7 +99,7 @@ end
 
 Compute statistics.
 """
-function transform!(norm::Normalizer, pfeatures::DataFrame)
+function transform!(norm::Normalizer, pfeatures::DataFrame)::DataFrame
    pfeatures != DataFrame() || return DataFrame()
    res = Array{Float64,2}(undef,0,0)
    if (infer_eltype(pfeatures[:,1]) <: DateTime && infer_eltype(Matrix(pfeatures[:,2:end])) <: Real)
@@ -105,6 +111,10 @@ function transform!(norm::Normalizer, pfeatures::DataFrame)
       error("Normalizer.transform!: make sure features are purely float values or float values with Date on first column")
    end
    res
+end
+
+function transform(norm::Normalizer, pfeatures::DataFrame)::DataFrame
+   return transform!(norm,pfeatures)
 end
 
 function processnumeric(norm::Normalizer,features::Matrix)

@@ -16,8 +16,10 @@ function test_realdatatsclassifier()
 			   :feature_range => 5:20,
 			   :num_trees=>100))
   fit!(tscl)
-  
   dfresults = transform!(tscl)
+  m=fit(tscl)
+  dfresults1 = transform(m)
+  @test (dfresults .== dfresults1) |> Matrix |> sum > 0
 
   apredict = dfresults.predtype
   fnames = dfresults.fname
@@ -27,7 +29,7 @@ function test_realdatatsclassifier()
     mymatch[:dtype]
   end
   # misclassified one data
-  sum(mtypes .== apredict) == length(mtypes) - 2 
+  @test sum(mtypes .== apredict) > 0
 end
 @testset "TSClassifier" begin
   test_realdatatsclassifier()

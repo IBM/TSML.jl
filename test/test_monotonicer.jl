@@ -18,6 +18,9 @@ function test_basicmonotonicer()
   fit!(mono,df)
   res=transform!(mono,df)
   @test ismonotonic(res.Value) == false 
+  m=fit(mono,df)
+  res=transform(m,df)
+  @test ismonotonic(res.Value) == false 
 
   fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
   csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
@@ -31,6 +34,10 @@ function test_basicmonotonicer()
 
   mpipeline2 = csvfilter |> valgator |> stfier
   respipe2 = fit_transform!(mpipeline2)
+  @test (respipe1[1:1,:] .== respipe2[1:1,:]) |> Matrix |> sum  == ncol(respipe1)
+
+  respipe1 = fit_transform(mpipeline1)
+  respipe2 = fit_transform(mpipeline2)
   @test (respipe1[1:1,:] .== respipe2[1:1,:]) |> Matrix |> sum  == ncol(respipe1)
 
   mpipeline3 = csvfilter |> valgator |> valnner |> mono |> stfier

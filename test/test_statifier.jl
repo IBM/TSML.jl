@@ -14,11 +14,19 @@ function test_statifier()
   res=transform!(statfier,dat)
   @test ncol(res) == 20
   @test res[1,3:end]|>Vector|>sum |> x->round(x,digits=5) > 0.0
+  m=fit(statfier,dat)
+  res=transform(m,dat)
+  @test ncol(res) == 20
+  @test res[1,3:end]|>Vector|>sum |> x->round(x,digits=5) > 0.0
 
   Random.seed!(123)
   statfier = Statifier(Dict(:processmissing=>true))
   fit!(statfier,dat)
   res=transform!(statfier,dat)
+  @test ncol(res) == 26
+  @test res[1,3:end]|>Vector|>sum |> x->round(x,digits=5) > 0.0
+  m=fit(statfier,dat)
+  res=transform!(m,dat)
   @test ncol(res) == 26
   @test res[1,3:end]|>Vector|>sum |> x->round(x,digits=5) > 0.0
 
@@ -33,16 +41,27 @@ function test_statifier()
   @test round(respipe0[1,:sfreq],digits=2) ==  0.18
   vals = respipe0[1,3:end] |> Vector
   @test (vals[(!isnan).(vals)] |> sum |> x->round(x,sigdigits=2)) == -1.3e6
+  respipe0 = fit_transform(mpipeline0)
+  @test round(respipe0[1,:sfreq],digits=2) ==  0.18
+  vals = respipe0[1,3:end] |> Vector
+  @test (vals[(!isnan).(vals)] |> sum |> x->round(x,sigdigits=2)) == -1.3e6
 
   stfier = Statifier(Dict(:processmissing=>true))
   mpipeline1 = csvfilter |> valgator |> stfier
   fit!(mpipeline1)
   respipe1 = transform!(mpipeline1)
   @test respipe1[1,3:end] |> Vector |> sum |> x->round(x,digits=5) == -102779.88226
+  m=fit(mpipeline1)
+  respipe1 = transform(m)
+  @test respipe1[1,3:end] |> Vector |> sum |> x->round(x,digits=5) == -102779.88226
 
   mpipeline2 = csvfilter |> valgator |> valnner |> stfier
   fit!(mpipeline2)
   respipe2 = transform!(mpipeline2) 
+  res2 = respipe2[1,3:end] |> Vector
+  @test (res2[(!isnan).(res2)] |> sum |> x->round(x,sigdigits=2)) == -230000.00
+  m=fit(mpipeline2)
+  respipe2 = transform(m) 
   res2 = respipe2[1,3:end] |> Vector
   @test (res2[(!isnan).(res2)] |> sum |> x->round(x,sigdigits=2)) == -230000.00
 
@@ -51,10 +70,16 @@ function test_statifier()
   respipe1 = fit_transform!(mpipeline1)
   res1 = respipe1[1,3:end] |> Vector
   @test res1 |> sum |> x->round(x,digits=5) == -105185.44114
+  respipe1 = fit_transform(mpipeline1)
+  res1 = respipe1[1,3:end] |> Vector
+  @test res1 |> sum |> x->round(x,digits=5) == -105185.44114
 
   stfier = Statifier(Dict(:processmissing=>true))
   mpipeline2 = csvfilter |> valgator |> valnner |> stfier
   respipe2 = fit_transform!(mpipeline2) 
+  res2 = respipe2[1,3:end] |> Vector
+  @test res2[(!isnan).(res2)] |> sum |> x->round(x,digits=5) == -227824.85354
+  respipe2 = fit_transform(mpipeline2) 
   res2 = respipe2[1,3:end] |> Vector
   @test res2[(!isnan).(res2)] |> sum |> x->round(x,digits=5) == -227824.85354
 

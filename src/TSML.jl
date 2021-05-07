@@ -28,7 +28,7 @@ export @pipeline @pipelinex, @pipelinez
 export +, |>, *, |, >>
 export Pipeline, ComboPipeline
 
-import AMLPipelineBase.AbsTypes: fit!, transform!
+import AMLPipelineBase.AbsTypes: fit, fit!, transform, transform!
 
 # ----------------------------------------------
 

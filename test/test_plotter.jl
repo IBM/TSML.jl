@@ -32,9 +32,15 @@ function test_artificialdataplotter()
   fit!(pltr,df)
   myplot=transform!(pltr,df);
   @test nrow(myplot) == nrow(df);
+  m=fit(pltr,df)
+  myplot=transform(m,df);
+  @test nrow(myplot) == nrow(df);
   df = generatedf()
   fit!(pltr,df)
   myplot1=transform!(pltr,df);
+  @test nrow(myplot1) == nrow(df);
+  m=fit(pltr,df)
+  myplot1=transform(m,df);
   @test nrow(myplot1) == nrow(df);
 end
 @testset "Plotter: using artificial data" begin
@@ -48,6 +54,8 @@ function test_realdataplotter()
   pltr = TSML.Plotter(Dict(:interactive => false))
   mpipeline1 = csvfilter |> pltr
   myplot = fit_transform!(mpipeline1);
+  @test nrow(myplot) > 0;
+  myplot = fit_transform(mpipeline1);
   @test nrow(myplot) > 0;
 end
 @testset "Plotter: readcsv |> plotter" begin

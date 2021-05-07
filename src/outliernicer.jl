@@ -9,9 +9,9 @@ using StatsBase: iqr, quantile, sample
 using ..ValDateFilters
 using ..AbsTypes
 using ..Utils
-import ..AbsTypes: fit!, transform!
+import ..AbsTypes: fit, fit!, transform, transform!
 
-export fit!,transform!
+export fit, fit!, transform, transform!
 export Outliernicer
 
 
@@ -61,12 +61,18 @@ mutable struct Outliernicer <: Transformer
 end
 
 """
-    fit!(st::Outliernicer, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+    fit!(st::Outliernicer, features::T, labels::Vector=[])
 
 Check that `features` are two-colum data.
 """
-function fit!(st::Outliernicer, features::DataFrame, labels::Vector=[]) 
+function fit!(st::Outliernicer, features::DataFrame, labels::Vector=[])::Nothing
    ncol(features) == 2 || throw(ArgumentError("dataframe must have 2 columns: Date, Val"))
+   return nothing
+end
+
+function fit(st::Outliernicer, features::DataFrame, labels::Vector=[])::Outliernicer
+   fit!(st,features,labels)
+   return deepcopy(st)
 end
 
 """
@@ -74,7 +80,7 @@ end
 
 Locate outliers based on IQR factor and calls DateValNNer to replace them with nearest neighbors.
 """
-function transform!(st::Outliernicer, features::DataFrame)
+function transform!(st::Outliernicer, features::DataFrame)::DataFrame
    features != DataFrame() || return DataFrame()
    ncol(features) == 2 || throw(ArgumentError("dataframe must have 2 columns: Date, Val"))
    sum(names(features) .== ("Date","Value"))  == 2 || throw(ArgumentError("wrong column names"))
@@ -98,6 +104,10 @@ function transform!(st::Outliernicer, features::DataFrame)
    resdf = transform!(valnner,mfeatures)
    resdf.Value = collect(skipmissing(resdf.Value)) 
    resdf
+end
+
+function transform(st::Outliernicer, features::DataFrame)::DataFrame
+   return transform!(st,features)
 end
 
 end

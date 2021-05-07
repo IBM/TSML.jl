@@ -8,8 +8,9 @@ using ..AbsTypes
 using ..BaseFilters
 using ..Utils
 
-import ..AbsTypes: fit!, transform!
-export fit!, transform!
+import ..AbsTypes: fit, fit!, transform, transform!
+
+export fit, fit!, transform, transform!
 export SVMModel, svmlearners
 
 const svm_dict = Dict{String,Any}()
@@ -102,7 +103,7 @@ Train the model using  SVM fit!
 - `features::DataFrame`: input
 - `labels::Vector=[]`: 
 """
-function fit!(svm::SVMModel, features::DataFrame, labels::Vector=[])
+function fit!(svm::SVMModel, features::DataFrame, labels::Vector=[])::Nothing
    if features == DataFrame()
       throw(ArgumentError("empty dataframe"))
    end
@@ -112,7 +113,12 @@ function fit!(svm::SVMModel, features::DataFrame, labels::Vector=[])
    impl_args = svm.model[:impl_args]
    model = LIBSVM.fit!(svmlearner(;impl_args...),featarray,lv)
    svm.model[:svmmodel]=model
-   nothing
+   return nothing
+end
+
+function fit(svm::SVMModel, features::DataFrame, labels::Vector=[])::SVMModel
+   fit!(svm,features,labels)
+   return deepcopy(svm)
 end
 
 """
@@ -124,7 +130,7 @@ Predict using svm model
 - `svm::SVMModel`: custom type
 - `features::DataFrame`: input
 """
-function transform!(svm::SVMModel, features::DataFrame)
+function transform!(svm::SVMModel, features::DataFrame)::Vector
   if features == DataFrame()
       throw(ArgumentError("empty dataframe"))
   end
@@ -132,6 +138,10 @@ function transform!(svm::SVMModel, features::DataFrame)
   model = svm.model[:svmmodel]
   pred = LIBSVM.predict(model,featarray)
   return pred
+end
+
+function transform(svm::SVMModel, features::DataFrame)::Vector
+   return transform!(svm,features)
 end
 
 end

@@ -12,11 +12,10 @@ using ..Statifiers
 using ..ValDateFilters
 using ..AbsTypes
 using ..Utils
-import ..AbsTypes: fit!, transform!
+import ..AbsTypes: fit, fit!, transform, transform!
 
-export fit!, transform!
+export fit, fit!, transform, transform!
 export TSClassifier, getstats
-
 
 """
     TSClassifier(
@@ -93,11 +92,11 @@ mutable struct TSClassifier <: Learner
 end
 
 """
-    fit!(tsc::TSClassifier, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+    fit!(tsc::TSClassifier, features::T=[], labels::Vector=[])
     
 Get the stats of each file, collect as dataframe, and train.
 """
-function fit!(tsc::TSClassifier, features::DataFrame=DataFrame(), labels::Vector=[])
+function fit!(tsc::TSClassifier, features::DataFrame=DataFrame(), labels::Vector=[])::Nothing
    ispathnotempty(tsc.model) || throw(ArgumentError("empty training/testing/modeling directory"))
    ldirname = tsc.model[:trdirectory]
    mdirname = tsc.model[:modeldirectory]
@@ -117,15 +116,20 @@ function fit!(tsc::TSClassifier, features::DataFrame=DataFrame(), labels::Vector
    trdata |> CSV.write(trstatfname)
    tsc.model[:features] = names(X)
    tsc.model[:fmodel] = rfmodel
+   return nothing
 end
 
+function fit(tsc::TSClassifier, features::DataFrame=DataFrame(), labels::Vector=[])::TSClassifier
+   fit!(tsc,features,labels)
+   return deepcopy(tsc)
+end
 
 """
-    transform!(tsc::TSClassifier, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+    transform!(tsc::TSClassifier, features::T=[])
     
 Apply the learned parameters to the new data.
 """
-function transform!(tsc::TSClassifier, features::DataFrame=DataFrame())
+function transform!(tsc::TSClassifier, features::DataFrame=DataFrame())::DataFrame
    ldirname = tsc.model[:tstdirectory]
    mdirname = tsc.model[:modeldirectory]
    modelfname=tsc.model[:juliarfmodelname]
@@ -147,6 +151,9 @@ function transform!(tsc::TSClassifier, features::DataFrame=DataFrame())
    return DataFrame(fname=trdata.fname,predtype=mpred)
 end
 
+function transform(tsc::TSClassifier, features::DataFrame=DataFrame())::DataFrame
+   return transform!(tsc,features)
+end
 
 @enum TSType begin
   temperature = 1

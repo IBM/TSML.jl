@@ -7,9 +7,9 @@ using Statistics
 
 using ..AbsTypes
 using ..Utils
-import ..AbsTypes: fit!, transform!
+import ..AbsTypes: fit, fit!, transform, transform!
 
-export fit!,transform!
+export fit, fit!, trasnform, transform!
 export Monotonicer,ismonotonic,dailyflips
 
 # Transforms instances with nominal features into one-hot form
@@ -53,14 +53,19 @@ mutable struct Monotonicer <: Transformer
 end
 
 """
-    fit!(st::Monotonicer,features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+    fit!(st::Monotonicer,features::T, labels::Vector=[])
 
 A function that checks if `features` are two-column data of  Dates and Values
 """
-function fit!(st::Monotonicer, features::DataFrame, labels::Vector=[]) 
+function fit!(st::Monotonicer, features::DataFrame, labels::Vector=[])::Nothing
    ncol(features) == 2 || throw(ArgumentError("dataframe must have 2 columns: Date, Val"))
+   return nothing
 end
 
+function fit(st::Monotonicer, features::DataFrame, labels::Vector=[])::Monotonicer
+   fit!(st,features,labels)
+   return deepcopy(st)
+end
 
 """
     transform!(st::Monotonicer, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
@@ -87,6 +92,10 @@ function transform!(st::Monotonicer, features::DataFrame)
       antimono = mfeatures
    end
    return antimono
+end
+
+function transform(st::Monotonicer, features::DataFrame)::DataFrame
+   return transform!(st,features)
 end
 
 function antimonotonizedaily(dat::DataFrame)
