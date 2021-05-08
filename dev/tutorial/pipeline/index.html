@@ -90,20 +90,21 @@ csvdata = transform!(csvreader)</code></pre><pre><code class="language-julia-rep
    7 │ 2014-01-01T01:13:00      9.8
    8 │ 2014-01-01T01:24:00     10.0
    9 │ 2014-01-01T01:35:00      9.8
-  10 │ 2014-01-01T01:46:00     10.0</code></pre><p>Let us now include the newly created <code>CSVReader</code> in the pipeline to read the csv data and process it by aggregation and imputation.</p><pre><code class="language-julia">mypipeline = @pipeline csvreader |&gt; dtvalgator |&gt; dtvalnner
+  10 │ 2014-01-01T01:46:00     10.0</code></pre><p>Let us now include the newly created <code>CSVReader</code> in the pipeline to read the csv data and process it by aggregation and imputation.</p><pre><code class="language-">mypipeline = @pipeline csvreader |&gt; dtvalgator |&gt; dtvalnner
 
-results = fit_transform!(mypipeline)</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
+results = fit_transform!(mypipeline)
+nothing #hide</code></pre><pre><code class="language-julia-repl">julia&gt; first(results,10)
 10×2 DataFrame
  Row │ Date                 Value
      │ DateTime             Float64?
 ─────┼───────────────────────────────
-   1 │ 2014-01-01T00:00:00     10.0
-   2 │ 2014-01-01T01:00:00      9.9
-   3 │ 2014-01-01T02:00:00     10.0
-   4 │ 2014-01-01T03:00:00     10.0
-   5 │ 2014-01-01T04:00:00     10.0
-   6 │ 2014-01-01T05:00:00     10.0
-   7 │ 2014-01-01T06:00:00     10.0
-   8 │ 2014-01-01T07:00:00      9.8
-   9 │ 2014-01-01T08:00:00      9.85
-  10 │ 2014-01-01T09:00:00      9.9</code></pre><p>Notice that there is no more the need to pass X in the arguments of <code>fit!</code> and <code>transform</code> because the data is now transmitted by the <code>CSVReader</code> instance to the other transformers in the pipeline.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../aggregators/">« Aggregators and Imputers</a><a class="docs-footer-nextpage" href="../statistics/">Statistical Metrics »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 30 March 2021 23:29">Tuesday 30 March 2021</span>. Using Julia version 1.6.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+   1 │ 2014-01-01T00:00:00  0.108871
+   2 │ 2014-01-01T01:00:00  0.108871
+   3 │ 2014-01-01T02:00:00  0.108871
+   4 │ 2014-01-01T03:00:00  0.473017
+   5 │ 2014-01-01T04:00:00  0.361194
+   6 │ 2014-01-01T05:00:00  0.582318
+   7 │ 2014-01-01T06:00:00  0.918165
+   8 │ 2014-01-01T07:00:00  0.614255
+   9 │ 2014-01-01T08:00:00  0.690462
+  10 │ 2014-01-01T09:00:00  0.92049</code></pre><p>Notice that there is no more the need to pass X in the arguments of <code>fit!</code> and <code>transform</code> because the data is now transmitted by the <code>CSVReader</code> instance to the other transformers in the pipeline.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../aggregators/">« Aggregators and Imputers</a><a class="docs-footer-nextpage" href="../statistics/">Statistical Metrics »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Saturday 8 May 2021 02:20">Saturday 8 May 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
