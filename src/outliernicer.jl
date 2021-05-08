@@ -52,7 +52,8 @@ mutable struct Outliernicer <: Transformer
          :dateinterval => Dates.Hour(1),
          :nnsize => 1,
          :missdirection => :symmetric,
-         :scale => 1.25
+         :scale => 1.25,
+         :strict => false
       )
       cargs=nested_dict_merge(default_args,args)
       cargs[:name] = cargs[:name]*"_"*randstring(3)

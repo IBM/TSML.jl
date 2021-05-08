@@ -25,7 +25,7 @@ function test_basicmonotonicer()
   fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
   csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
   valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-  valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
+  valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:strict=>false))
   stfier = Statifier(Dict(:processmissing=>true))
   mono = Monotonicer(Dict())
 
@@ -65,7 +65,7 @@ function test_typesmonotonicer()
   dailymonofilecsv = CSVDateValReader(Dict(:filename=>dailymonofile,:dateformat=>"dd/mm/yyyy HH:MM"))
 
   valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-  valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
+  valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1),:strict=>false))
   stfier = Statifier(Dict(:processmissing=>true))
   mono = Monotonicer(Dict())
 
@@ -79,8 +79,8 @@ function test_typesmonotonicer()
   dailymonodf=fit_transform!(dailymonopipeline)
 
   @test round(dailyflips(regulardf),digits=2) == 11.98
-  @test round(dailyflips(monodf),digits=2) == 10.28
-  @test round(dailyflips(dailymonodf),digits=2) == 9.11
+  @test round(dailyflips(monodf),digits=2) == 10.32
+  @test round(dailyflips(dailymonodf),digits=2) == 8.49
 end
 @testset "Monotonicer: check type format detection" begin
   test_basicmonotonicer()
