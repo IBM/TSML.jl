@@ -50,7 +50,7 @@ function test_statifier()
   mpipeline1 = csvfilter |> valgator |> stfier
   fit!(mpipeline1)
   respipe1 = transform!(mpipeline1)
-  @test respipe1[1,3:end] |> Vector |> sum |> x->round(x,digits=5) < 0 .0
+  @test respipe1[1,3:end] |> Vector |> sum |> x->round(x,digits=5) < 0.0
   m=fit(mpipeline1)
   respipe1 = transform(m)
   @test respipe1[1,3:end] |> Vector |> sum |> x->round(x,digits=5) < 0.0
