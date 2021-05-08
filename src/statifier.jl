@@ -7,14 +7,12 @@ using Dates
 using DataFrames
 using Statistics
 
-export fit!,transform!
-
-export Statifier,tsmlfullstat
-
 using ..AbsTypes
 using ..Utils
-import ..AbsTypes: fit!, transform!
+import ..AbsTypes: fit, fit!, transform, transform!
 
+export fit, fit!,transform, transform!
+export Statifier,tsmlfullstat
 
 # Transforms instances with nominal features into one-hot form
 # and coerces the instance matrix to be of element type Float64.
@@ -59,21 +57,27 @@ mutable struct Statifier <: Transformer
 end
 
 """
-    fit!(st::Statifier, features::T=[], labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+    fit!(st::Statifier, features::T=[], labels::Vector=[])
 
 Validate argument to make sure it's a 2-column format.
 """
-function fit!(st::Statifier, features::DataFrame=DataFrame(), labels::Vector=[])
+function fit!(st::Statifier, features::DataFrame=DataFrame(), labels::Vector=[])::Nothing
    typeof(features) <: DataFrame || throw(ArgumentError("Statifier.fit!: data should be a dataframe: Date,Val "))
    ncol(features) == 2 || throw(ArgumentError("dataframe must have 2 columns: Date, Val"))
+   return nothing
+end
+
+function fit(st::Statifier, features::DataFrame=DataFrame(), labels::Vector=[])::Statifier
+   fit!(st,features,labels)
+   return deepcopy(st)
 end
 
 """
-    transform!(st::Statifier, features::T=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+    transform!(st::Statifier, features::T=[]) 
 
 Compute statistics.
 """
-function transform!(st::Statifier, features::DataFrame=DataFrame())
+function transform!(st::Statifier, features::DataFrame=DataFrame())::DataFrame
    features != [] || return DataFrame()
    typeof(features) <: DataFrame || throw(ArgumentError("Statifier.fit!: data should be a dataframe: Date,Val "))
    ncol(features) == 2 || throw(ArgumentError("dataframe must have 2 columns: Date, Val"))
@@ -86,6 +90,10 @@ function transform!(st::Statifier, features::DataFrame=DataFrame())
    else
       hcat(timestat,fstat.stat1,fstat.stat2)
    end
+end
+
+function transform(st::Statifier, features::DataFrame=DataFrame())::DataFrame
+   return transform!(st,features)
 end
 
 function timevalstat(features::DataFrame)

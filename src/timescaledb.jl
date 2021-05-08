@@ -6,9 +6,10 @@ using DataFrames
 
 using ..AbsTypes
 using ..Utils
-import ..AbsTypes: fit!, transform!
 
-export fit!,transform!
+import ..AbsTypes: fit, fit!, transform, transform!
+
+export fit, fit!,transform, transform!
 export TimescaleDB
 
 # Transforms instances with nominal features into one-hot form
@@ -31,13 +32,19 @@ mutable struct TimescaleDB <: Transformer
    end
 end
 
-function fit!(tdb::TimescaleDB, features::DataFrame=DataFrame(), labels::Vector=[]) 
+function fit!(tdb::TimescaleDB, features::DataFrame=DataFrame(), labels::Vector=[])::Nothing
    (features == DataFrame() && labels == [])  || throw(ArgumentError("features and labels should be empty because data are from http request"))
    uri = tdb.model[:uri]; db = tdb.model[:db]; query = tdb.model[:query] 
    (uri != "" && query != "" && db != "") || error("missing uri/query/db")
+   return nothing
 end
 
-function transform!(tdb::TimescaleDB, features::DataFrame=DataFrame())
+function fit(tdb::TimescaleDB, features::DataFrame=DataFrame(), labels::Vector=[])::TimescaleDB
+   fit!(tdb,features,labels)
+   return deepcopy(tdb)
+end
+
+function transform!(tdb::TimescaleDB, features::DataFrame=DataFrame())::DataFrame
    features == DataFrame()  || throw(ArgumentError("features should be empty because data are from http request"))
    uri = tdb.model[:uri]; db = tdb.model[:db]; query = tdb.model[:query] 
    (uri != "" && query != "" && db != "") || error("missing uri/query/db")
@@ -52,6 +59,10 @@ function transform!(tdb::TimescaleDB, features::DataFrame=DataFrame())
    df.Date = DateTime.(df.Date)
    eltype(df.Value) <: Number || throw(ArgumentError("values in second column are not numeric"))
    return df
+end
+
+function transform(tdb::TimescaleDB, features::DataFrame=DataFrame())::DataFrame
+   return transform!(tdb,features)
 end
 
 end

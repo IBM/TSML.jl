@@ -17,6 +17,8 @@ function test_baseline()
     @test idy.model == nothing
     @test (transform!(idy,instances) .== instances) |> Matrix |> sum == 150*4
     @test idy.args == Dict()
+    m = fit(idy,instances,labels)
+    @test (transform(m,instances) .== instances) |> Matrix |> sum == 150*4
 end
 @testset "Baseline Tests" begin
   test_baseline()

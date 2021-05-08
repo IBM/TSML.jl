@@ -7,9 +7,9 @@ using LinearAlgebra
 
 using ..AbsTypes
 using ..Utils
-import ..AbsTypes: fit!, transform!
+import ..AbsTypes: fit, fit!, transform, transform!
 
-export fit!,transform!
+export fit, fit!,transform, transform!
 
 export Standardize
 export standardize, standardize!, estimate, transform,StandardScaler
@@ -50,26 +50,36 @@ end
 
 Compute the parameters to center and scale.
 """
-function fit!(st::StandardScaler, features::DataFrame, labels::Vector=[]) 
+function fit!(st::StandardScaler, features::DataFrame, labels::Vector=[])::Nothing 
    mfeatures = Matrix(features)
    pfeatures = mfeatures' |> collect |> Matrix{Float64}
    impl_args = st.model[:impl_args]
    st_transform = estimate(Standardize, Array(mfeatures'); impl_args...)
    st.model[:standardize_transform] = st_transform
+   return nothing
+end
+
+function fit(st::StandardScaler, features::DataFrame, labels::Vector=[])::StandardScaler
+   fit!(st,features,labels)
+   return deepcopy(st)
 end
 
 """
-    transform!(st::StandardScaler, features::T)  where {T<:Union{Vector,Matrix,DataFrame}}
+    transform!(st::StandardScaler, features::T)  
 
 Apply the computed parameters for centering and scaling to new data.
 """
-function transform!(st::StandardScaler, features::DataFrame)
+function transform!(st::StandardScaler, features::DataFrame)::DataFrame
    mfeatures = Matrix(features)
    st_transform = st.model[:standardize_transform]
    pfeatures = mfeatures' |> collect |> Matrix{Float64}
    transposed_instances = Array(pfeatures)
    pres = transform(st_transform, transposed_instances)
-   return (pres' |> collect |> Array{Float64}) |> DataFrame
+   return (pres' |> collect |> Array{Float64}) |> x->DataFrame(x,:auto)
+end
+
+function transform(st::StandardScaler, features::DataFrame)::DataFrame
+   return transform!(st,features)
 end
 
 ### Standardization

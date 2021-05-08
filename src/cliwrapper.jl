@@ -19,7 +19,8 @@ export tsmlrun
 const COMMONARG = Dict(
                     :dateformat=>"dd/mm/yyyy HH:MM",
                     :dateinterval=>Dates.Hour(1),
-                    :processmissing=>true
+                    :processmissing=>true,
+                    :strict => false
                   )
 
 function tsmlrun(inputname::AbstractString,outputname::AbstractString="",datefmt::AbstractString="dd/mm/yyyy HH:MM",otype::AbstractString="table")

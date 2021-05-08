@@ -8,10 +8,10 @@ using Dates
 
 using ..AbsTypes
 using ..Utils
-import ..AbsTypes: fit!, transform!
 using ..ValDateFilters
+import ..AbsTypes: fit, fit!, transform, transform!
 
-export fit!,transform!
+export fit, fit!, transform, transform!
 export Plotter
 
 ## setup plotting for publication
@@ -83,20 +83,26 @@ mutable struct Plotter <: Transformer
 end
 
 """
-fit!(pltr::Plotter, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+fit!(pltr::Plotter, features::T, labels::Vector=[])
 
 Check validity of `features`: 2-column Date,Val data
 """
-function fit!(pltr::Plotter, features::DataFrame, labels::Vector=[]) 
+function fit!(pltr::Plotter, features::DataFrame, labels::Vector=[])::Nothing
    ncol(features) == 2 || throw(ArgumentError("dataframe must have 2 columns: Date, Val"))
+   return nothing
+end
+
+function fit(pltr::Plotter, features::DataFrame, labels::Vector=[])::Plotter
+   fit!(pltr,features,labels)
+   return deepcopy(pltr)
 end
 
 """
-transform!(pltr::Plotter, features::T) where {T<:Union{Vector,Matrix,DataFrame}}
+transform!(pltr::Plotter, features::T) 
 
 Convert `missing` into `NaN` to allow plotting of discontinuities.
 """
-function transform!(pltr::Plotter, features::DataFrame)
+function transform!(pltr::Plotter, features::DataFrame)::DataFrame
    features != DataFrame() || return DataFrame()
    ncol(features) == 2 || throw(ArgumentError("dataframe must have 2 columns: Date, Val"))
    sum(names(features) .== ("Date","Value"))  == 2 || throw(ArgumentError("wrong column names"))
@@ -122,6 +128,11 @@ function transform!(pltr::Plotter, features::DataFrame)
    end
    dtval = DateVal(df.Date,df.Value)
    RecipesBase.plot(dtval,sz)
+   return features
+end
+
+function transform(pltr::Plotter, features::DataFrame)::DataFrame
+   return transform!(pltr,features)
 end
 
 #function interactiveplot(df::Union{Vector,Matrix,DataFrame})

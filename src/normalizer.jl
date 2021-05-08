@@ -1,17 +1,18 @@
 module Normalizers
 
-using StatsBase
+import StatsBase
+using StatsBase: zscore, ZScoreTransform,UnitRangeTransform
 using Dates
 using DataFrames: DataFrame
 using Statistics
-using MultivariateStats
+import MultivariateStats
 using Random
 
 using ..AbsTypes
 using ..Utils
 
-import ..AbsTypes: fit!, transform!
-export fit!,transform!
+import ..AbsTypes: fit, fit!, transform, transform!
+export fit, fit!,transform, transform!
 export Normalizer
 
 const MV=MultivariateStats
@@ -76,15 +77,21 @@ function Normalizer(st::Symbol)
 end
 
 """
-    fit!(st::Statifier, features::T, labels::Vector=[]) where {T<:Union{Vector,Matrix,DataFrame}}
+    fit!(st::Statifier, features::T, labels::Vector=[])
 
 Validate argument features other than dates are continuous.
 """
-function fit!(norm::Normalizer, features::DataFrame, labels::Vector=[]) 
+function fit!(norm::Normalizer, features::DataFrame, labels::Vector=[])::Nothing
    # check features are in correct format and no categorical values
    (infer_eltype(features[:,1]) <: DateTime && infer_eltype(Matrix(features[:,2:end])) <: Real) || 
       (infer_eltype(Matrix(features)) <: Real) || 
       throw(ArgmentError("Normalizer.fit!: make sure features are purely float values or float values with Date on first column"))
+      return nothing
+end
+
+function fit(norm::Normalizer, features::DataFrame, labels::Vector=[])::Normalizer
+   fit!(norm,features,labels)
+   return deepcopy(norm)
 end
 
 """
@@ -92,18 +99,22 @@ end
 
 Compute statistics.
 """
-function transform!(norm::Normalizer, pfeatures::DataFrame)
+function transform!(norm::Normalizer, pfeatures::DataFrame)::DataFrame
    pfeatures != DataFrame() || return DataFrame()
    res = Array{Float64,2}(undef,0,0)
    if (infer_eltype(pfeatures[:,1]) <: DateTime && infer_eltype(Matrix(pfeatures[:,2:end])) <: Real)
-      res = processnumeric(norm,Matrix{Float64}(pfeatures[:,2:end])) |> DataFrame
+      res = processnumeric(norm,Matrix{Float64}(pfeatures[:,2:end])) |> x->DataFrame(x,:auto)
    elseif infer_eltype(Matrix(pfeatures)) <: Real
       features = pfeatures |> Array{Float64}
-      res = processnumeric(norm,features) |> DataFrame
+      res = processnumeric(norm,features) |> x->DataFrame(x,:auto)
    else
       error("Normalizer.transform!: make sure features are purely float values or float values with Date on first column")
    end
    res
+end
+
+function transform(norm::Normalizer, pfeatures::DataFrame)::DataFrame
+   return transform!(norm,pfeatures)
 end
 
 function processnumeric(norm::Normalizer,features::Matrix)
@@ -142,19 +153,19 @@ end
 # apply z-score transform
 function ztransform(X)
    xp = X' |> collect |> Matrix{Float64}
-   fit(ZScoreTransform, xp,dims=2; center=true, scale=true) |> dt -> StatsBase.transform(dt,xp)' |> collect
+   StatsBase.fit(ZScoreTransform, xp,dims=2; center=true, scale=true) |> dt -> StatsBase.transform(dt,xp)' |> collect
 end
 
 # unit-range
 function unitrtransform(X)
    xp = X' |> collect |> Matrix{Float64}
-   fit(UnitRangeTransform,xp,dims=2) |> dt -> StatsBase.transform(dt,xp)' |> collect
+   StatsBase.fit(UnitRangeTransform,xp,dims=2) |> dt -> StatsBase.transform(dt,xp)' |> collect
 end
 
 # pca
 function pca(X)
    xp = X' |> collect |> Matrix{Float64}
-   m = MV.fit(PCA,xp)
+   m = MV.fit(MV.PCA,xp)
    MV.transform(m,xp)' |> collect
 end
 
@@ -164,7 +175,7 @@ function ica(X,kk::Int=0)
       k = size(X)[2]
    end
    xp = X' |> collect |> Matrix{Float64}
-   m = MV.fit(ICA,xp,k)
+   m = MV.fit(MV.ICA,xp,k)
    MV.transform(m,xp)' |> collect
 end
 
@@ -172,14 +183,14 @@ end
 # ppca
 function ppca(X)
    xp = X' |> collect |> Matrix{Float64}
-   m = MV.fit(PPCA,xp)
+   m = MV.fit(MV.PPCA,xp)
    MV.transform(m,xp)' |> collect
 end
 
 # fa
 function fa(X)
    xp = X' |> collect |> Matrix{Float64}
-   m = MV.fit(FactorAnalysis,xp)
+   m = MV.fit(MV.FactorAnalysis,xp)
    MV.transform(m,xp)' |> collect
 end
 

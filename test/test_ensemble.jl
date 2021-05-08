@@ -21,6 +21,9 @@ function getprediction(model::Learner,data::Dict)
   fit!(model,trfeatures,troutput)
   trresults = TSML.transform!(model,tstfeatures)
   sum(trresults .== tstoutput)/length(tstoutput)
+  m = fit(model,trfeatures,troutput)
+  trresults = TSML.transform(m,tstfeatures)
+  sum(trresults .== tstoutput)/length(tstoutput)
 end
 
 function test_ensembles()

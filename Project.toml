@@ -1,7 +1,7 @@
 name = "TSML"
 uuid = "198dc43e-9e51-5cd7-9d40-d9794d335912"
 authors = ["Paulito Palmes <ppalmes@gmail.com>"]
-version = "2.7.0"
+version = "2.7.1"
 
 [deps]
 AMLPipelineBase = "e3c3008a-8869-4d53-9f34-c96f99c8a2b6"
@@ -25,7 +25,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 AMLPipelineBase = "0.1"
 ArgParse = "0.5, 0.6, 0.7, 1.0, 1.1"
 CSV = "0.4, 0.5, 0.6, 0.7, 0.8"
-DataFrames = "0.17, 0.18, 0.19, 0.20, 0.21, 0.22"
+DataFrames = "0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 1.0, 1.1"
 HTTP = "0.6, 0.7, 0.8, 0.9"
 Impute = "0.5, 0.6"
 JSON2 = "0.2, 0.3"
