@@ -259,38 +259,38 @@ function test_csvreaderwriter()
   csvreader = CSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
   csvwtr = CSVDateValWriter(Dict(:filename=>outputfile,:dateformat=>"d/m/y H:M"))
   filter1 = DateValgator()
-  filter2 = DateValNNer(Dict(:nnsize=>1))
+  filter2 = DateValNNer(Dict(:nnsize=>1,:strict=>:false))
   mypipeline = csvreader |> filter1 |> filter2
   res=fit_transform!(mypipeline)
   @test nrow(res) == 8761
   @test ncol(res) == 2
   @test sum(ismissing.(res.Value)) == 0
-  @test floor(sum(res.Value)) == 97564.0
+  @test floor(sum(res.Value)) == 93080.0
   res=fit_transform(mypipeline)
   @test nrow(res) == 8761
   @test ncol(res) == 2
   @test sum(ismissing.(res.Value)) == 0
-  @test floor(sum(res.Value)) == 97564.0
+  @test floor(sum(res.Value)) == 93080.0
   dat = fit_transform!(csvreader)
   res1=fit_transform!(filter1,dat)
   res2=fit_transform!(filter2,res1)
   @test nrow(res2) == 8761
   @test ncol(res2) == 2
   @test sum(ismissing.(res2.Value)) == 0
-  @test floor(sum(res2.Value)) == 97564.0
+  @test floor(sum(res2.Value)) == 93080.0
   dat = fit_transform(csvreader)
   res1=fit_transform(filter1,dat)
   res2=fit_transform(filter2,res1)
   @test nrow(res2) == 8761
   @test ncol(res2) == 2
   @test sum(ismissing.(res2.Value)) == 0
-  @test floor(sum(res2.Value)) == 97564.0
+  @test floor(sum(res2.Value)) == 93080.0
   mypipeline = csvreader |> filter1 |> filter2 |> csvwtr
   res=fit_transform!(mypipeline)
   @test nrow(res2) == 8761
   @test ncol(res2) == 2
   @test sum(ismissing.(res2.Value)) == 0
-  @test floor(sum(res2.Value)) == 97564.0
+  @test floor(sum(res2.Value)) == 93080.0
   @test filesize(csvwtr.model[:filename]) > 209220
   rm(outputfile,force=true)
 end
@@ -319,7 +319,7 @@ function test_statoutputwriter()
   csvstatwtr = CSVDateValWriter(Dict(:filename=>statoutputfile))
   statfier =  Statifier(Dict(:processmissing=>true))
   filter1 = DateValgator(Dict(:nnsize=>1))
-  filter2 = DateValNNer(Dict(:nnsize=>1))
+  filter2 = DateValNNer(Dict(:nnsize=>1,:strict=>false))
 
   mypipeline = csvreader |> filter1  |> filter2 |> statfier  |> csvstatwtr
   res=fit_transform!(mypipeline)

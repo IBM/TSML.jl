@@ -614,8 +614,13 @@ function transform_worker!(dnnr::DateValNNer,joinc::DataFrame)
   #joined[missingndx[:Missed],:Value] = (r -> skipmedian(joined[r,:Value])).(missingndx[:neighbors]) # iterate to each range
   missingvals::SubArray = @view joined[missingndx.Missed,:Value] # get view of only missings
   missingvals .=  (r -> skipmedian(joined[r,:Value])).(missingndx.neighbors) # replace with nn medians
-  dnnr.model[:strict] && (sum(ismissing.(joined.Value)) == 0 || error("Nearest Neigbour algo failed to replace missings"))
-  joined
+  if !dnnr.model[:strict]
+     return joined
+  elseif dnnr.model[:strict] && (sum(ismissing.(joined.Value)) == 0) 
+     return joined
+  else
+     error("Nearest Neigbour algo failed to replace missings")
+  end
 end
 
 """
