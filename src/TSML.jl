@@ -89,7 +89,6 @@ include("demo.jl")
 using .TSMLDemo
 export tsml_demo
 
-
 #include("schema.jl")
 #using .Schemalizers
 #export Schemalizer, ML, table
