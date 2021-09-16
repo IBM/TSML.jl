@@ -73,9 +73,9 @@ export Normalizer
 #using .SVMModels
 #export SVMModel
 
-include("timescaledb.jl")
-using .TimescaleDBs
-export TimescaleDB
+#include("timescaledb.jl")
+#using .TimescaleDBs
+#export TimescaleDB
 
 include("argparse.jl")
 using .ArgumentParsers
