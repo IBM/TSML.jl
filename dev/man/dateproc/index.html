@@ -9,11 +9,11 @@ x = DataFrame(Date=dat,Value=vals)</code></pre><pre><code class="language-julia-
  Row │ Date                 Value
      │ DateTime             Float64
 ─────┼───────────────────────────────
-   1 │ 2017-01-01T00:00:00  0.471045
-   2 │ 2017-01-02T00:00:00  0.777635
-   3 │ 2017-01-03T00:00:00  0.289509
-   4 │ 2017-01-04T00:00:00  0.819411
-   5 │ 2017-01-05T00:00:00  0.358696</code></pre><h2 id="Dateifier"><a class="docs-heading-anchor" href="#Dateifier">Dateifier</a><a id="Dateifier-1"></a><a class="docs-heading-anchor-permalink" href="#Dateifier" title="Permalink"></a></h2><p>Let us create an instance of <code>Dateifier</code> passing the size of row, stride, and steps ahead to predict:</p><pre><code class="language-julia hljs">mtr = Dateifier(Dict(:ahead=&gt;24,:size=&gt;24,:stride=&gt;5))
+   1 │ 2017-01-01T00:00:00  0.299437
+   2 │ 2017-01-02T00:00:00  0.523209
+   3 │ 2017-01-03T00:00:00  0.790082
+   4 │ 2017-01-04T00:00:00  0.457049
+   5 │ 2017-01-05T00:00:00  0.536486</code></pre><h2 id="Dateifier"><a class="docs-heading-anchor" href="#Dateifier">Dateifier</a><a id="Dateifier-1"></a><a class="docs-heading-anchor-permalink" href="#Dateifier" title="Permalink"></a></h2><p>Let us create an instance of <code>Dateifier</code> passing the size of row, stride, and steps ahead to predict:</p><pre><code class="language-julia hljs">mtr = Dateifier(Dict(:ahead=&gt;24,:size=&gt;24,:stride=&gt;5))
 res = fit_transform!(mtr,x)</code></pre><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(res,5)</code><code class="nohighlight hljs ansi" style="display:block;">5×8 DataFrame
  Row │ year   month  day    hour   week   dow    doq    qoy
      │ Int64  Int64  Int64  Int64  Int64  Int64  Int64  Int64
@@ -35,22 +35,22 @@ X = DataFrame(Date=dat,Value=vals)
 valuematrix = fit_transform!(mtr,X)
 datematrix = fit_transform!(dtr,X)
 mlfeatures = hcat(datematrix,valuematrix)</code></pre><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(mlfeatures,5)</code><code class="nohighlight hljs ansi" style="display:block;">5×14 DataFrame
- Row │ year   month  day    hour   week   dow    doq    qoy    x1         x2   ⋯
-     │ Int64  Int64  Int64  Int64  Int64  Int64  Int64  Int64  Float64    Floa ⋯
+ Row │ year   month  day    hour   week   dow    doq    qoy    x1        x2    ⋯
+     │ Int64  Int64  Int64  Int64  Int64  Int64  Int64  Int64  Float64   Float ⋯
 ─────┼──────────────────────────────────────────────────────────────────────────
-   1 │  2018      1     28      0      4      7     28      1  0.476169   0.04 ⋯
-   2 │  2018      1     26      0      4      5     26      1  0.901203   0.61
-   3 │  2018      1     24      0      4      3     24      1  0.837601   0.25
-   4 │  2018      1     22      0      4      1     22      1  0.0423197  0.47
-   5 │  2018      1     20      0      3      6     20      1  0.459311   0.41 ⋯
+   1 │  2018      1     28      0      4      7     28      1  0.695402  0.299 ⋯
+   2 │  2018      1     26      0      4      5     26      1  0.73159   0.169
+   3 │  2018      1     24      0      4      3     24      1  0.481764  0.512
+   4 │  2018      1     22      0      4      1     22      1  0.704985  0.994
+   5 │  2018      1     20      0      3      6     20      1  0.139663  0.500 ⋯
                                                                5 columns omitted</code></pre><p>Another way is to use the symbolic pipeline to describe the transformation and concatenation in just one line of expression.</p><pre><code class="language-julia hljs">ppl = @pipeline dtr + mtr
 features = fit_transform!(ppl,X)</code></pre><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(features,5)</code><code class="nohighlight hljs ansi" style="display:block;">5×14 DataFrame
- Row │ year   month  day    hour   week   dow    doq    qoy    x1         x2   ⋯
-     │ Int64  Int64  Int64  Int64  Int64  Int64  Int64  Int64  Float64    Floa ⋯
+ Row │ year   month  day    hour   week   dow    doq    qoy    x1        x2    ⋯
+     │ Int64  Int64  Int64  Int64  Int64  Int64  Int64  Int64  Float64   Float ⋯
 ─────┼──────────────────────────────────────────────────────────────────────────
-   1 │  2018      1     28      0      4      7     28      1  0.476169   0.04 ⋯
-   2 │  2018      1     26      0      4      5     26      1  0.901203   0.61
-   3 │  2018      1     24      0      4      3     24      1  0.837601   0.25
-   4 │  2018      1     22      0      4      1     22      1  0.0423197  0.47
-   5 │  2018      1     20      0      3      6     20      1  0.459311   0.41 ⋯
-                                                               5 columns omitted</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../valueproc/">« Value PreProcessing</a><a class="docs-footer-nextpage" href="../aggregation/">Aggregation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.15 on <span class="colophon-date" title="Thursday 14 April 2022 21:01">Thursday 14 April 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+   1 │  2018      1     28      0      4      7     28      1  0.695402  0.299 ⋯
+   2 │  2018      1     26      0      4      5     26      1  0.73159   0.169
+   3 │  2018      1     24      0      4      3     24      1  0.481764  0.512
+   4 │  2018      1     22      0      4      1     22      1  0.704985  0.994
+   5 │  2018      1     20      0      3      6     20      1  0.139663  0.500 ⋯
+                                                               5 columns omitted</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../valueproc/">« Value PreProcessing</a><a class="docs-footer-nextpage" href="../aggregation/">Aggregation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.15 on <span class="colophon-date" title="Thursday 14 April 2022 21:09">Thursday 14 April 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
