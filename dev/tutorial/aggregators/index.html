@@ -12,20 +12,20 @@ function generateDataWithMissing()
 end</code></pre><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; X = generateDataWithMissing();</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(X,15)</code><code class="nohighlight hljs ansi" style="display:block;">15×2 DataFrame
  Row │ Date                 Value
      │ DateTime             Float64?
-─────┼──────────────────────────────────────
-   1 │ 2014-01-01T00:00:00  missing
+─────┼─────────────────────────────────────
+   1 │ 2014-01-01T00:00:00        0.9063
    2 │ 2014-01-01T00:15:00  missing
    3 │ 2014-01-01T00:30:00  missing
    4 │ 2014-01-01T00:45:00  missing
    5 │ 2014-01-01T01:00:00  missing
-   6 │ 2014-01-01T01:15:00  missing
+   6 │ 2014-01-01T01:15:00        0.334152
    7 │ 2014-01-01T01:30:00  missing
-   8 │ 2014-01-01T01:45:00        0.0521332
-   9 │ 2014-01-01T02:00:00        0.26864
-  10 │ 2014-01-01T02:15:00        0.108871
-  11 │ 2014-01-01T02:30:00        0.163666
-  12 │ 2014-01-01T02:45:00        0.473017
-  13 │ 2014-01-01T03:00:00        0.865412
+   8 │ 2014-01-01T01:45:00  missing
+   9 │ 2014-01-01T02:00:00  missing
+  10 │ 2014-01-01T02:15:00  missing
+  11 │ 2014-01-01T02:30:00  missing
+  12 │ 2014-01-01T02:45:00        0.136551
+  13 │ 2014-01-01T03:00:00  missing
   14 │ 2014-01-01T03:15:00  missing
   15 │ 2014-01-01T03:30:00  missing</code></pre><h2 id="DateValgator"><a class="docs-heading-anchor" href="#DateValgator">DateValgator</a><a id="DateValgator-1"></a><a class="docs-heading-anchor-permalink" href="#DateValgator" title="Permalink"></a></h2><p>You&#39;ll notice several blocks of missing in the table above with reading frequency of every 15 minutes.  To minimize noise and lessen the occurrence of missing values, let&#39;s aggregate our dataset by taking the hourly median using the <code>DateValgator</code> transformer.</p><pre><code class="language-julia hljs">using TSML
 
@@ -34,45 +34,45 @@ results = fit_transform!(dtvlgator,X)</code></pre><pre><code class="language-jul
  Row │ Date                 Value
      │ DateTime             Float64?
 ─────┼─────────────────────────────────────
-   1 │ 2014-01-01T00:00:00  missing
-   2 │ 2014-01-01T01:00:00  missing
-   3 │ 2014-01-01T02:00:00        0.108871
-   4 │ 2014-01-01T03:00:00        0.473017
-   5 │ 2014-01-01T04:00:00        0.361194
-   6 │ 2014-01-01T05:00:00        0.582318
-   7 │ 2014-01-01T06:00:00        0.918165
-   8 │ 2014-01-01T07:00:00        0.614255
-   9 │ 2014-01-01T08:00:00        0.690462
-  10 │ 2014-01-01T09:00:00        0.92049</code></pre><p>The occurrence of missing values is now reduced because of the hourly aggregation. While the default is hourly aggregation, you can easily change it by using a different interval in the argument during instance creation. Below indicates every 30 minutes interval.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; dtvlgator = DateValgator(Dict(:dateinterval=&gt;Dates.Minute(30)))</code><code class="nohighlight hljs ansi" style="display:block;">DateValgator(&quot;dtvalgtr_TJf&quot;, Dict{Symbol, Any}(:dateinterval =&gt; Minute(30), :aggregator =&gt; :median, :name =&gt; &quot;dtvalgtr_TJf&quot;))</code></pre><p><code>DateValgator</code> is one of the several TSML transformers to preprocess and clean the  time series data. In order to create additional transformers to extend TSML,  each transformer must overload the two <code>Transformer</code> functions:<code>fit!</code> and <code>transform!</code>.  <code>DateValgator</code> <code>fit!</code> performs initial setups of necessary parameters and validation of arguments while its <code>transform!</code> function contains the algorithm  for aggregation. </p><p>For machine learning prediction and classification transformer,  <code>fit!</code> function is equivalent to ML training or parameter optimization,  while the <code>transform!</code> function is for doing the actual prediction. The later part of the tutorial will provide an example how to add a <code>Transformer</code> to extend the functionality of TSML.</p><h2 id="DateValNNer"><a class="docs-heading-anchor" href="#DateValNNer">DateValNNer</a><a id="DateValNNer-1"></a><a class="docs-heading-anchor-permalink" href="#DateValNNer" title="Permalink"></a></h2><p>Let&#39;s perform further processing to replace the remaining missing values with their nearest neighbors.  We will use <code>DateValNNer</code> which is a TSML transformer to process the output of <code>DateValgator</code>. <code>DateValNNer</code> can also process non-aggregated data by first running similar workflow of <code>DateValgator</code> before performing its imputation routine.</p><pre><code class="language-julia hljs">using TSML
+   1 │ 2014-01-01T00:00:00        0.9063
+   2 │ 2014-01-01T01:00:00        0.334152
+   3 │ 2014-01-01T02:00:00  missing
+   4 │ 2014-01-01T03:00:00        0.136551
+   5 │ 2014-01-01T04:00:00        0.478823
+   6 │ 2014-01-01T05:00:00  missing
+   7 │ 2014-01-01T06:00:00        0.131798
+   8 │ 2014-01-01T07:00:00        0.450484
+   9 │ 2014-01-01T08:00:00        0.360583
+  10 │ 2014-01-01T09:00:00        0.571645</code></pre><p>The occurrence of missing values is now reduced because of the hourly aggregation. While the default is hourly aggregation, you can easily change it by using a different interval in the argument during instance creation. Below indicates every 30 minutes interval.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; dtvlgator = DateValgator(Dict(:dateinterval=&gt;Dates.Minute(30)))</code><code class="nohighlight hljs ansi" style="display:block;">DateValgator(&quot;dtvalgtr_Wit&quot;, Dict{Symbol, Any}(:dateinterval =&gt; Minute(30), :aggregator =&gt; :median, :name =&gt; &quot;dtvalgtr_Wit&quot;))</code></pre><p><code>DateValgator</code> is one of the several TSML transformers to preprocess and clean the  time series data. In order to create additional transformers to extend TSML,  each transformer must overload the two <code>Transformer</code> functions:<code>fit!</code> and <code>transform!</code>.  <code>DateValgator</code> <code>fit!</code> performs initial setups of necessary parameters and validation of arguments while its <code>transform!</code> function contains the algorithm  for aggregation. </p><p>For machine learning prediction and classification transformer,  <code>fit!</code> function is equivalent to ML training or parameter optimization,  while the <code>transform!</code> function is for doing the actual prediction. The later part of the tutorial will provide an example how to add a <code>Transformer</code> to extend the functionality of TSML.</p><h2 id="DateValNNer"><a class="docs-heading-anchor" href="#DateValNNer">DateValNNer</a><a id="DateValNNer-1"></a><a class="docs-heading-anchor-permalink" href="#DateValNNer" title="Permalink"></a></h2><p>Let&#39;s perform further processing to replace the remaining missing values with their nearest neighbors.  We will use <code>DateValNNer</code> which is a TSML transformer to process the output of <code>DateValgator</code>. <code>DateValNNer</code> can also process non-aggregated data by first running similar workflow of <code>DateValgator</code> before performing its imputation routine.</p><pre><code class="language-julia hljs">using TSML
 
 datevalnner = DateValNNer(Dict(:dateinterval=&gt;Dates.Hour(1)))
 results = fit_transform!(datevalnner,X)</code></pre><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(results,10)</code><code class="nohighlight hljs ansi" style="display:block;">10×2 DataFrame
  Row │ Date                 Value
      │ DateTime             Float64?
 ─────┼───────────────────────────────
-   1 │ 2014-01-01T00:00:00  0.108871
-   2 │ 2014-01-01T01:00:00  0.108871
-   3 │ 2014-01-01T02:00:00  0.108871
-   4 │ 2014-01-01T03:00:00  0.473017
-   5 │ 2014-01-01T04:00:00  0.361194
-   6 │ 2014-01-01T05:00:00  0.582318
-   7 │ 2014-01-01T06:00:00  0.918165
-   8 │ 2014-01-01T07:00:00  0.614255
-   9 │ 2014-01-01T08:00:00  0.690462
-  10 │ 2014-01-01T09:00:00  0.92049</code></pre><p>After running the <code>DateValNNer</code>, it&#39;s guaranteed that there will be no more missing data unless the input are all missing data.</p><h2 id="DateValizer"><a class="docs-heading-anchor" href="#DateValizer">DateValizer</a><a id="DateValizer-1"></a><a class="docs-heading-anchor-permalink" href="#DateValizer" title="Permalink"></a></h2><p>One more imputer to replace missing data is <code>DateValizer</code>. It computes the hourly median over 24 hours and use the <code>hour =&gt; median</code> hashmap learned to replace missing data using <code>hour</code> as the key. In this implementation, <code>fit!</code> function is doing the training of parameters by computing the medians and save it for the <code>transform!</code> function to use for imputation. It is possible that the hashmap can contain missing values in cases where the pooled hourly median in a particular hour have all missing data. Below is a sample workflow to replace missing data in X with the hourly medians.</p><pre><code class="language-julia hljs">using TSML
+   1 │ 2014-01-01T00:00:00  0.9063
+   2 │ 2014-01-01T01:00:00  0.334152
+   3 │ 2014-01-01T02:00:00  0.235352
+   4 │ 2014-01-01T03:00:00  0.136551
+   5 │ 2014-01-01T04:00:00  0.478823
+   6 │ 2014-01-01T05:00:00  0.305311
+   7 │ 2014-01-01T06:00:00  0.131798
+   8 │ 2014-01-01T07:00:00  0.450484
+   9 │ 2014-01-01T08:00:00  0.360583
+  10 │ 2014-01-01T09:00:00  0.571645</code></pre><p>After running the <code>DateValNNer</code>, it&#39;s guaranteed that there will be no more missing data unless the input are all missing data.</p><h2 id="DateValizer"><a class="docs-heading-anchor" href="#DateValizer">DateValizer</a><a id="DateValizer-1"></a><a class="docs-heading-anchor-permalink" href="#DateValizer" title="Permalink"></a></h2><p>One more imputer to replace missing data is <code>DateValizer</code>. It computes the hourly median over 24 hours and use the <code>hour =&gt; median</code> hashmap learned to replace missing data using <code>hour</code> as the key. In this implementation, <code>fit!</code> function is doing the training of parameters by computing the medians and save it for the <code>transform!</code> function to use for imputation. It is possible that the hashmap can contain missing values in cases where the pooled hourly median in a particular hour have all missing data. Below is a sample workflow to replace missing data in X with the hourly medians.</p><pre><code class="language-julia hljs">using TSML
 
 datevalizer = DateValizer(Dict(:dateinterval=&gt;Dates.Hour(1)))
 results = fit_transform!(datevalizer,X)</code></pre><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(results,10)</code><code class="nohighlight hljs ansi" style="display:block;">10×2 DataFrame
  Row │ Date                 Value
      │ DateTime             Float64?
 ─────┼───────────────────────────────
-   1 │ 2014-01-01T00:00:00  0.498827
-   2 │ 2014-01-01T01:00:00  0.500748
-   3 │ 2014-01-01T02:00:00  0.108871
-   4 │ 2014-01-01T03:00:00  0.473017
-   5 │ 2014-01-01T04:00:00  0.361194
-   6 │ 2014-01-01T05:00:00  0.582318
-   7 │ 2014-01-01T06:00:00  0.918165
-   8 │ 2014-01-01T07:00:00  0.614255
-   9 │ 2014-01-01T08:00:00  0.690462
-  10 │ 2014-01-01T09:00:00  0.92049</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« HOME</a><a class="docs-footer-nextpage" href="../pipeline/">Pipeline »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.7 on <span class="colophon-date" title="Monday 11 October 2021 13:34">Monday 11 October 2021</span>. Using Julia version 1.6.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+   1 │ 2014-01-01T00:00:00  0.9063
+   2 │ 2014-01-01T01:00:00  0.334152
+   3 │ 2014-01-01T02:00:00  0.485687
+   4 │ 2014-01-01T03:00:00  0.136551
+   5 │ 2014-01-01T04:00:00  0.478823
+   6 │ 2014-01-01T05:00:00  0.51387
+   7 │ 2014-01-01T06:00:00  0.131798
+   8 │ 2014-01-01T07:00:00  0.450484
+   9 │ 2014-01-01T08:00:00  0.360583
+  10 │ 2014-01-01T09:00:00  0.571645</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« HOME</a><a class="docs-footer-nextpage" href="../pipeline/">Pipeline »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.15 on <span class="colophon-date" title="Thursday 14 April 2022 20:36">Thursday 14 April 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
