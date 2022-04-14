@@ -41,15 +41,16 @@ end
 end
 
 function test_datevalgator()
+    const maxlim = 200
     dtvl = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
     res = fit_transform!(dtvl,XX)
-    @test abs(sum(ismissing.(res.Value)) - 4466) <=100
-    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 6556.17) <= 100
+    @test abs(sum(ismissing.(res.Value)) - 4466) <=200
+    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 6556.17) <= maxlim
     @test sum(X1.Value .!== XX.Value) == 0
     @test sum(Y1 .!== YY) == 0
     res = fit_transform(dtvl,XX)
-    @test abs(sum(ismissing.(res.Value)) - 4466) <= 100
-    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 6556.17) <= 100
+    @test abs(sum(ismissing.(res.Value)) - 4466) <= maxlim
+    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 6556.17) <= maxlim
     @test sum(X1.Value .!== XX.Value) == 0
     @test sum(Y1 .!== YY) == 0
 
@@ -57,31 +58,31 @@ function test_datevalgator()
 	  :dateinterval=>Dates.Hour(1),
 	  :aggregator => :mean))
     res = fit_transform!(dtvlmean,XX)
-    @test abs(sum(ismissing.(res.Value)) - 4466) <= 100
-    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 6557.97) <= 100
+    @test abs(sum(ismissing.(res.Value)) - 4466) <= maxlim
+    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 6557.97) <= maxlim
     res = fit_transform(dtvlmean,XX)
-    @test abs(sum(ismissing.(res.Value)) - 4466) <= 100
-    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 6557.97) <= 100
+    @test abs(sum(ismissing.(res.Value)) - 4466) <= maxlim
+    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 6557.97) <= maxlim
 
     dtvlmax = DateValgator(Dict(
 	  :dateinterval=>Dates.Hour(1),
 	  :aggregator => :maximum))
     res = fit_transform!(dtvlmax,XX)
-    @test abs(sum(ismissing.(res.Value)) - 4466) <= 100
-    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 7599.95) <= 100
+    @test abs(sum(ismissing.(res.Value)) - 4466) <= maxlim
+    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 7599.95) <= maxlim
     res = fit_transform(dtvlmax,XX)
-    @test abs(sum(ismissing.(res.Value)) - 4466) <= 100
-    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 7599.95) <= 100
+    @test abs(sum(ismissing.(res.Value)) - 4466) <= maxlim
+    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 7599.95) <= maxlim
 
     dtvlmin = DateValgator(Dict(
 	  :dateinterval=>Dates.Hour(1),
 	  :aggregator => :minimum))
     res = fit_transform!(dtvlmin,XX)
-    @test abs(sum(ismissing.(res.Value)) - 4466) <= 100
-    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 5516.92) <= 100
+    @test abs(sum(ismissing.(res.Value)) - 4466) <= maxlim
+    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 5516.92) <= maxlim
     res = fit_transform(dtvlmin,XX)
     @test sum(ismissing.(res.Value)) >= 4000
-    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 5516.92) <= 100
+    @test abs(round(sum(skipmissing(res.Value)),digits=2) - 5516.92) <= maxlim
 end
 @testset "DateValgator: aggregate by timeperiod without filling missings" begin
     test_datevalgator()
