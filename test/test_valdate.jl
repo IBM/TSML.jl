@@ -41,7 +41,7 @@ end
 end
 
 function test_datevalgator()
-    const maxlim = 200
+    maxlim = 200
     dtvl = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
     res = fit_transform!(dtvl,XX)
     @test abs(sum(ismissing.(res.Value)) - 4466) <=200
