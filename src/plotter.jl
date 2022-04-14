@@ -109,7 +109,7 @@ function transform!(pltr::Plotter, features::DataFrame)::DataFrame
    # covert missing to NaN
    df = deepcopy(features)
    df.Value = Array{Union{Missing, Float64,eltype(features.Value)},1}(missing,nrow(df))
-   df.Value .= features.Value
+   df[:,:Value] .= features.Value
    ndxmissing = findall(x->ismissing(x),df.Value)
    df.Value[ndxmissing] .= NaN
    #setupplot(pltr.model[:pdfoutput])

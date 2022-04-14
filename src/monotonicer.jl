@@ -102,13 +102,13 @@ function antimonotonizedaily(dat::DataFrame)
   # get diffs, negative values represent reset
   # replace negative values by succeeding neighbor
   df = deepcopy(dat)
-  df.Value .= [ -1.0; diff(dat.Value) ]
+  df[:,:Value] .= [ -1.0; diff(dat.Value) ]
   valuelength = length(df.Value)
   # find locations of negatives
   negatives = findall(x->x<0,df.Value)
   # if last element is negative, zero it
   if negatives[end] == valuelength
-    df.Value[negative[end]] = 0.0
+    df.Value[negatives[end]] = 0.0
     pop!(negatives)
   end
   # replace negatives with immediate neighbor
