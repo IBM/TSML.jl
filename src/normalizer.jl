@@ -166,7 +166,7 @@ end
 function pca(X)
    xp = X' |> collect |> Matrix{Float64}
    m = MV.fit(MV.PCA,xp)
-   MV.transform(m,xp)' |> collect
+   MV.predict(m,xp)' |> collect
 end
 
 function ica(X,kk::Int=0)
@@ -176,7 +176,7 @@ function ica(X,kk::Int=0)
    end
    xp = X' |> collect |> Matrix{Float64}
    m = MV.fit(MV.ICA,xp,k)
-   MV.transform(m,xp)' |> collect
+   MV.predict(m,xp)' |> collect
 end
 
 
@@ -184,14 +184,14 @@ end
 function ppca(X)
    xp = X' |> collect |> Matrix{Float64}
    m = MV.fit(MV.PPCA,xp)
-   MV.transform(m,xp)' |> collect
+   MV.predict(m,xp)' |> collect
 end
 
 # fa
 function fa(X)
    xp = X' |> collect |> Matrix{Float64}
    m = MV.fit(MV.FactorAnalysis,xp)
-   MV.transform(m,xp)' |> collect
+   MV.predict(m,xp)' |> collect
 end
 
 end
