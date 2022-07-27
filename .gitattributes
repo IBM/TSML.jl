@@ -1,4 +1,3 @@
 *.ipynb linguist-language=Julia
-paper/** linguist-documentation
+juliconpaper/** linguist-documentation
 docs/** linguist-documentation
-examples/** linguist-documentation
