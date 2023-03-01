@@ -4,6 +4,7 @@ alt="TSML Logo" width="250"></img> </div>
 
 ![Overall Stats](https://github-readme-stats.vercel.app/api?username=ppalmes&count_private=true&show_icons=true&hide=contribs)
 
+[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7094/badge)](https://bestpractices.coreinfrastructure.org/projects/7094)
 
 | **Documentation** | **Build Status** | **Help** |
 |:---:|:---:|:---:|
