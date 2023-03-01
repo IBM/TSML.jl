@@ -2,6 +2,9 @@
 src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo13.png"
 alt="TSML Logo" width="250"></img> </div>
 
+![Overall Stats](https://github-readme-stats.vercel.app/api?username=ppalmes&count_private=true&show_icons=true&hide=contribs)
+
+
 | **Documentation** | **Build Status** | **Help** |
 |:---:|:---:|:---:|
 | [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][travis-img]][travis-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
@@ -9,7 +12,7 @@ alt="TSML Logo" width="250"></img> </div>
 #### Stargazers over time
 [![Stargazers over time](https://starchart.cc/IBM/TSML.jl.svg)](https://starchart.cc/IBM/TSML.jl)
 
-### TSML (Timeseries Machine Learning)
+### TSML (Timeseries Machine Learning) ![Visitor](https://visitor-badge.laobi.icu/badge?page_id=ppalmes.TSML.jl)
 ---------------------------------------
 **TSML** is a package for time series data 
 processing, classification, clustering, 
