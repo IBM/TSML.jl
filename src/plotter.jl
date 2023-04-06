@@ -28,12 +28,12 @@ export Plotter
 #  return nothing
 #end
 
-struct DateVal{D<:DateTime,V<:Union{Missing,Real}}
+struct DateVal{D<:DateTime,V<:Union{Missing,<:Number}}
    dtime::Vector{D}
    values::Vector{V}
 end
 
-@recipe function plot(dt::DateVal,sz=(390,200))
+@recipe function plot(dt::DateVal,sz=(390,200)) 
    marker := :none
    markertype --> :none
    seriestype := :path
@@ -127,7 +127,7 @@ function transform!(pltr::Plotter, features::DataFrame)::DataFrame
       sz = (390,200)
    end
    dtval = DateVal(df.Date,df.Value)
-   RecipesBase.plot(dtval,sz)
+   display(RecipesBase.plot(dtval,sz))
    return features
 end
 
