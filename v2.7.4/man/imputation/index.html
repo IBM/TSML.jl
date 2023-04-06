@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Imputation · TSML Documentation</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">TSML Documentation</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">HOME</a></li><li><span class="tocitem">Tutorial</span><ul><li><a class="tocitem" href="../../tutorial/aggregators/">Aggregators and Imputers</a></li><li><a class="tocitem" href="../../tutorial/pipeline/">Pipeline</a></li><li><a class="tocitem" href="../../tutorial/statistics/">Statistical Metrics</a></li><li><a class="tocitem" href="../../tutorial/monotonic_plotting/">Monotonic Detection and Plotting</a></li><li><a class="tocitem" href="../../tutorial/tsclassifier/">TS Data Discovery</a></li></ul></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../valueproc/">Value PreProcessing</a></li><li><a class="tocitem" href="../dateproc/">Date PreProcessing</a></li><li><a class="tocitem" href="../aggregation/">Aggregation</a></li><li class="is-active"><a class="tocitem" href>Imputation</a><ul class="internal"><li><a class="tocitem" href="#DateValNNer"><span>DateValNNer</span></a></li><li><a class="tocitem" href="#DateValizer"><span>DateValizer</span></a></li></ul></li></ul></li><li><span class="tocitem">ML Library</span><ul><li><a class="tocitem" href="../../lib/functions/">Types and Functions</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>Imputation</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Imputation</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/IBM/TSML.jl/blob/master/docs/src/man/imputation.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Imputation"><a class="docs-heading-anchor" href="#Imputation">Imputation</a><a id="Imputation-1"></a><a class="docs-heading-anchor-permalink" href="#Imputation" title="Permalink"></a></h1><p>There are two ways to impute the <code>date,value</code> TS data. One uses <code>DateValNNer</code> which uses nearest neighbor and <code>DateValizer</code> which uses the dictionary of medians mapped to  certain date-time interval grouping.</p><h2 id="DateValNNer"><a class="docs-heading-anchor" href="#DateValNNer">DateValNNer</a><a id="DateValNNer-1"></a><a class="docs-heading-anchor-permalink" href="#DateValNNer" title="Permalink"></a></h2><p><code>DateValNNer</code> expects the following arguments with their default values during instantation: </p><ul><li><code>:dateinterval =&gt; Dates.Hour(1)</code>  <ul><li>grouping interval</li></ul></li><li><code>:nnsize =&gt; 1</code> <ul><li>size of neighborhood</li></ul></li><li><code>:missdirection =&gt; :symmetric</code> <ul><li><code>:forward</code> vs <code>:backward</code> vs <code>:symmetric</code></li></ul></li><li><code>:strict =&gt; true</code> <ul><li>whether or not to repeatedly iterate until no more missing data</li></ul></li></ul><p>The <code>:missdirection</code> indicates the imputation direction and the extent of neighborhood. Symmetric implies getting info from both sides of the missing data. <code>:forward</code> direction starts imputing from the top while the <code>:reverse</code> starts from the bottom. Please refer to  <a href="../../tutorial/aggregators/#aggregators_imputers">Aggregators and Imputers</a> for other examples.</p><p>Let&#39;s use the same dataset we have used in the tutorial and print the first few rows.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(X,10)</code><code class="nohighlight hljs ansi" style="display:block;">10×2 DataFrame
+ Row │ Date                 Value
+     │ DateTime             Float64?
+─────┼─────────────────────────────────────
+   1 │ 2014-01-01T00:00:00        0.9063
+   2 │ 2014-01-01T00:15:00  missing
+   3 │ 2014-01-01T00:30:00  missing
+   4 │ 2014-01-01T00:45:00  missing
+   5 │ 2014-01-01T01:00:00  missing
+   6 │ 2014-01-01T01:15:00        0.334152
+   7 │ 2014-01-01T01:30:00  missing
+   8 │ 2014-01-01T01:45:00  missing
+   9 │ 2014-01-01T02:00:00  missing
+  10 │ 2014-01-01T02:15:00  missing</code></pre><p>Let&#39;s try the following setup grouping daily with <code>forward</code> imputation and 10 neighbors:</p><pre><code class="language-julia hljs">dnnr = DateValNNer(Dict(:dateinterval=&gt;Dates.Hour(2),
+             :nnsize=&gt;10,:missdirection =&gt; :forward,
+             :strict=&gt;false))
+forwardres=fit_transform!(dnnr,X)</code></pre><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(forwardres,5)</code><code class="nohighlight hljs ansi" style="display:block;">5×2 DataFrame
+ Row │ Date                 Value
+     │ DateTime             Float64?
+─────┼───────────────────────────────
+   1 │ 2014-01-01T00:00:00  0.9063
+   2 │ 2014-01-01T02:00:00  0.478823
+   3 │ 2014-01-01T04:00:00  0.478823
+   4 │ 2014-01-01T06:00:00  0.131798
+   5 │ 2014-01-01T08:00:00  0.360583</code></pre><p>Same parameters as above but uses <code>reverse</code> instead of <code>forward</code> direction:</p><pre><code class="language-julia hljs">dnnr = DateValNNer(Dict(:dateinterval=&gt;Dates.Hour(2),
+             :nnsize=&gt;10,:missdirection =&gt; :reverse,
+             :strict=&gt;false))
+reverseres=fit_transform!(dnnr,X)</code></pre><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(reverseres,5)</code><code class="nohighlight hljs ansi" style="display:block;">5×2 DataFrame
+ Row │ Date                 Value
+     │ DateTime             Float64?
+─────┼───────────────────────────────
+   1 │ 2014-01-01T00:00:00  0.9063
+   2 │ 2014-01-01T02:00:00  0.486039
+   3 │ 2014-01-01T04:00:00  0.478823
+   4 │ 2014-01-01T06:00:00  0.131798
+   5 │ 2014-01-01T08:00:00  0.360583</code></pre><p>Using <code>symmetric</code> imputation:</p><pre><code class="language-julia hljs">dnnr = DateValNNer(Dict(:dateinterval=&gt;Dates.Hour(2),
+             :nnsize=&gt;10,:missdirection =&gt; :symmetric,
+             :strict=&gt;false))
+symmetricres=fit_transform!(dnnr,X)</code></pre><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(symmetricres,5)</code><code class="nohighlight hljs ansi" style="display:block;">5×2 DataFrame
+ Row │ Date                 Value
+     │ DateTime             Float64?
+─────┼───────────────────────────────
+   1 │ 2014-01-01T00:00:00  0.9063
+   2 │ 2014-01-01T02:00:00  0.478823
+   3 │ 2014-01-01T04:00:00  0.478823
+   4 │ 2014-01-01T06:00:00  0.131798
+   5 │ 2014-01-01T08:00:00  0.360583</code></pre><p>Unlike <code>symmetric</code> imputation that guarantees 100% imputation of missing data as long as the input has non-missing elements, <code>forward</code> and <code>reverse</code> cannot guarantee that the imputation replaces all missing data because of the boundary issues. If the top or bottom of the input is missing, the assymetric imputation will not be able to replace the endpoints that are missing. It is advised that to have successful imputation, <code>symmetric</code> imputation shall be used.</p><p>In the example above, the number of remaining missing data not imputed for <code>forward</code>, <code>reverse</code>, and <code>symmetric</code> is:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; sum(ismissing.(forwardres.Value))</code><code class="nohighlight hljs ansi" style="display:block;">0</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; sum(ismissing.(reverseres.Value))</code><code class="nohighlight hljs ansi" style="display:block;">0</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; sum(ismissing.(symmetricres.Value))</code><code class="nohighlight hljs ansi" style="display:block;">0</code></pre><h2 id="DateValizer"><a class="docs-heading-anchor" href="#DateValizer">DateValizer</a><a id="DateValizer-1"></a><a class="docs-heading-anchor-permalink" href="#DateValizer" title="Permalink"></a></h2><p><code>DateValizer</code> operates on the principle that there is a reqularity of patterns in a specific time period such that replacing values is just a matter of  extracting which time period it belongs and used the pooled median in that time period to replace the missing data. The default time period for <code>DateValizer</code> is hourly. In a more advanced implementation, we can add daily, hourly, and weekly  periods but it will require much larger hash table. Additional grouping criteria  can result into smaller subgroups which may contain 100% missing in some of these subgroups resulting to imputation failure. <code>DateValizer</code> only depends on the <code>:dateinterval =&gt; Dates.Hour(1)</code>  argument with default value of hourly. Please refer to <a href="../../tutorial/aggregators/#aggregators_imputers">Aggregators and Imputers</a> for more examples.</p><p>Let&#39;s try hourly, daily, and monthly median as the basis of imputation:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; hourlyzer = DateValizer(Dict(:dateinterval =&gt; Dates.Hour(1)));</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; monthlyzer = DateValizer(Dict(:dateinterval =&gt; Dates.Month(1)));</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; dailyzer = DateValizer(Dict(:dateinterval =&gt; Dates.Day(1)));</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; hourlyres = fit_transform!(hourlyzer,X)</code><code class="nohighlight hljs ansi" style="display:block;">17521×2 DataFrame
+   Row │ Date                 Value
+       │ DateTime             Float64?
+───────┼───────────────────────────────
+     1 │ 2014-01-01T00:00:00  0.9063
+     2 │ 2014-01-01T01:00:00  0.334152
+     3 │ 2014-01-01T02:00:00  0.485687
+     4 │ 2014-01-01T03:00:00  0.136551
+     5 │ 2014-01-01T04:00:00  0.478823
+     6 │ 2014-01-01T05:00:00  0.51387
+     7 │ 2014-01-01T06:00:00  0.131798
+     8 │ 2014-01-01T07:00:00  0.450484
+   ⋮   │          ⋮              ⋮
+ 17515 │ 2015-12-31T18:00:00  0.920049
+ 17516 │ 2015-12-31T19:00:00  0.380189
+ 17517 │ 2015-12-31T20:00:00  0.970942
+ 17518 │ 2015-12-31T21:00:00  0.3312
+ 17519 │ 2015-12-31T22:00:00  0.508722
+ 17520 │ 2015-12-31T23:00:00  0.632262
+ 17521 │ 2016-01-01T00:00:00  0.951966
+                     17506 rows omitted</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; dailyres = fit_transform!(dailyzer,X)</code><code class="nohighlight hljs ansi" style="display:block;">731×2 DataFrame
+ Row │ Date                 Value
+     │ DateTime             Float64?
+─────┼───────────────────────────────
+   1 │ 2014-01-01T00:00:00  0.390013
+   2 │ 2014-01-02T00:00:00  0.509696
+   3 │ 2014-01-03T00:00:00  0.571543
+   4 │ 2014-01-04T00:00:00  0.578252
+   5 │ 2014-01-05T00:00:00  0.463037
+   6 │ 2014-01-06T00:00:00  0.646811
+   7 │ 2014-01-07T00:00:00  0.468079
+   8 │ 2014-01-08T00:00:00  0.538296
+  ⋮  │          ⋮              ⋮
+ 725 │ 2015-12-26T00:00:00  0.478571
+ 726 │ 2015-12-27T00:00:00  0.441035
+ 727 │ 2015-12-28T00:00:00  0.651315
+ 728 │ 2015-12-29T00:00:00  0.438614
+ 729 │ 2015-12-30T00:00:00  0.442234
+ 730 │ 2015-12-31T00:00:00  0.433304
+ 731 │ 2016-01-01T00:00:00  0.632262
+                     716 rows omitted</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; monthlyres = fit_transform!(monthlyzer,X)</code><code class="nohighlight hljs ansi" style="display:block;">25×2 DataFrame
+ Row │ Date                 Value
+     │ DateTime             Float64?
+─────┼───────────────────────────────
+   1 │ 2014-01-01T00:00:00  0.51885
+   2 │ 2014-02-01T00:00:00  0.531905
+   3 │ 2014-03-01T00:00:00  0.495285
+   4 │ 2014-04-01T00:00:00  0.485427
+   5 │ 2014-05-01T00:00:00  0.459212
+   6 │ 2014-06-01T00:00:00  0.504739
+   7 │ 2014-07-01T00:00:00  0.485148
+   8 │ 2014-08-01T00:00:00  0.511601
+  ⋮  │          ⋮              ⋮
+  19 │ 2015-07-01T00:00:00  0.512868
+  20 │ 2015-08-01T00:00:00  0.498659
+  21 │ 2015-09-01T00:00:00  0.480135
+  22 │ 2015-10-01T00:00:00  0.486423
+  23 │ 2015-11-01T00:00:00  0.482642
+  24 │ 2015-12-01T00:00:00  0.498927
+  25 │ 2016-01-01T00:00:00  0.485564
+                      10 rows omitted</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../aggregation/">« Aggregation</a><a class="docs-footer-nextpage" href="../../lib/functions/">Types and Functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Thursday 6 April 2023 21:54">Thursday 6 April 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
