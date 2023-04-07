@@ -148,7 +148,7 @@ chkoutlier   = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize ou
 
 - ##### Pipeline to load csv data
 ```julia
-pipexpr = @pipeline csvread
+pipexpr = csvread
 data    = fit_transform!(pipexpr)
 first(data,5)
 
@@ -165,7 +165,7 @@ first(data,5)
 
 - ##### Pipeline to aggregate and check statistics
 ```julia
-pipexpr = @pipeline csvread |> aggregate |> chkstats
+pipexpr = csvread |> aggregate |> chkstats
 stats   = fit_transform!(pipexpr)
 
 1×26 DataFrame. Omitted printing of 19 columns
@@ -178,7 +178,7 @@ Note: `fit_transform!` is equivalent to calling in sequence `fit!` and `transfor
 
  - ##### Pipeline to aggregate, impute, and check stats
 ```julia
-pipexpr = @pipeline csvread |> aggregate |> impute |> chkstats
+pipexpr = csvread |> aggregate |> impute |> chkstats
 stats2  = fit_transform!(pipexpr)
 
 1×26 DataFrame. Omitted printing of 19 columns
@@ -190,7 +190,7 @@ stats2  = fit_transform!(pipexpr)
 
 - ##### Pipeline to aggregate, impute, and normalize monotonic data
 ```julia
-pipexpr = @pipeline csvread |> aggregate |> impute |> normtonic  
+pipexpr = csvread |> aggregate |> impute |> normtonic  
 fit_transform!(pipexpr)
 
 8761×2 DataFrame
@@ -231,7 +231,7 @@ ts      = DataFrame(Date=datets,Value=valuets)
 args     = Dict(:ahead => 24,:size => 24,:stride => 5)
 datemtr  = Dateifier(args)
 valuemtr = Matrifier(args)
-ppl      = @pipeline datemtr + valuemtr
+ppl      = datemtr + valuemtr
 dateval  = fit_transform!(ppl,ts)
 first(dateval,5)
 
