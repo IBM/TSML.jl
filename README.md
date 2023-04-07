@@ -1,14 +1,21 @@
-<div align="center"> <img
-src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo13.png"
-alt="TSML Logo" width="250"></img> </div>
+<div align="center"> 
 
-![Overall Stats](https://github-readme-stats.vercel.app/api?username=ppalmes&count_private=true&show_icons=true&hide=contribs)
+<img
+src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo13.png"
+alt="TSML Logo" width="250">
+</img> 
+
+<div align="center"> 
 
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7094/badge)](https://bestpractices.coreinfrastructure.org/projects/7094)
+
+![Overall Stats](https://github-readme-stats.vercel.app/api?username=ppalmes&count_private=true&show_icons=true&hide=contribs)
 
 | **Documentation** | **Build Status** | **Help** |
 |:---:|:---:|:---:|
 | [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][travis-img]][travis-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
+
+</div>
 
 #### Stargazers over time
 [![Stargazers over time](https://starchart.cc/IBM/TSML.jl.svg)](https://starchart.cc/IBM/TSML.jl)
