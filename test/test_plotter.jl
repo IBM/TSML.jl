@@ -28,7 +28,7 @@ function test_artificialdataplotter()
   soutndx = sample(1:length(mdates),length(soutliers))
   mvals[soutndx] = soutliers
   df = DataFrame(Date=mdates,Value=mvals)
-  pltr = TSML.Plotter(Dict(:interactive => false))
+  pltr = TSML.Plotter(Dict(:pdfoutput=>false))
   fit!(pltr,df)
   myplot=transform!(pltr,df);
   @test nrow(myplot) == nrow(df);
@@ -51,7 +51,7 @@ function test_realdataplotter()
   Random.seed!(123)
   fname = joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
   csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
-  pltr = TSML.Plotter(Dict(:interactive => false))
+  pltr = TSML.Plotter(Dict(:pdfoutput=>false))
   mpipeline1 = csvfilter |> pltr
   myplot = fit_transform!(mpipeline1);
   @test nrow(myplot) > 0;

@@ -52,7 +52,7 @@ dtvalnner = DateValNNer(Dict(:dateinterval => Dates.Hour(1)))
 dtvalizer = DateValizer(Dict(:dateinterval => Dates.Hour(1)))
 stfier = Statifier(Dict(:processmissing => true))
 
-mypipeline = @pipeline dtvalgator |> stfier
+mypipeline = dtvalgator |> stfier
 
 results = fit_transform!(mypipeline,X)
 nothing #hide
@@ -70,7 +70,7 @@ blocks stat summary by indicating `:processmissing => false` in the instance arg
 ```@example stat
 stfier = Statifier(Dict(:processmissing=>false))
 
-mypipeline = @pipeline dtvalgator |> stfier
+mypipeline = dtvalgator |> stfier
 
 results = fit_transform!(mypipeline,X)
 nothing #hide
@@ -89,7 +89,7 @@ the stats for missing blocks will all be NaN because stats of empty set is an Na
 ```@example stat
 stfier = Statifier(Dict(:processmissing=>true))
 
-mypipeline = @pipeline dtvalgator |> dtvalnner |> stfier
+mypipeline = dtvalgator |> dtvalnner |> stfier
 
 results = fit_transform!(mypipeline,X)
 nothing #hide
@@ -108,7 +108,7 @@ missing values based on the stats.
 ```@example stat
 stfier = Statifier(Dict(:processmissing=>true))
 
-mypipeline = @pipeline dtvalgator |> dtvalizer |> stfier
+mypipeline = dtvalgator |> dtvalizer |> stfier
 
 results = fit_transform!(mypipeline,X)
 nothing #hide
