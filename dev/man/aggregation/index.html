@@ -6,17 +6,17 @@ gval = rand(length(gdate))
 df = DataFrame(Date=gdate,Value=gval)</code></pre><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(df,10)</code><code class="nohighlight hljs ansi" style="display:block;">10×2 DataFrame
  Row │ Date                 Value
      │ DateTime             Float64
-─────┼─────────────────────────────────
-   1 │ 2014-01-01T00:00:00  0.142006
-   2 │ 2014-01-01T00:05:00  0.489402
-   3 │ 2014-01-01T00:10:00  0.895484
-   4 │ 2014-01-01T00:15:00  0.498375
-   5 │ 2014-01-01T00:20:00  0.536931
-   6 │ 2014-01-01T00:25:00  0.0038344
-   7 │ 2014-01-01T00:30:00  0.823714
-   8 │ 2014-01-01T00:35:00  0.00347418
-   9 │ 2014-01-01T00:40:00  0.349935
-  10 │ 2014-01-01T00:45:00  0.70799</code></pre><h2 id="DateValgator"><a class="docs-heading-anchor" href="#DateValgator">DateValgator</a><a id="DateValgator-1"></a><a class="docs-heading-anchor-permalink" href="#DateValgator" title="Permalink"></a></h2><p>Let&#39;s apply the aggregator and try diffent groupings: hourly vs half hourly vs daily aggregates of the data.</p><pre><code class="language-julia hljs">using TSML
+─────┼───────────────────────────────
+   1 │ 2014-01-01T00:00:00  0.321595
+   2 │ 2014-01-01T00:05:00  0.661591
+   3 │ 2014-01-01T00:10:00  0.964526
+   4 │ 2014-01-01T00:15:00  0.970166
+   5 │ 2014-01-01T00:20:00  0.339544
+   6 │ 2014-01-01T00:25:00  0.26243
+   7 │ 2014-01-01T00:30:00  0.27459
+   8 │ 2014-01-01T00:35:00  0.441022
+   9 │ 2014-01-01T00:40:00  0.814748
+  10 │ 2014-01-01T00:45:00  0.974616</code></pre><h2 id="DateValgator"><a class="docs-heading-anchor" href="#DateValgator">DateValgator</a><a id="DateValgator-1"></a><a class="docs-heading-anchor-permalink" href="#DateValgator" title="Permalink"></a></h2><p>Let&#39;s apply the aggregator and try diffent groupings: hourly vs half hourly vs daily aggregates of the data.</p><pre><code class="language-julia hljs">using TSML
 
 hourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Hour(1)))
 halfhourlyagg = DateValgator(Dict(:dateinterval =&gt; Dates.Minute(30)))
@@ -29,25 +29,25 @@ hourlyres = fit_transform!(hourlyagg,df)
 dailyres = fit_transform!(dailyagg,df)</code></pre><p>The first 5 rows of half-hourly, hourly, and daily aggregates:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(halfhourlyres,5)</code><code class="nohighlight hljs ansi" style="display:block;">5×2 DataFrame
  Row │ Date                 Value
      │ DateTime             Float64?
-─────┼────────────────────────────────
-   1 │ 2014-01-01T00:00:00  0.142006
-   2 │ 2014-01-01T00:30:00  0.823714
-   3 │ 2014-01-01T01:00:00  0.221396
-   4 │ 2014-01-01T01:30:00  0.0639409
-   5 │ 2014-01-01T02:00:00  0.537521</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(hourlyres,5)</code><code class="nohighlight hljs ansi" style="display:block;">5×2 DataFrame
+─────┼───────────────────────────────
+   1 │ 2014-01-01T00:00:00  0.321595
+   2 │ 2014-01-01T00:30:00  0.27459
+   3 │ 2014-01-01T01:00:00  0.966553
+   4 │ 2014-01-01T01:30:00  0.452613
+   5 │ 2014-01-01T02:00:00  0.338955</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(hourlyres,5)</code><code class="nohighlight hljs ansi" style="display:block;">5×2 DataFrame
  Row │ Date                 Value
      │ DateTime             Float64?
 ─────┼───────────────────────────────
-   1 │ 2014-01-01T00:00:00  0.493889
-   2 │ 2014-01-01T01:00:00  0.506403
-   3 │ 2014-01-01T02:00:00  0.530043
-   4 │ 2014-01-01T03:00:00  0.433364
-   5 │ 2014-01-01T04:00:00  0.808981</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(dailyres,5)</code><code class="nohighlight hljs ansi" style="display:block;">5×2 DataFrame
+   1 │ 2014-01-01T00:00:00  0.500567
+   2 │ 2014-01-01T01:00:00  0.551086
+   3 │ 2014-01-01T02:00:00  0.525824
+   4 │ 2014-01-01T03:00:00  0.508376
+   5 │ 2014-01-01T04:00:00  0.701219</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; first(dailyres,5)</code><code class="nohighlight hljs ansi" style="display:block;">5×2 DataFrame
  Row │ Date                 Value
      │ DateTime             Float64?
 ─────┼───────────────────────────────
-   1 │ 2014-01-01T00:00:00  0.539597
-   2 │ 2014-01-02T00:00:00  0.49899
-   3 │ 2014-01-03T00:00:00  0.540271
-   4 │ 2014-01-04T00:00:00  0.530123
-   5 │ 2014-01-05T00:00:00  0.486277</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../dateproc/">« Date PreProcessing</a><a class="docs-footer-nextpage" href="../imputation/">Imputation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Wednesday 1 March 2023 16:35">Wednesday 1 March 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+   1 │ 2014-01-01T00:00:00  0.555552
+   2 │ 2014-01-02T00:00:00  0.47113
+   3 │ 2014-01-03T00:00:00  0.541477
+   4 │ 2014-01-04T00:00:00  0.501334
+   5 │ 2014-01-05T00:00:00  0.526063</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../dateproc/">« Date PreProcessing</a><a class="docs-footer-nextpage" href="../imputation/">Imputation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Friday 7 April 2023 09:29">Friday 7 April 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
