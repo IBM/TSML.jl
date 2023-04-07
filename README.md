@@ -1,5 +1,7 @@
 <div align="center"> 
 
+![Visitor](https://visitor-badge.laobi.icu/badge?page_id=ppalmes.TSML.jl)
+
 <img
 src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo13.png"
 alt="TSML Logo" width="250">
