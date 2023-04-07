@@ -87,7 +87,7 @@ mdirname = tscl.model[:modeldirectory]
 modelfname=tscl.model[:juliarfmodelname]
 
 trstatfname = joinpath(mdirname,modelfname*".csv")
-res = CSV.read(trstatfname) |> DataFrame
+res = CSV.read(trstatfname,DataFrame)
 nothing #hide
 ```
 

@@ -79,7 +79,7 @@ Another way is to use the symbolic pipeline to
 describe the transformation and concatenation in
 just one line of expression.
 ```@example dateifier
-ppl = @pipeline dtr + mtr
+ppl = dtr + mtr
 features = fit_transform!(ppl,X)
 nothing #hide
 ```
