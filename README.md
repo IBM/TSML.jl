@@ -1,14 +1,21 @@
-<div align="center"> <img
-src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo13.png"
-alt="TSML Logo" width="250"></img> </div>
+<div align="center"> 
 
-![Overall Stats](https://github-readme-stats.vercel.app/api?username=ppalmes&count_private=true&show_icons=true&hide=contribs)
+![Visitor](https://visitor-badge.laobi.icu/badge?page_id=ppalmes.TSML.jl)
+
+<img
+src="https://ibm.github.io/TSML.jl/tsmllogo/tsmllogo13.png"
+alt="TSML Logo" width="250">
+</img> 
 
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7094/badge)](https://bestpractices.coreinfrastructure.org/projects/7094)
+
+![Overall Stats](https://github-readme-stats.vercel.app/api?username=ppalmes&count_private=true&show_icons=true&hide=contribs)
 
 | **Documentation** | **Build Status** | **Help** |
 |:---:|:---:|:---:|
 | [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][travis-img]][travis-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
+
+</div>
 
 #### Stargazers over time
 [![Stargazers over time](https://starchart.cc/IBM/TSML.jl.svg)](https://starchart.cc/IBM/TSML.jl)
@@ -141,7 +148,7 @@ chkoutlier   = Outliernicer(Dict(:dateinterval => Dates.Hour(1))) # normalize ou
 
 - ##### Pipeline to load csv data
 ```julia
-pipexpr = @pipeline csvread
+pipexpr = csvread
 data    = fit_transform!(pipexpr)
 first(data,5)
 
@@ -158,7 +165,7 @@ first(data,5)
 
 - ##### Pipeline to aggregate and check statistics
 ```julia
-pipexpr = @pipeline csvread |> aggregate |> chkstats
+pipexpr = csvread |> aggregate |> chkstats
 stats   = fit_transform!(pipexpr)
 
 1×26 DataFrame. Omitted printing of 19 columns
@@ -171,7 +178,7 @@ Note: `fit_transform!` is equivalent to calling in sequence `fit!` and `transfor
 
  - ##### Pipeline to aggregate, impute, and check stats
 ```julia
-pipexpr = @pipeline csvread |> aggregate |> impute |> chkstats
+pipexpr = csvread |> aggregate |> impute |> chkstats
 stats2  = fit_transform!(pipexpr)
 
 1×26 DataFrame. Omitted printing of 19 columns
@@ -183,7 +190,7 @@ stats2  = fit_transform!(pipexpr)
 
 - ##### Pipeline to aggregate, impute, and normalize monotonic data
 ```julia
-pipexpr = @pipeline csvread |> aggregate |> impute |> normtonic  
+pipexpr = csvread |> aggregate |> impute |> normtonic  
 fit_transform!(pipexpr)
 
 8761×2 DataFrame
@@ -224,7 +231,7 @@ ts      = DataFrame(Date=datets,Value=valuets)
 args     = Dict(:ahead => 24,:size => 24,:stride => 5)
 datemtr  = Dateifier(args)
 valuemtr = Matrifier(args)
-ppl      = @pipeline datemtr + valuemtr
+ppl      = datemtr + valuemtr
 dateval  = fit_transform!(ppl,ts)
 first(dateval,5)
 

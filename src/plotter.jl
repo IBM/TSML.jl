@@ -2,9 +2,10 @@ module Plotters
 
 #using Interact
 using Random
-using RecipesBase
 using DataFrames
 using Dates
+using Plots
+using GR
 
 using ..AbsTypes
 using ..Utils
@@ -15,18 +16,18 @@ export fit, fit!, transform, transform!
 export Plotter
 
 ## setup plotting for publication
-#function setupplot(pdfoutput::Bool)
-#  Plots.gr();
-#  fntsm = Plots.font("sans-serif", 8);
-#  fntlg = Plots.font("sans-serif", 8);
-#  Plots.default(titlefont=fntlg, guidefont=fntlg, tickfont=fntsm, legendfont=fntsm);
-#  if pdfoutput == true 
-#    Plots.default(size=(390,200)); #Plot canvas size
-#  else
-#    Plots.default(size=(500,300)); #Plot canvas size
-#  end
-#  return nothing
-#end
+function setupplot(pdfoutput::Bool)
+  Plots.gr();
+  fntsm = Plots.font("sans-serif", 8);
+  fntlg = Plots.font("sans-serif", 8);
+  Plots.default(titlefont=fntlg, guidefont=fntlg, tickfont=fntsm, legendfont=fntsm);
+  if pdfoutput == true 
+    Plots.default(size=(390,200)); #Plot canvas size
+  else
+    Plots.default(size=(500,300)); #Plot canvas size
+  end
+  return nothing
+end
 
 struct DateVal{D<:DateTime,V<:Union{Missing,<:Number}}
    dtime::Vector{D}
@@ -47,7 +48,7 @@ end
 Plotter(
   Dict(
     :interactive => false,
-    :pdfoutput => false
+    :pdfoutput => true
   )
 )
 
@@ -73,11 +74,11 @@ mutable struct Plotter <: Transformer
       default_args = Dict(
          :name => "pltr",
          :interactive => false,
-         :pdfoutput => false
+         :pdfoutput => true
       )
-      #setupplot(margs[:pdfoutput])
       cargs=nested_dict_merge(default_args,args)
       cargs[:name] = cargs[:name]*"_"*randstring(3)
+      setupplot(cargs[:pdfoutput])
       new(cargs[:name],cargs)
    end
 end
@@ -112,22 +113,29 @@ function transform!(pltr::Plotter, features::DataFrame)::DataFrame
    df[:,:Value] .= features.Value
    ndxmissing = findall(x->ismissing(x),df.Value)
    df.Value[ndxmissing] .= NaN
-   #setupplot(pltr.model[:pdfoutput])
+   setupplot(pltr.model[:pdfoutput])
    #if pltr.model[:interactive] == true && pltr.model[:pdfoutput] == false
    #  # disable interactive plot due to Knockout.jl badly maintained (Interact.jl deps)
    #  #interactiveplot(df)
    #  pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
-   #  return pl
+   #  #return pl
    #else
    #  pl=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false,show=false);
-   #  return pl
+   #  #return pl
    #end
-   sz = (500,300) # default
    if pltr.model[:pdfoutput] == true
-      sz = (390,200)
+      plt=Plots.plot(df.Date,df.Value,xlabel="Date",ylabel="Value",legend=false);
+      display(plt)
    end
-   dtval = DateVal(df.Date,df.Value)
-   display(RecipesBase.plot(dtval,sz))
+   # for Plot recipes block
+   # --------
+   #sz = (500,300) # default
+   #if pltr.model[:pdfoutput] == true
+   #   sz = (390,200)
+   #end
+   #dtval = DateVal(df.Date,df.Value)
+   #RecipesBase.plot(dtval,sz)
+   # --------
    return features
 end
 

@@ -37,9 +37,9 @@ Let's use the pipeline transformer to aggregate and impute:
 using TSML
 
 dtvalgator = DateValgator(Dict(:dateinterval => Dates.Hour(1)))
-dtvalnner = DateValNNer(Dict(:dateinterval => Dates.Hour(1)))
+dtvalnner = DateValLinearImputer(Dict(:dateinterval => Dates.Hour(1)))
 
-mypipeline = @pipeline dtvalgator |> dtvalnner
+mypipeline = dtvalgator |> dtvalnner
 
 results = fit_transform!(mypipeline,X)
 nothing #hide
@@ -120,7 +120,7 @@ and process it by aggregation and imputation.
 
 
 ```@example pipeline
-mypipeline = @pipeline csvreader |> dtvalgator |> dtvalnner
+mypipeline = csvreader |> dtvalgator |> dtvalnner
 
 results = fit_transform!(mypipeline)
 nothing #hide
