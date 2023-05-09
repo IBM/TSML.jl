@@ -470,7 +470,7 @@ end
           :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
           :dateinterval => Dates.Hour(1),
           :nnsize => 1,
-          :strict => true,
+          :strict => false,
           :aggregator => :median
       )
     )
@@ -515,7 +515,7 @@ mutable struct DateValNNer <: Transformer
          :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
          :dateinterval => Dates.Hour(1),
          :nnsize => 1,
-         :strict => true,
+         :strict => false,
          :aggregator => :median
       )
       cargs=nested_dict_merge(default_args,args)
@@ -860,7 +860,7 @@ end
           :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
           :dateinterval => Dates.Hour(1),
           :nnsize => 1,
-          :strict => true,
+          :strict => false,
           :aggregator => :median
       )
     )
@@ -897,7 +897,7 @@ Example:
           :dateinterval=>Dates.Hour(1),
           :nnsize=>10,
           :missdirection => :symmetric,
-          :strict=>true,
+          :strict=>false,
           :aggregator => :mean))
     fit!(dnnr,X)
     transform!(dnnr,X)
