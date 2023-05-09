@@ -235,11 +235,13 @@ end
 
 
 function transducersloop(ldirname,mfiles)
-  @floop for mfile in mfiles
-      println("getting stats of "*mfile*" on thread:"*string(Base.Threads.threadid()))
+   n = length(mfiles)
+   p = Progress(n, dt=0.01, showspeed=true)
+   @floop for mfile in mfiles
       df=getfilestat(ldirname,mfile)
+      next!(p; showvalues = [(:fname,mfile)])
       @reduce() do (dftable = DataFrame(); df)
-        dftable = vcat(dftable,df)
+         dftable = vcat(dftable,df)
       end
    end
    return dftable
