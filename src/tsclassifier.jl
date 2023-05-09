@@ -14,6 +14,10 @@ using ..AbsTypes
 using ..Utils
 import ..AbsTypes: fit, fit!, transform, transform!
 
+using FLoops
+using Transducers
+using ProgressMeter
+
 export fit, fit!, transform, transform!
 export TSClassifier, getstats
 
@@ -178,14 +182,20 @@ function getfilestat(ldirname::AbstractString,lfname::AbstractString)
    dtype in string.(instances(TSType)) || error(dtype * ", filename does not indicate known data type.")
    # create a pipeline to get stat
    fname = joinpath(ldirname,lfname)
-   csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
-   valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
-   valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
-   stfier = Statifier(Dict(:processmissing=>false))
-   mpipeline = @pipeline csvfilter |> valgator |> valnner |> stfier
-   df = fit_transform!(mpipeline)
-   df.dtype = repeat([dtype],nrow(df))
-   df.fname = repeat([lfname],nrow(df))
+   df = DataFrame()
+   try
+      csvfilter = CSVDateValReader(Dict(:filename=>fname,:dateformat=>"dd/mm/yyyy HH:MM"))
+      valgator = DateValgator(Dict(:dateinterval=>Dates.Hour(1)))
+      valnner = DateValNNer(Dict(:dateinterval=>Dates.Hour(1)))
+      stfier = Statifier(Dict(:processmissing=>false))
+      mpipeline = @pipeline csvfilter |> valgator |> valnner |> stfier
+      df = fit_transform!(mpipeline)
+      df.dtype = repeat([dtype],nrow(df))
+      df.fname = repeat([lfname],nrow(df))
+   catch errormsg
+      println("skipping "*fname*": "*string(errormsg))
+      df = DataFrame()
+   end
    return (df)
 end
 
@@ -223,6 +233,20 @@ function threadloop(ldirname,mfiles)
    return trdata
 end
 
+
+function transducersloop(ldirname,mfiles)
+   n = length(mfiles)
+   p = Progress(n, dt=0.01, showspeed=true)
+   @floop for mfile in mfiles
+      df=getfilestat(ldirname,mfile)
+      next!(p; showvalues = [(:fname,mfile)])
+      @reduce() do (dftable = DataFrame(); df)
+         dftable = vcat(dftable,df)
+      end
+   end
+   return dftable
+end
+
 # loop over the directory and get stats of each file
 # return a dataframe containing stat features and ts type for target
 function getstats(ldirname::AbstractString)
@@ -231,13 +255,15 @@ function getstats(ldirname::AbstractString)
    mfiles != [] || error("empty csv directory")
    #df = serialloop(ldirname,mfiles)
    # get julia version and run threads if julia 1.3
-   jversion = string(Base.VERSION)
-   df = DataFrame()
-   if match(r"^1.5",jversion) === nothing
-      df = serialloop(ldirname,mfiles)
-   else
-      df = threadloop(ldirname,mfiles)
-   end
+   #jversion = string(Base.VERSION)
+   #df = DataFrame()
+   #if match(r"^1.5",jversion) === nothing
+   #   df = serialloop(ldirname,mfiles)
+   #else
+   #   df = threadloop(ldirname,mfiles)
+   #end
+   #println(first(df))
+   df = transducersloop(ldirname, mfiles)
    return df
 end
 

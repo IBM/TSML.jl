@@ -24,7 +24,9 @@ export VoteEnsemble, StackEnsemble, BestLearner
 export FeatureSelector, CatFeatureSelector, NumFeatureSelector, CatNumDiscriminator
 export crossvalidate
 export NARemover
-export @pipeline @pipelinex, @pipelinez
+export @pipeline 
+export @pipelinex
+export @pipelinez
 export +, |>, *, |, >>
 export Pipeline, ComboPipeline
 
