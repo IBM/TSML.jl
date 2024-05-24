@@ -1,6 +1,6 @@
 using Pkg
 
-Pkg.activate("/Users/ppalmes/julia/TSML.jl")
+Pkg.activate(".")
 using TSML
 
 using TSML.ArgumentParsers
