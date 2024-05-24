@@ -4,7 +4,7 @@ using Random
 using Dates
 using Statistics
 using CSV
-using DataFrames: DataFrame,rename!,ncol,groupby,combine,leftjoin,innerjoin
+using DataFrames: DataFrame,rename!,ncol,groupby,combine,leftjoin,innerjoin,semijoin,outerjoin
 using MLDataUtils: slidingwindow
 
 using Impute
@@ -321,6 +321,7 @@ function transform!(dvmr::DateValgator,xx::DataFrame)::DataFrame
    #create list of complete dates and join with aggregated data
    cdate = DataFrame(Date = collect(lower:dvmr.model[:dateinterval]:upper))
    joined = leftjoin(cdate,aggr,on=:Date)
+   sort!(joined,:Date)
    joined
 end
 
