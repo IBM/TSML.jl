@@ -76,7 +76,7 @@ function createrunpipeline(args::Dict)
     if args[:save] == true
         name = split(fname,".csv")[1]
         fnameoutput = name*"_output"*".csv"
-        csvwriter.args[:filename] = fnameoutput
+        csvwriter.model[:filename] = fnameoutput
     end
 
     # extract date interval
@@ -115,7 +115,8 @@ function createrunpipeline(args::Dict)
     end
 
     pipeline = Pipeline(transformers)
-    fit_transform!(pipeline)
+    results = fit_transform!(pipeline)
+    return results
 end
 
 

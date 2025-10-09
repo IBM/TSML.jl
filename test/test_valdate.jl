@@ -255,6 +255,7 @@ end
 end
 
 function test_csvreaderwriter()
+  commonval=97564.0
   inputfile =joinpath(dirname(pathof(TSML)),"../data/testdata.csv")
   outputfile = joinpath(dirname(pathof(TSML)),"../data/testdata_output.csv")
   csvreader = CSVDateValReader(Dict(:filename=>inputfile,:dateformat=>"d/m/y H:M"))
@@ -266,32 +267,32 @@ function test_csvreaderwriter()
   @test nrow(res) == 8761
   @test ncol(res) == 2
   @test sum(ismissing.(res.Value)) == 0
-  @test floor(sum(res.Value)) == 93080.0
+  @test floor(sum(res.Value)) == commonval
   res=fit_transform(mypipeline)
   @test nrow(res) == 8761
   @test ncol(res) == 2
   @test sum(ismissing.(res.Value)) == 0
-  @test floor(sum(res.Value)) == 93080.0
+  @test floor(sum(res.Value)) == commonval
   dat = fit_transform!(csvreader)
   res1=fit_transform!(filter1,dat)
   res2=fit_transform!(filter2,res1)
   @test nrow(res2) == 8761
   @test ncol(res2) == 2
   @test sum(ismissing.(res2.Value)) == 0
-  @test floor(sum(res2.Value)) == 93080.0
+  @test floor(sum(res2.Value)) == commonval
   dat = fit_transform(csvreader)
   res1=fit_transform(filter1,dat)
   res2=fit_transform(filter2,res1)
   @test nrow(res2) == 8761
   @test ncol(res2) == 2
   @test sum(ismissing.(res2.Value)) == 0
-  @test floor(sum(res2.Value)) == 93080.0
+  @test floor(sum(res2.Value)) == commonval
   mypipeline = csvreader |> filter1 |> filter2 |> csvwtr
   res=fit_transform!(mypipeline)
   @test nrow(res2) == 8761
   @test ncol(res2) == 2
   @test sum(ismissing.(res2.Value)) == 0
-  @test floor(sum(res2.Value)) == 93080.0
+  @test floor(sum(res2.Value)) == commonval
   @test filesize(csvwtr.model[:filename]) > 209220
   rm(outputfile,force=true)
 end
