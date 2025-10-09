@@ -17,9 +17,22 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        jlversion: ["1", "1.9"]
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-        arch: [aarch64]
+        jlversion: ["1", "1.10"]
+        os:
+          - ubuntu-latest
+        arch:
+          - x64
+        include:
+          - os: windows-latest
+            version: "1"
+            arch: x86
+          - os: macos-latest
+            version: "1"
+            arch: aarch64
+          - os: ubuntu-latest
+            version: "nightly"
+            arch: x64
+            allow_failure: true
 
     steps:
       - uses: actions/checkout@v5
