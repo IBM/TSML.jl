@@ -1,6 +1,6 @@
 name = "TSML"
 uuid = "198dc43e-9e51-5cd7-9d40-d9794d335912"
-version = "2.7.9"
+version = "2.8.0"
 authors = ["Paulito Palmes <ppalmes@gmail.com>"]
 
 [deps]
@@ -52,4 +52,12 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Dates", "Test", "DataFrames", "Random", "StatsBase", "Statistics", "Plots"]
+test = [
+  "Dates",
+  "Test",
+  "DataFrames",
+  "Random",
+  "StatsBase",
+  "Statistics",
+  "Plots",
+]
