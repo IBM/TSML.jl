@@ -1,0 +1,8 @@
+https://nextjournal.com/julia-environments/datascience-environment?change-id=CTtF6xQrPhCRkb9u3cQneo&node-id=758ec5ab-8cc7-4e01-ba79-3f95ada429b0
+https://github.com/JuliaLang/PackageCompiler.jl/issues/215
+
+
+]add TSML#docker_packagecompiler
+]add PackageCompiler#sd-notomls
+using PackageCompiler
+compile_incremental(:TSML,install=true)
