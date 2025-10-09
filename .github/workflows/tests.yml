@@ -19,6 +19,7 @@ jobs:
       matrix:
         jlversion: ["1", "1.9"]
         os: [ubuntu-latest, macOS-latest, windows-latest]
+        arch: [aarch64]
 
     steps:
       - uses: actions/checkout@v5
