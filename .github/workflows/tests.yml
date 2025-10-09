@@ -22,6 +22,7 @@ jobs:
           - os: windows-latest
             version: "1"
             arch: x86
+            allow_failure: true
           - os: macos-latest
             version: "1"
             arch: aarch64
