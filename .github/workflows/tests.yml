@@ -1,23 +1,19 @@
-name: Tests
-
+name: CI
 on:
   pull_request:
-    branches:
-      - master
   push:
-    branches:
-      - master
-    tags:
-      - "*"
-
+    branches: [main]
+    tags: ["*"]
 jobs:
-  julia:
-    name: Test Julia ${{ matrix.jlversion }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+  test:
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        jlversion: ["1", "1.10"]
+        version:
+          - "1.10"
+          - "1" # automatically expands to the latest stable 1.x release of Julia
         os:
           - ubuntu-latest
         arch:
@@ -33,31 +29,30 @@ jobs:
             version: "nightly"
             arch: x64
             allow_failure: true
-
     steps:
       - uses: actions/checkout@v5
-
-      - name: Setup Julia ${{matrix.jlversion}}
-        uses: julia-actions/setup-julia@v2
+      - uses: julia-actions/setup-julia@v2
         with:
-          version: ${{ matrix.jlversion }}
+          version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-
-      #      - name: Use julia-actions cache
-      #        uses: julia-actions/cache@v2
-
-      - name: Build package
-        uses: julia-actions/julia-buildpkg@v1
-
-      - name: Run tests
-        uses: julia-actions/julia-runtest@v1
+      - uses: julia-actions/cache@v2
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
         env:
-          JULIA_NUM_THREADS: "8"
-
-      - name: Process coverage
-        uses: julia-actions/julia-processcoverage@v1
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+          JULIA_NUM_THREADS: 4,1
+      - uses: julia-actions/julia-processcoverage@v1
+      - uses: codecov/codecov-action@v5
+        with:
+          files: lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: julia-actions/cache@v2
+      - uses: julia-actions/julia-buildpkg@latest
+      - uses: julia-actions/julia-docdeploy@latest
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
