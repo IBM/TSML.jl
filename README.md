@@ -9,7 +9,7 @@ alt="TSML Logo" width="250">
 
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7094/badge)](https://bestpractices.coreinfrastructure.org/projects/7094)
 
-![Overall Stats](https://github-readme-stats.vercel.app/api?username=ppalmes&count_private=true&show_icons=true&hide=contribs)
+![Overall Stats](https://readme-stats-ten-gray.vercel.app/api?username=ppalmes&count_private=true&show_icons=true&hide=contribs)
 
 |                             **Documentation**                             |                                 **Build Status**                                  |                         **Help**                          |
 | :-----------------------------------------------------------------------: | :-------------------------------------------------------------------------------: | :-------------------------------------------------------: |
