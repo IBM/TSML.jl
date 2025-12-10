@@ -362,5 +362,7 @@ Usage questions can be posted in:
 [docs-dev-url]: https://ibm.github.io/TSML.jl/dev/
 [travis-img]: https://github.com/IBM/TSML.jl/actions/workflows/ci.yml/badge.svg
 [travis-url]: https://github.com/IBM/TSML.jl/actions/workflows/ci.yml
+[gha-img]: https://github.com/IBM/TSML.jl/actions/workflows/ci.yml/badge.svg
+[gha-url]: https://github.com/IBM/TSML.jl/actions/workflows/ci.yml
 [codecov-img]: https://codecov.io/gh/IBM/TSML.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/IBM/TSML.jl
