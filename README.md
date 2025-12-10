@@ -13,7 +13,7 @@ alt="TSML Logo" width="250">
 
 |                             **Documentation**                             |                                 **Build Status**                                  |                         **Help**                          |
 | :-----------------------------------------------------------------------: | :-------------------------------------------------------------------------------: | :-------------------------------------------------------: |
-| [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][test-img][test-url]] [![][gha-img]][gha-url] [![][codecov-img]][codecov-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
+| [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][test-img]][test-url] [![][gha-img]][gha-url] [![][codecov-img]][codecov-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
 
 </div>
 
