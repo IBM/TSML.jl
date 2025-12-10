@@ -11,9 +11,9 @@ alt="TSML Logo" width="250">
 
 ![Overall Stats](https://github-readme-stats.vercel.app/api?username=ppalmes&count_private=true&show_icons=true&hide=contribs)
 
-|                             **Documentation**                             |                    **Build Status**                     |                         **Help**                          |
-| :-----------------------------------------------------------------------: | :-----------------------------------------------------: | :-------------------------------------------------------: |
-| [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][gha-img]][gha-url] [![][codecov-img]][codecov-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
+|                             **Documentation**                             |                                 **Build Status**                                  |                         **Help**                          |
+| :-----------------------------------------------------------------------: | :-------------------------------------------------------------------------------: | :-------------------------------------------------------: |
+| [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][test-img][test-url]] [![][gha-img]][gha-url] [![][codecov-img]][codecov-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
 
 </div>
 
@@ -364,5 +364,7 @@ Usage questions can be posted in:
 [travis-url]: https://github.com/IBM/TSML.jl/actions/workflows/ci.yml
 [gha-img]: https://github.com/IBM/TSML.jl/actions/workflows/ci.yml/badge.svg
 [gha-url]: https://github.com/IBM/TSML.jl/actions/workflows/ci.yml
+[test-img]: https://github.com/IBM/TSML.jl/actions/workflows/tests.yml/badge.svg
+[test-url]: https://github.com/IBM/TSML.jl/actions/workflows/tests.yml
 [codecov-img]: https://codecov.io/gh/IBM/TSML.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/IBM/TSML.jl
