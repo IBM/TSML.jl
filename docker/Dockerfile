@@ -1,4 +1,4 @@
-FROM debian:buster AS build
+FROM debian:trixie AS build
 LABEL maintainer="paulpalmes@ie.ibm.com"
 
 WORKDIR /

@@ -1,4 +1,4 @@
-FROM debian:buster AS build
+FROM debian:trixie AS build
 LABEL maintainer="paulpalmes@ie.ibm.com"
 
 WORKDIR /
@@ -15,7 +15,7 @@ RUN wget https://julialang-s3.julialang.org/bin/linux/x64/1.1/julia-1.1.1-linux-
 RUN /julia-1.1.1/bin/julia -e 'using Pkg; pkg"up; add TSML#docker_packagecompiler PackageCompiler#sd-notomls"'
 RUN /julia-1.1.1/bin/julia -e 'using TSML, PackageCompiler; sysnew,sysold = compile_incremental(:TSML;install=true); cp(sysnew,sysold,force=true)'
 
-FROM debian:buster
+FROM debian:trixie
 WORKDIR /
 COPY --from=build /julia-1.1.1 /julia-1.1.1
 COPY --from=build /root/.julia /root/.julia
