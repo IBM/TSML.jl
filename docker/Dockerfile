@@ -1,4 +1,4 @@
-FROM debian:trixie AS build
+FROM debian:trixie-20260623 AS build
 LABEL maintainer="paulpalmes@ie.ibm.com"
 
 WORKDIR /
