@@ -917,7 +917,7 @@ mutable struct DateValMultiNNer <: Transformer
          :missdirection => :symmetric, #:reverse, # or :forward or :symmetric
          :dateinterval => Dates.Hour(1),
          :nnsize => 1,
-         :strict => true,
+         :strict => false,
          :aggregator => :median
       )
       cargs=nested_dict_merge(default_args,args)
